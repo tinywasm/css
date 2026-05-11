@@ -109,5 +109,6 @@ The DSL provides type-safe constructors for CSS properties:
 - `Rule(selector, declarations...)`
 - `Root(declarations...)`
 - `Media(query, items...)`
+- `Keyframes(name, At(at, declarations...)...)`
 
 Keywords like `Auto`, `None`, `Block`, `Flex_`, `Center`, `Zero` are also provided.

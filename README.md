@@ -1,4 +1,5 @@
 # tinywasm/css
+<img src="docs/img/badges.svg">
 
 Typed CSS DSL and design tokens for the tinywasm framework.
 

@@ -151,6 +151,48 @@ func MediaPrefersDark(items ...item) item {
 	return Media("(prefers-color-scheme: dark)", items...)
 }
 
+// KeyframeStep is one step of a keyframes animation.
+// At is the percentage or named position ("0%", "50%", "100%", "from", "to").
+type KeyframeStep struct {
+	At    string
+	Decls []Decl
+}
+
+// At builds a KeyframeStep. Variadic Decls match the DSL's existing rule shape.
+func At(at string, decls ...Decl) KeyframeStep {
+	return KeyframeStep{At: at, Decls: decls}
+}
+
+type KeyframesItem struct {
+	name  string
+	steps []KeyframeStep
+}
+
+func (k KeyframesItem) writeTo(b *fmt.Builder) {
+	b.WriteString("@keyframes ")
+	b.WriteString(k.name)
+	b.WriteString(" {\n")
+	for _, s := range k.steps {
+		b.WriteString("  ")
+		b.WriteString(s.At)
+		b.WriteString(" {\n")
+		for _, d := range s.Decls {
+			b.WriteString("    ")
+			b.WriteString(d.Prop)
+			b.WriteString(": ")
+			b.WriteString(d.Val)
+			b.WriteString(";\n")
+		}
+		b.WriteString("  }\n")
+	}
+	b.WriteString("}\n\n")
+}
+
+// Keyframes builds an @keyframes at-rule.
+func Keyframes(name string, steps ...KeyframeStep) item {
+	return KeyframesItem{name: name, steps: steps}
+}
+
 type RawItem string
 
 func (r RawItem) writeTo(b *fmt.Builder) {

@@ -21,6 +21,27 @@ func TestDSL_Rule(t *testing.T) {
 	}
 }
 
+func TestDSL_Keyframes(t *testing.T) {
+	sheet := New(
+		Keyframes("pulse",
+			At("0%",
+				Transform(Str("scale(1)")),
+				Opacity(1),
+			),
+			At("100%",
+				Transform(Str("scale(1.1)")),
+				Opacity(0),
+				Color(ColorPrimary),
+			),
+		),
+	)
+	got := sheet.String()
+	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#00ADD8);\n  }\n}\n\n"
+	if got != want {
+		t.Errorf("got:\n%q\nwant:\n%q", got, want)
+	}
+}
+
 func TestDSL_Root(t *testing.T) {
 	sheet := New(
 		Root(

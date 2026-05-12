@@ -1,11 +1,20 @@
 package css
 
+import (
+	"github.com/tinywasm/fmt"
+)
+
 // Class is a CSS class name. Shared by HTML emission (WASM) and CSS emission (SSR).
 // Only the string identity crosses the WASM boundary; pseudo-class helpers
 // (Hover/Focus/Disabled) live in dsl.go (!wasm) because they only feed Rule().
 type Class string
 
 func (c Class) String() string { return string(c) }
+
+// AsAttr returns a KeyValue attribute for this class to be used in element construction.
+func (c Class) AsAttr() fmt.KeyValue {
+	return fmt.KeyValue{Key: "class", Value: string(c)}
+}
 
 // Token is a design token: a named visual decision with a fallback value.
 // Industry-standard term (W3C Design Tokens CG, Material, Carbon, Primer, Spectrum).

@@ -103,12 +103,12 @@ Tokens are the single source of truth for all design decisions.
 
 The DSL provides type-safe constructors for CSS properties:
 
-- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, etc.
+- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, `MinWidth(Value)`, `MaxHeight(Value)`, `AlignSelf(Value)`, `Overflow(Value)`, `Visibility(Value)`, `TextAlign(Value)`, `TextTransform(Value)`, `TextDecoration(Value)`, `TextShadow(Value...)`, `UserSelect(Value)`, `TouchAction(Value)`, `ListStyleType(Value)`, `GridArea(Value)`, `GridTemplate(Value)`, etc.
 - `Padding(Value...)`, `Margin(Value...)`
-- `Px(int)`, `Rem(float64)`, `Pct(int)`, `Hex(string)`, `Str(string)`
+- `Px(int)`, `Rem(float64)`, `Pct(int)`, `Vw(int)`, `Vh(int)`, `Calc(string)`, `Hex(string)`, `Str(string)`
 - `Rule(selector, declarations...)`
 - `Root(declarations...)`
-- `Media(query, items...)`
+- `Media(query, items...)`, `MediaDesktop(items...)`
 - `Keyframes(name, At(at, declarations...)...)`
 
-Keywords like `Auto`, `None`, `Block`, `Flex_`, `Center`, `Zero` are also provided.
+Keywords like `Auto`, `None`, `Block`, `Flex_`, `Center`, `Zero`, `Fixed`, `Absolute`, `Unset`, `Initial`, `FlexEnd`, `SpaceAround`, `Row`, `Column`, `Hidden`, `Visible`, `Uppercase`, `Capitalize`, `RightText` are also provided.

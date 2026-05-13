@@ -21,6 +21,69 @@ func TestDSL_Rule(t *testing.T) {
 	}
 }
 
+func TestDSL_NewAdditions(t *testing.T) {
+	sheet := New(
+		Rule(".test",
+			MinWidth(Px(100)),
+			MaxHeight(Vh(50)),
+			AlignSelf(FlexEnd),
+			Overflow(Hidden),
+			Visibility(Visible),
+			TextAlign(RightText),
+			TextTransform(Uppercase),
+			TextDecoration(None),
+			TextShadow(Px(1), Px(1), Hex("#000")),
+			UserSelect(None),
+			TouchAction(Auto),
+			ListStyleType(None),
+			GridArea(Str("content")),
+			GridTemplate(Calc("100% - 20px")),
+			Width(Vw(80)),
+			Position(Fixed),
+			Top(Unset),
+			Bottom(Initial),
+			FlexDirection(Row),
+			JustifyContent(SpaceAround),
+		),
+		MediaDesktop(
+			Rule(".desktop", Display(Grid), FlexDirection(Column)),
+		),
+	)
+	got := sheet.String()
+
+	// Check for a few key properties to ensure they are rendered correctly
+	expectations := []string{
+		"min-width: 100px;",
+		"max-height: 50vh;",
+		"align-self: flex-end;",
+		"overflow: hidden;",
+		"visibility: visible;",
+		"text-align: right;",
+		"text-transform: uppercase;",
+		"text-decoration: none;",
+		"text-shadow: 1px 1px #000;",
+		"user-select: none;",
+		"touch-action: auto;",
+		"list-style-type: none;",
+		"grid-area: content;",
+		"grid-template: calc(100% - 20px);",
+		"width: 80vw;",
+		"position: fixed;",
+		"top: unset;",
+		"bottom: initial;",
+		"flex-direction: row;",
+		"justify-content: space-around;",
+		"@media (orientation: landscape) and (hover: hover)",
+		"flex-direction: column;",
+	}
+
+	for _, want := range expectations {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing expected output %q in:\n%s", want, got)
+		}
+	}
+}
+
 func TestDSL_Keyframes(t *testing.T) {
 	sheet := New(
 		Keyframes("pulse",

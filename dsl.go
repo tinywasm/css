@@ -61,6 +61,10 @@ type rawRule string
 
 func (r rawRule) ruleContent() {}
 
+// RawRule is a transitional escape hatch. New code SHOULD use the typed DSL.
+// Each RawRule call site SHOULD carry a // TODO(css-dsl): add typed X comment
+// naming the missing property, so reviewers can decide whether to extend the
+// DSL or accept the raw use case (vendor-prefixed, exotic property, etc.).
 func RawRule(s string) rawRule { return rawRule(s) }
 
 func Rule(sel any, content ...RuleContent) item {
@@ -151,6 +155,13 @@ func MediaPrefersDark(items ...item) item {
 	return Media("(prefers-color-scheme: dark)", items...)
 }
 
+// MediaDesktop wraps the canonical "landscape + hover" media query used by
+// tinywasm layouts to distinguish desktop from mobile.
+// Reference: appears 4 times verbatim in platformd Appendix A.
+func MediaDesktop(items ...item) item {
+	return Media("(orientation: landscape) and (hover: hover)", items...)
+}
+
 // KeyframeStep is one step of a keyframes animation.
 // At is the percentage or named position ("0%", "50%", "100%", "from", "to").
 type KeyframeStep struct {
@@ -216,6 +227,9 @@ func Px(n int) Value      { return stringValue(fmt.Sprintf("%dpx", n)) }
 func Rem(f float64) Value { return stringValue(fmt.Sprintf("%grem", f)) }
 func Em(f float64) Value  { return stringValue(fmt.Sprintf("%gem", f)) }
 func Pct(n int) Value     { return stringValue(fmt.Sprintf("%d%%", n)) }
+func Vw(n int) Value      { return stringValue(fmt.Sprintf("%dvw", n)) }
+func Vh(n int) Value      { return stringValue(fmt.Sprintf("%dvh", n)) }
+func Calc(expr string) Value { return stringValue(fmt.Sprintf("calc(%s)", expr)) }
 func Hex(s string) Value  { return stringValue(s) }
 func Str(s string) Value  { return stringValue(s) }
 
@@ -233,6 +247,20 @@ var (
 	Center  Value = kw("center")
 	Zero    Value = kw("0")
 	Pointer Value = kw("pointer")
+
+	Fixed       Value = kw("fixed")
+	Absolute    Value = kw("absolute")
+	Unset       Value = kw("unset")
+	Initial     Value = kw("initial")
+	FlexEnd     Value = kw("flex-end")
+	SpaceAround Value = kw("space-around")
+	Row         Value = kw("row")
+	Column      Value = kw("column")
+	Hidden      Value = kw("hidden")
+	Visible     Value = kw("visible")
+	Uppercase   Value = kw("uppercase")
+	Capitalize  Value = kw("capitalize")
+	RightText   Value = kw("right")
 )
 
 func joinValues(vs []Value) string {
@@ -287,6 +315,20 @@ func Bottom(v Value) Decl          { return Decl{"bottom", v.cssValue()} }
 func Left(v Value) Decl            { return Decl{"left", v.cssValue()} }
 func ZIndex(v Value) Decl          { return Decl{"z-index", v.cssValue()} }
 func FontFamily(v Value) Decl      { return Decl{"font-family", v.cssValue()} }
+func MinWidth(v Value) Decl        { return Decl{"min-width", v.cssValue()} }
+func MaxHeight(v Value) Decl       { return Decl{"max-height", v.cssValue()} }
+func AlignSelf(v Value) Decl       { return Decl{"align-self", v.cssValue()} }
+func Overflow(v Value) Decl        { return Decl{"overflow", v.cssValue()} }
+func Visibility(v Value) Decl      { return Decl{"visibility", v.cssValue()} }
+func TextAlign(v Value) Decl       { return Decl{"text-align", v.cssValue()} }
+func TextTransform(v Value) Decl   { return Decl{"text-transform", v.cssValue()} }
+func TextDecoration(v Value) Decl  { return Decl{"text-decoration", v.cssValue()} }
+func TextShadow(v ...Value) Decl   { return Decl{"text-shadow", joinValues(v)} }
+func UserSelect(v Value) Decl      { return Decl{"user-select", v.cssValue()} }
+func TouchAction(v Value) Decl     { return Decl{"touch-action", v.cssValue()} }
+func ListStyleType(v Value) Decl   { return Decl{"list-style-type", v.cssValue()} }
+func GridArea(v Value) Decl        { return Decl{"grid-area", v.cssValue()} }
+func GridTemplate(v Value) Decl    { return Decl{"grid-template", v.cssValue()} }
 
 func Declare(t Token, value string) Decl {
 	return Decl{t.Name, value}

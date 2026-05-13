@@ -3,7 +3,7 @@
 package css
 
 func RootCSS() *Stylesheet {
-	return New(
+	return NewStylesheet(
 		Root(
 			// Brand group
 			Declare(ColorPrimary, "#00ADD8"),
@@ -106,7 +106,7 @@ func RootCSS() *Stylesheet {
 }
 
 func RenderCSS() *Stylesheet {
-	return New(
+	return NewStylesheet(
 		Rule(Selector("*, *::before, *::after"),
 			BoxSizing(Str("border-box")),
 		),

@@ -8,7 +8,7 @@ import (
 )
 
 func TestDSL_Rule(t *testing.T) {
-	sheet := New(
+	sheet := NewStylesheet(
 		Rule(".btn",
 			BackgroundColor(Hex("#fff")),
 			Color(ColorPrimary),
@@ -22,7 +22,7 @@ func TestDSL_Rule(t *testing.T) {
 }
 
 func TestDSL_NewAdditions(t *testing.T) {
-	sheet := New(
+	sheet := NewStylesheet(
 		Rule(".test",
 			MinWidth(Px(100)),
 			MaxHeight(Vh(50)),
@@ -44,6 +44,15 @@ func TestDSL_NewAdditions(t *testing.T) {
 			Bottom(Initial),
 			FlexDirection(Row),
 			JustifyContent(SpaceAround),
+			MarginLeft(Px(5)),
+			MarginRight(Rem(0.4)),
+			PaddingBottom(Space1),
+			ListStyle(None),
+			All(Initial),
+			OverflowY(Auto),
+			GridTemplateRows(Str("auto 1fr")),
+			GridTemplateColumns(Str("1fr 3fr 1fr")),
+			BorderRight(Vw(0.1), Str("solid"), Hex("#ccc")),
 		),
 		MediaDesktop(
 			Rule(".desktop", Display(Grid), FlexDirection(Column)),
@@ -73,6 +82,15 @@ func TestDSL_NewAdditions(t *testing.T) {
 		"bottom: initial;",
 		"flex-direction: row;",
 		"justify-content: space-around;",
+		"margin-left: 5px;",
+		"margin-right: 0.4rem;",
+		"padding-bottom: var(--space-1,0.25rem);",
+		"list-style: none;",
+		"all: initial;",
+		"overflow-y: auto;",
+		"grid-template-rows: auto 1fr;",
+		"grid-template-columns: 1fr 3fr 1fr;",
+		"border-right: 0.1vw solid #ccc;",
 		"@media (orientation: landscape) and (hover: hover)",
 		"flex-direction: column;",
 	}
@@ -85,7 +103,7 @@ func TestDSL_NewAdditions(t *testing.T) {
 }
 
 func TestDSL_Keyframes(t *testing.T) {
-	sheet := New(
+	sheet := NewStylesheet(
 		Keyframes("pulse",
 			At("0%",
 				Transform(Str("scale(1)")),
@@ -106,7 +124,7 @@ func TestDSL_Keyframes(t *testing.T) {
 }
 
 func TestDSL_Root(t *testing.T) {
-	sheet := New(
+	sheet := NewStylesheet(
 		Root(
 			Declare(ColorPrimary, "#00ADD8"),
 			Bind(ColorBackground, ColorBackgroundLight),
@@ -120,7 +138,7 @@ func TestDSL_Root(t *testing.T) {
 }
 
 func TestDSL_Media(t *testing.T) {
-	sheet := New(
+	sheet := NewStylesheet(
 		MediaPrefersDark(
 			Root(Bind(ColorBackground, ColorBackgroundDark)),
 		),
@@ -136,7 +154,7 @@ func TestDSL_Media(t *testing.T) {
 
 func TestDSL_Pseudo(t *testing.T) {
 	btn := Class("btn")
-	sheet := New(
+	sheet := NewStylesheet(
 		Rule(btn.Hover(),
 			Opacity(0.8),
 		),

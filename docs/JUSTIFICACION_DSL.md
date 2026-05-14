@@ -16,7 +16,7 @@ var (
 )
 
 func (b *Button) RenderCSS() *Stylesheet {
-    return New(
+    return NewStylesheet(
         Rule(ClsBtn,
             Padding(Rem(0.5), Rem(1)),
             BorderRadius(RadiusSm),

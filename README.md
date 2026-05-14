@@ -23,7 +23,7 @@ func MyComponent() {
 
 // SSR: Use the DSL to generate CSS
 func Styles() *Stylesheet {
-    return New(
+    return NewStylesheet(
         Rule(".btn",
             BackgroundColor(ColorPrimary),
             Color(Hex("#fff")),
@@ -55,7 +55,7 @@ The split is the key to safe theming: vocabulary is replaceable so apps can rebr
 import "github.com/tinywasm/css"
 
 func RootCSS() *css.Stylesheet {
-    return css.New(
+    return css.NewStylesheet(
         css.RootCSS(), // inherit framework defaults
         css.Root(
             css.Declare(css.ColorPrimary, "#FF6B35"),
@@ -103,9 +103,9 @@ Tokens are the single source of truth for all design decisions.
 
 The DSL provides type-safe constructors for CSS properties:
 
-- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, `MinWidth(Value)`, `MaxHeight(Value)`, `AlignSelf(Value)`, `Overflow(Value)`, `Visibility(Value)`, `TextAlign(Value)`, `TextTransform(Value)`, `TextDecoration(Value)`, `TextShadow(Value...)`, `UserSelect(Value)`, `TouchAction(Value)`, `ListStyleType(Value)`, `GridArea(Value)`, `GridTemplate(Value)`, etc.
+- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, `MinWidth(Value)`, `MaxHeight(Value)`, `AlignSelf(Value)`, `Overflow(Value)`, `Visibility(Value)`, `TextAlign(Value)`, `TextTransform(Value)`, `TextDecoration(Value)`, `TextShadow(Value...)`, `UserSelect(Value)`, `TouchAction(Value)`, `ListStyleType(Value)`, `GridArea(Value)`, `GridTemplate(Value)`, `MarginLeft(Value)`, `MarginRight(Value)`, `PaddingBottom(Value)`, `ListStyle(Value)`, `All(Value)`, `OverflowY(Value)`, `GridTemplateRows(Value)`, `GridTemplateColumns(Value)`, `BorderRight(Value...)`, etc.
 - `Padding(Value...)`, `Margin(Value...)`
-- `Px(int)`, `Rem(float64)`, `Pct(int)`, `Vw(int)`, `Vh(int)`, `Calc(string)`, `Hex(string)`, `Str(string)`
+- `Px(int)`, `Rem(float64)`, `Pct(int)`, `Vw(float64)`, `Vh(float64)`, `Calc(string)`, `Hex(string)`, `Str(string)`
 - `Rule(selector, declarations...)`
 - `Root(declarations...)`
 - `Media(query, items...)`, `MediaDesktop(items...)`

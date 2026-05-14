@@ -9,7 +9,7 @@ import (
 type Stylesheet struct{ items []item }
 type item interface{ writeTo(b *fmt.Builder) }
 
-func New(items ...item) *Stylesheet { return &Stylesheet{items} }
+func NewStylesheet(items ...item) *Stylesheet { return &Stylesheet{items} }
 
 func (s *Stylesheet) String() string {
 	b := fmt.GetConv()
@@ -227,8 +227,8 @@ func Px(n int) Value      { return stringValue(fmt.Sprintf("%dpx", n)) }
 func Rem(f float64) Value { return stringValue(fmt.Sprintf("%grem", f)) }
 func Em(f float64) Value  { return stringValue(fmt.Sprintf("%gem", f)) }
 func Pct(n int) Value     { return stringValue(fmt.Sprintf("%d%%", n)) }
-func Vw(n int) Value      { return stringValue(fmt.Sprintf("%dvw", n)) }
-func Vh(n int) Value      { return stringValue(fmt.Sprintf("%dvh", n)) }
+func Vw(f float64) Value  { return stringValue(fmt.Sprintf("%gvw", f)) }
+func Vh(f float64) Value  { return stringValue(fmt.Sprintf("%gvh", f)) }
 func Calc(expr string) Value { return stringValue(fmt.Sprintf("calc(%s)", expr)) }
 func Hex(s string) Value  { return stringValue(s) }
 func Str(s string) Value  { return stringValue(s) }
@@ -329,6 +329,15 @@ func TouchAction(v Value) Decl     { return Decl{"touch-action", v.cssValue()} }
 func ListStyleType(v Value) Decl   { return Decl{"list-style-type", v.cssValue()} }
 func GridArea(v Value) Decl        { return Decl{"grid-area", v.cssValue()} }
 func GridTemplate(v Value) Decl    { return Decl{"grid-template", v.cssValue()} }
+func MarginLeft(v Value) Decl      { return Decl{"margin-left", v.cssValue()} }
+func MarginRight(v Value) Decl     { return Decl{"margin-right", v.cssValue()} }
+func PaddingBottom(v Value) Decl   { return Decl{"padding-bottom", v.cssValue()} }
+func ListStyle(v Value) Decl       { return Decl{"list-style", v.cssValue()} }
+func All(v Value) Decl             { return Decl{"all", v.cssValue()} }
+func OverflowY(v Value) Decl       { return Decl{"overflow-y", v.cssValue()} }
+func GridTemplateRows(v Value) Decl    { return Decl{"grid-template-rows", v.cssValue()} }
+func GridTemplateColumns(v Value) Decl { return Decl{"grid-template-columns", v.cssValue()} }
+func BorderRight(v ...Value) Decl      { return Decl{"border-right", joinValues(v)} }
 
 func Declare(t Token, value string) Decl {
 	return Decl{t.Name, value}

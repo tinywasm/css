@@ -1,5 +1,3 @@
-//go:build !wasm
-
 package css
 
 func RootCSS() *Stylesheet {

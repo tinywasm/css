@@ -100,7 +100,7 @@ No es invención local. Es la convergencia industrial de la última década apli
 |---|---|---|
 | `tokens.go` (Class, Token, constantes) | ninguno | ✅ |
 | `dsl.go` (Stylesheet, Rule, propiedades) | `!wasm` | ❌ |
-| `ssr.go` (RootCSS, RenderCSS) | `!wasm` | ❌ |
+| `css.go` (RootCSS, RenderCSS) | `!wasm` | ❌ |
 
 Lo único que cruza al binario WASM son las strings con nombres de clase (`"btn-primary"`) que el HTML necesita emitir. TinyGo además elimina por dead-code los tokens no referenciados. El generador de CSS no existe en el frontend.
 
@@ -132,7 +132,7 @@ Un análisis profesional debe nombrar lo que el patrón pierde o complica:
 
 2. **`@media` y selectores raros pasan por `Selector("...")` o `Media("...")`.** Para `@container`, attribute selectors complejos, `:nth-child(...)`, la API se vuelve un escape hatch a string. No es elegante pero es honesto: cubrir 100% de CSS spec en Go tipado es esfuerzo desproporcionado. El DSL prioriza el 90% común.
 
-3. **`ssr.go` puede crecer.** Un componente con 200 líneas de CSS se convierte en 200 líneas de Go en `ssr.go`. Es el mismo volumen, no más. Si duele en algún componente puntual, se permite un `ssr_styles.go` en el mismo package como excepción.
+3. **`css.go` puede crecer.** Un componente con 200 líneas de CSS se convierte en 200 líneas de Go en `css.go`. Es el mismo volumen, no más. Si duele en algún componente puntual, se permite un `css_styles.go` en el mismo package como excepción.
 
 4. **Curva de adopción inicial.** Un colaborador que solo conoce CSS clásico necesita media hora para internalizar el mapeo. Coste único; el beneficio es permanente.
 

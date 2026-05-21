@@ -51,7 +51,7 @@ The split is the key to safe theming: vocabulary is replaceable so apps can rebr
 ### App override pattern
 
 ```go
-// ssr.go at the app root
+// css.go at the app root
 import "github.com/tinywasm/css"
 
 func RootCSS() *css.Stylesheet {

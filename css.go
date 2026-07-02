@@ -143,5 +143,23 @@ func RenderCSS() *Stylesheet {
 				Bind(ColorHover, ColorHoverDark),
 			),
 		),
+		// Explicit theme override via the [data-theme] attribute (set by a theme
+		// toggle on <html>). These come after the :root/@media defaults and have
+		// higher specificity, so a manual choice wins over the OS preference.
+		// Removing the attribute (ThemeAuto) falls back to the @media query above.
+		Rule(Selector("[data-theme=\"light\"]"),
+			Bind(ColorBackground, ColorBackgroundLight),
+			Bind(ColorSurface, ColorSurfaceLight),
+			Bind(ColorOnSurface, ColorOnSurfaceLight),
+			Bind(ColorMuted, ColorMutedLight),
+			Bind(ColorHover, ColorHoverLight),
+		),
+		Rule(Selector("[data-theme=\"dark\"]"),
+			Bind(ColorBackground, ColorBackgroundDark),
+			Bind(ColorSurface, ColorSurfaceDark),
+			Bind(ColorOnSurface, ColorOnSurfaceDark),
+			Bind(ColorMuted, ColorMutedDark),
+			Bind(ColorHover, ColorHoverDark),
+		),
 	)
 }

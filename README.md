@@ -48,25 +48,36 @@ func Styles() *Stylesheet {
 
 The split is the key to safe theming: vocabulary is replaceable so apps can rebrand; logic is additive so dark-mode switching cannot be deleted by accident.
 
-### App override pattern
+### Theming una app (Rebrand)
+
+Para aplicar un tema o rebrand a una aplicación, el proyecto raíz debe exponer su propio `RootCSS()`. Debido a que `assetmin` trata el bloque `:root` como un **slot de un solo ganador**, el `RootCSS()` de la app reemplaza por completo al de la librería.
+
+La forma canónica y tipada de hacer esto es usando `css.Theme()`:
 
 ```go
-// css.go at the app root
+// css.go en el raíz de la aplicación (!wasm)
 import "github.com/tinywasm/css"
 
 func RootCSS() *css.Stylesheet {
-    return css.NewStylesheet(
-        css.RootCSS(), // inherit framework defaults
-        css.Root(
-            css.Declare(css.ColorPrimary, "#FF6B35"),
-            css.Declare(css.ColorBackgroundLight, "#FAFAFA"),
-            css.Declare(css.ColorBackgroundDark, "#121212"),
-        ),
+    return css.Theme(
+        css.Set(css.ColorPrimary, "#FF6B35"),
+        css.Set(css.ColorSecondary, "#3f88bf"),
+        css.Set(css.ColorBackgroundLight, "#FAFAFA"),
+        css.Set(css.ColorBackgroundDark, "#121212"),
     )
 }
 ```
 
-The app does **not** need to redeclare the active-layer bindings or the `@media` rule — those live in `RenderCSS()` and are always present.
+`Theme()` devuelve el catálogo completo de tokens (incluyendo escalas de espacio, radio, tipografía, etc.) con los overrides aplicados al final del bloque. Esto asegura que la app gane en la cascada sin perder el resto de los tokens del framework.
+
+La app **no** necesita redeclarar los bindings de la capa activa (`--color-surface`, etc.) ni la lógica de `prefers-color-scheme`; esos viven en `RenderCSS()` y se mantienen siempre presentes.
+
+| Quiero... | Uso... |
+|---|---|
+| Cambiar un color de marca | `css.Set(css.ColorPrimary, "#hex")` |
+| Cambiar el fondo en modo claro | `css.Set(css.ColorBackgroundLight, "#hex")` |
+| Ajustar un radio de borde global | `css.Set(css.RadiusMd, "12px")` |
+| Cambiar una escala tipográfica | `css.Set(css.TextBase, "1.1rem")` |
 
 ---
 
@@ -96,6 +107,8 @@ Tokens are the single source of truth for all design decisions.
 - **Scales over magic numbers** — typography and spacing follow mathematical ratios so all values are proportional and limited.
 - **Two-layer color pattern** — separates *source* values (per mode) from *active* tokens (used by components). `@media (prefers-color-scheme)` switches modes without JS.
 - **Single override point** — apps only need to change source-layer or scale variables; the rest cascades automatically.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for more details on the theming system.
 
 ---
 

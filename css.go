@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package css
 
 func RootCSS() *Stylesheet {
@@ -162,4 +164,34 @@ func RenderCSS() *Stylesheet {
 			Bind(ColorHover, ColorHoverDark),
 		),
 	)
+}
+
+// Override es el cambio de valor de UN token. Campos no exportados: solo Set lo construye.
+type Override struct {
+	token Token
+	value string
+}
+
+// Set declara el override de un token del catálogo. Token tipado (no un nombre libre);
+// value es el borde de I/O.
+func Set(t Token, value string) Override { return Override{t, value} }
+
+// Theme devuelve el catálogo :root COMPLETO (como RootCSS) con los overrides al final.
+// Pensado como el RootCSS() del proyecto raíz — assetmin REEMPLAZA el :root de css por el de
+// la app, por eso trae el catálogo entero, no solo los overrides.
+func Theme(overrides ...Override) *Stylesheet {
+	root := RootCSS() // catálogo por defecto
+	if len(overrides) == 0 {
+		return root
+	}
+	decls := make([]Decl, len(overrides))
+	for i, o := range overrides {
+		decls[i] = Declare(o.token, o.value)
+	}
+	return withRootTail(root, Root(decls...))
+}
+
+func withRootTail(s *Stylesheet, it item) *Stylesheet {
+	s.items = append(s.items, it)
+	return s
 }

@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package css
 
 import (
@@ -83,5 +85,61 @@ func TestGoldenEquivalence(t *testing.T) {
 		if !strings.Contains(render, rule) {
 			t.Errorf("RenderCSS missing expected rule: %s", rule)
 		}
+	}
+}
+
+func TestTheme_NoOverrides(t *testing.T) {
+	got := Theme().String()
+	want := RootCSS().String()
+	if got != want {
+		t.Error("Theme() without overrides must be identical to RootCSS()")
+	}
+}
+
+func TestTheme_ContainsFullCatalog(t *testing.T) {
+	got := Theme(Set(ColorPrimary, "#FF0000")).String()
+	tokens := []string{
+		"--space-2",
+		"--radius-md",
+		"--text-xl",
+		"--color-surface-light",
+	}
+	for _, tok := range tokens {
+		if !strings.Contains(got, tok) {
+			t.Errorf("Theme() output does not contain catalog token '%s'", tok)
+		}
+	}
+}
+
+func TestTheme_OverrideTakesPrecedence(t *testing.T) {
+	overrideVal := "#3f88bf"
+	got := Theme(Set(ColorSecondary, overrideVal)).String()
+
+	// Find all occurrences of --color-secondary
+	tokenName := "--color-secondary"
+	indices := []int{}
+	lastIdx := 0
+	for {
+		idx := strings.Index(got[lastIdx:], tokenName)
+		if idx == -1 {
+			break
+		}
+		indices = append(indices, lastIdx+idx)
+		lastIdx += idx + len(tokenName)
+	}
+
+	if len(indices) < 2 {
+		t.Fatalf("Expected at least 2 occurrences of %s (default + override), got %d", tokenName, len(indices))
+	}
+
+	// The last occurrence should be the override
+	lastOccurrence := got[indices[len(indices)-1]:]
+	if !strings.Contains(lastOccurrence, overrideVal) {
+		t.Errorf("Last occurrence of %s does not contain override value %s\nContext: %s", tokenName, overrideVal, lastOccurrence)
+	}
+
+	// Verify the default value is also present (as Theme appends overrides)
+	if !strings.Contains(got, "#654FF0") {
+		t.Errorf("Default value for %s (#654FF0) missing from output", tokenName)
 	}
 }

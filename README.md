@@ -52,32 +52,30 @@ The split is the key to safe theming: vocabulary is replaceable so apps can rebr
 
 Para aplicar un tema o rebrand a una aplicación, el proyecto raíz debe exponer su propio `RootCSS()`. Debido a que `assetmin` trata el bloque `:root` como un **slot de un solo ganador**, el `RootCSS()` de la app reemplaza por completo al de la librería.
 
-La forma canónica y tipada de hacer esto es usando `css.Theme()`:
-
 ```go
-// css.go en el raíz de la aplicación (!wasm)
+// config/css.go en la aplicación (!wasm)
 import "github.com/tinywasm/css"
 
 func RootCSS() *css.Stylesheet {
-    return css.Theme(
-        css.Set(css.ColorPrimary, "#FF6B35"),
-        css.Set(css.ColorSecondary, "#3f88bf"),
-        css.Set(css.ColorBackgroundLight, "#FAFAFA"),
-        css.Set(css.ColorBackgroundDark, "#121212"),
+    return css.Root(
+        css.Declare(css.ColorPrimary, "#FF6B35"),
+        css.Declare(css.ColorSecondary, "#3f88bf"),
+        css.Declare(css.ColorBackgroundLight, "#FAFAFA"),
+        css.Declare(css.ColorBackgroundDark, "#121212"),
     )
 }
 ```
 
-`Theme()` devuelve el catálogo completo de tokens (incluyendo escalas de espacio, radio, tipografía, etc.) con los overrides aplicados al final del bloque. Esto asegura que la app gane en la cascada sin perder el resto de los tokens del framework.
+El `RootCSS()` devuelve un stylesheet con las declaraciones de tokens que la app necesita sobrescribir. Esto asegura que la app gane en la cascada.
 
 La app **no** necesita redeclarar los bindings de la capa activa (`--color-surface`, etc.) ni la lógica de `prefers-color-scheme`; esos viven en `RenderCSS()` y se mantienen siempre presentes.
 
 | Quiero... | Uso... |
 |---|---|
-| Cambiar un color de marca | `css.Set(css.ColorPrimary, "#hex")` |
-| Cambiar el fondo en modo claro | `css.Set(css.ColorBackgroundLight, "#hex")` |
-| Ajustar un radio de borde global | `css.Set(css.RadiusMd, "12px")` |
-| Cambiar una escala tipográfica | `css.Set(css.TextBase, "1.1rem")` |
+| Cambiar un color de marca | `css.Declare(css.ColorPrimary, "#hex")` |
+| Cambiar el fondo en modo claro | `css.Declare(css.ColorBackgroundLight, "#hex")` |
+| Ajustar un radio de borde global | `css.Declare(css.RadiusMd, "12px")` |
+| Cambiar una escala tipográfica | `css.Declare(css.TextBase, "1.1rem")` |
 
 ---
 
@@ -116,7 +114,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for more details on the theming
 
 The DSL provides type-safe constructors for CSS properties:
 
-- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, `MinWidth(Value)`, `MaxHeight(Value)`, `AlignSelf(Value)`, `Overflow(Value)`, `Visibility(Value)`, `TextAlign(Value)`, `TextTransform(Value)`, `TextDecoration(Value)`, `TextShadow(Value...)`, `UserSelect(Value)`, `TouchAction(Value)`, `ListStyleType(Value)`, `GridArea(Value)`, `GridTemplate(Value)`, `MarginLeft(Value)`, `MarginRight(Value)`, `PaddingBottom(Value)`, `ListStyle(Value)`, `All(Value)`, `OverflowY(Value)`, `GridTemplateRows(Value)`, `GridTemplateColumns(Value)`, `BorderRight(Value...)`, etc.
+- `BackgroundColor(Value)`, `Color(Value)`, `FontSize(Value)`, `MinWidth(Value)`, `MaxHeight(Value)`, `AlignSelf(Value)`, `Overflow(Value)`, `Visibility(Value)`, `TextAlign(Value)`, `TextTransform(Value)`, `TextDecoration(Value)`, `TextShadow(Value...)`, `UserSelect(Value)`, `TouchAction(Value)`, `ListStyleType(Value)`, `GridArea(Value)`, `GridTemplate(Value)`, `MarginLeft(Value)`, `MarginRight(Value)`, `MarginTop(Value)`, `MarginBottom(Value)`, `PaddingBottom(Value)`, `PaddingTop(Value)`, `PaddingLeft(Value)`, `PaddingRight(Value)`, `ListStyle(Value)`, `All(Value)`, `OverflowY(Value)`, `GridTemplateRows(Value)`, `GridTemplateColumns(Value)`, `BorderRight(Value...)`, `BorderLeft(Value...)`, `BorderBottom(Value...)`, `FlexWrap(Value)`, `FlexGrow(Value)`, `AlignContent(Value)`, `BackgroundSize(Value)`, `BackgroundPosition(Value)`, `BackgroundRepeat(Value)`, etc.
 - `Padding(Value...)`, `Margin(Value...)`
 - `Px(int)`, `Rem(float64)`, `Pct(int)`, `Vw(float64)`, `Vh(float64)`, `Calc(string)`, `Hex(string)`, `Str(string)`
 - `Rule(selector, declarations...)`
@@ -124,4 +122,4 @@ The DSL provides type-safe constructors for CSS properties:
 - `Media(query, items...)`, `MediaDesktop(items...)`
 - `Keyframes(name, At(at, declarations...)...)`
 
-Keywords like `Auto`, `None`, `Block`, `Flex_`, `Center`, `Zero`, `Fixed`, `Absolute`, `Unset`, `Initial`, `FlexEnd`, `SpaceAround`, `Row`, `Column`, `Hidden`, `Visible`, `Uppercase`, `Capitalize`, `RightText` are also provided.
+Keywords like `Auto`, `None`, `Block`, `Flex_`, `Center`, `Zero`, `Fixed`, `Absolute`, `Unset`, `Initial`, `FlexEnd`, `SpaceAround`, `Row`, `Column`, `Hidden`, `Visible`, `Uppercase`, `Capitalize`, `RightText`, `Relative`, `SpaceBetween`, `InlineFlex`, `Wrap`, `FlexStart`, `NoRepeat` are also provided.

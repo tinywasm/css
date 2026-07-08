@@ -261,6 +261,13 @@ var (
 	Uppercase   Value = kw("uppercase")
 	Capitalize  Value = kw("capitalize")
 	RightText   Value = kw("right")
+
+	Relative     Value = kw("relative")
+	SpaceBetween Value = kw("space-between")
+	InlineFlex   Value = kw("inline-flex")
+	Wrap         Value = kw("wrap")
+	FlexStart    Value = kw("flex-start")
+	NoRepeat     Value = kw("no-repeat")
 )
 
 func joinValues(vs []Value) string {
@@ -338,6 +345,19 @@ func OverflowY(v Value) Decl       { return Decl{"overflow-y", v.cssValue()} }
 func GridTemplateRows(v Value) Decl    { return Decl{"grid-template-rows", v.cssValue()} }
 func GridTemplateColumns(v Value) Decl { return Decl{"grid-template-columns", v.cssValue()} }
 func BorderRight(v ...Value) Decl      { return Decl{"border-right", joinValues(v)} }
+func PaddingTop(v Value) Decl           { return Decl{"padding-top", v.cssValue()} }
+func PaddingLeft(v Value) Decl          { return Decl{"padding-left", v.cssValue()} }
+func PaddingRight(v Value) Decl         { return Decl{"padding-right", v.cssValue()} }
+func MarginTop(v Value) Decl            { return Decl{"margin-top", v.cssValue()} }
+func MarginBottom(v Value) Decl         { return Decl{"margin-bottom", v.cssValue()} }
+func FlexWrap(v Value) Decl             { return Decl{"flex-wrap", v.cssValue()} }
+func FlexGrow(v Value) Decl             { return Decl{"flex-grow", v.cssValue()} }
+func AlignContent(v Value) Decl         { return Decl{"align-content", v.cssValue()} }
+func BorderBottom(v ...Value) Decl      { return Decl{"border-bottom", joinValues(v)} }
+func BorderLeft(v ...Value) Decl        { return Decl{"border-left", joinValues(v)} }
+func BackgroundSize(v Value) Decl       { return Decl{"background-size", v.cssValue()} }
+func BackgroundPosition(v Value) Decl   { return Decl{"background-position", v.cssValue()} }
+func BackgroundRepeat(v Value) Decl     { return Decl{"background-repeat", v.cssValue()} }
 
 func Declare(t Token, value string) Decl {
 	return Decl{t.Name, value}

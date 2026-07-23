@@ -33,11 +33,13 @@ var (
 	ColorError       = Token{"--color-error", "#E34F26"}
 
 	// Theme — active layer (consumed by components)
-	ColorBackground = Token{"--color-background", "#FFFFFF"}
-	ColorSurface    = Token{"--color-surface", "#F2F2F7"}
-	ColorOnSurface  = Token{"--color-on-surface", "#1C1C1E"}
-	ColorMuted      = Token{"--color-muted", "#6E6E73"}
-	ColorHover      = Token{"--color-hover", "#B8860B"}
+	ColorBackground  = Token{"--color-background", "#FFFFFF"}
+	ColorSurface     = Token{"--color-surface", "#F2F2F7"}
+	ColorOnSurface   = Token{"--color-on-surface", "#1C1C1E"}
+	ColorMuted       = Token{"--color-muted", "#6E6E73"}
+	ColorHover       = Token{"--color-hover", "#B8860B"}
+	ColorSelection   = Token{"--color-selection", "#f5a623"}    // selected/active highlight
+	ColorOnSelection = Token{"--color-on-selection", "#1C1C1E"} // text on a selected row
 
 	// Theme — source layer (apps redeclare these for rebrand)
 	ColorBackgroundLight = Token{"--color-background-light", "#FFFFFF"}
@@ -50,6 +52,12 @@ var (
 	ColorMutedDark       = Token{"--color-muted-dark", "#8B949E"}
 	ColorHoverLight      = Token{"--color-hover-light", "#B8860B"}
 	ColorHoverDark       = Token{"--color-hover-dark", "#F7DF1E"}
+	// Selection highlight: bright orange on light, muted amber on dark (a full
+	// #f5a623 reads too hot against a dark surface). Text flips dark→white.
+	ColorSelectionLight   = Token{"--color-selection-light", "#f5a623"}
+	ColorSelectionDark    = Token{"--color-selection-dark", "#9e6a2e"}
+	ColorOnSelectionLight = Token{"--color-on-selection-light", "#1C1C1E"}
+	ColorOnSelectionDark  = Token{"--color-on-selection-dark", "#FFFFFF"}
 
 	// Typography size scale
 	TextXs   = Token{"--text-xs", "0.75rem"}

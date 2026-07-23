@@ -5,9 +5,9 @@ package css
 func RootCSS() *Stylesheet {
 	return NewStylesheet(
 		Root(
-			// Brand group
-			Declare(ColorPrimary, "#00ADD8"),
-			Declare(ColorOnPrimary, "#1C1C1E"),
+			// Brand group — Pa100T reference palette: steel blue with white text.
+			Declare(ColorPrimary, "#3f88bf"),
+			Declare(ColorOnPrimary, "#FFFFFF"),
 			Declare(ColorSecondary, "#654FF0"),
 			Declare(ColorOnSecondary, "#FFFFFF"),
 			Declare(ColorSuccess, "#3FB950"),
@@ -25,6 +25,10 @@ func RootCSS() *Stylesheet {
 			Declare(ColorMutedDark, "#8B949E"),
 			Declare(ColorHoverLight, "#B8860B"),
 			Declare(ColorHoverDark, "#F7DF1E"),
+			Declare(ColorSelectionLight, "#f5a623"),
+			Declare(ColorSelectionDark, "#9e6a2e"),
+			Declare(ColorOnSelectionLight, "#1C1C1E"),
+			Declare(ColorOnSelectionDark, "#FFFFFF"),
 		),
 		Root(
 			// Typography scale
@@ -122,7 +126,7 @@ func RenderCSS() *Stylesheet {
 			Background(ColorBackground),
 		),
 		Rule(Selector(":focus-visible"),
-			Outline(Str("2px solid " + ColorPrimary.Var())),
+			Outline(Str("2px solid "+ColorPrimary.Var())),
 			OutlineOffset(Px(2)),
 		),
 		Rule(Selector("img, svg, video"),
@@ -135,6 +139,8 @@ func RenderCSS() *Stylesheet {
 			Bind(ColorOnSurface, ColorOnSurfaceLight),
 			Bind(ColorMuted, ColorMutedLight),
 			Bind(ColorHover, ColorHoverLight),
+			Bind(ColorSelection, ColorSelectionLight),
+			Bind(ColorOnSelection, ColorOnSelectionLight),
 		),
 		MediaPrefersDark(
 			Root(
@@ -143,6 +149,8 @@ func RenderCSS() *Stylesheet {
 				Bind(ColorOnSurface, ColorOnSurfaceDark),
 				Bind(ColorMuted, ColorMutedDark),
 				Bind(ColorHover, ColorHoverDark),
+				Bind(ColorSelection, ColorSelectionDark),
+				Bind(ColorOnSelection, ColorOnSelectionDark),
 			),
 		),
 		// Explicit theme override via the [data-theme] attribute (set by a theme
@@ -155,6 +163,8 @@ func RenderCSS() *Stylesheet {
 			Bind(ColorOnSurface, ColorOnSurfaceLight),
 			Bind(ColorMuted, ColorMutedLight),
 			Bind(ColorHover, ColorHoverLight),
+			Bind(ColorSelection, ColorSelectionLight),
+			Bind(ColorOnSelection, ColorOnSelectionLight),
 		),
 		Rule(Selector("[data-theme=\"dark\"]"),
 			Bind(ColorBackground, ColorBackgroundDark),
@@ -162,6 +172,8 @@ func RenderCSS() *Stylesheet {
 			Bind(ColorOnSurface, ColorOnSurfaceDark),
 			Bind(ColorMuted, ColorMutedDark),
 			Bind(ColorHover, ColorHoverDark),
+			Bind(ColorSelection, ColorSelectionDark),
+			Bind(ColorOnSelection, ColorOnSelectionDark),
 		),
 	)
 }

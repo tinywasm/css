@@ -1,8 +1,10 @@
 # Justificación del DSL tipado de CSS en Go
 
+> **NOTA DE ARQUITECTURA (POST-OVERHAUL):** Este documento justifica las decisiones de diseño del DSL tipado de CSS en Go. Tras el rediseño final descrito en `PLAN_CSS.md` Etapa 5, este DSL de bajo nivel ha sido **unexportado de la superficie pública** para evitar que los desarrolladores de widgets escapen del sistema de diseño escribiendo propiedades CSS manuales. En su lugar, el DSL actúa hoy como el motor de emisión interno, consumido exclusivamente por la API de intención semántica de `github.com/tinywasm/widget/style`.
+
 > Documento de análisis. Responde a la pregunta: **¿es esta API la forma más intuitiva, legible y profesional de escribir CSS en Go para el ecosistema tinywasm?**
 
-## 1. La forma propuesta
+## 1. La forma propuesta (Motor Interno de Emisión)
 
 ```go
 //go:build !wasm

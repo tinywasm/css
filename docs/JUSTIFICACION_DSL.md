@@ -1,10 +1,10 @@
-# Justificación del DSL tipado de CSS en Go
+# Justification for the Typed CSS DSL in Go
 
-> **NOTA DE ARQUITECTURA (POST-OVERHAUL):** Este documento justifica las decisiones de diseño del DSL tipado de CSS en Go. Tras el rediseño final descrito en `PLAN_CSS.md` Etapa 5, este DSL de bajo nivel ha sido **unexportado de la superficie pública** para evitar que los desarrolladores de widgets escapen del sistema de diseño escribiendo propiedades CSS manuales. En su lugar, el DSL actúa hoy como el motor de emisión interno, consumido exclusivamente por la API de intención semántica de `github.com/tinywasm/widget/style`.
+> **ARCHITECTURE NOTE:** This document justifies the design decisions of the typed CSS DSL in Go. Following the final redesign, this low-level DSL has been **unexported from the public surface** to prevent widget developers from escaping the design system by writing manual CSS properties. Instead, the DSL now acts as the internal emission engine, consumed exclusively by the semantic intent API of `github.com/tinywasm/widget/style`.
 
-> Documento de análisis. Responde a la pregunta: **¿es esta API la forma más intuitiva, legible y profesional de escribir CSS en Go para el ecosistema tinywasm?**
+> Analysis document. It answers the question: **is this API the most intuitive, readable, and professional way to write CSS in Go for the tinywasm ecosystem?**
 
-## 1. La forma propuesta (Motor Interno de Emisión)
+## 1. The Proposed Form (Internal Emission Engine)
 
 ```go
 //go:build !wasm
@@ -19,180 +19,179 @@ var (
 
 func (b *Button) RenderCSS() *Stylesheet {
     return NewStylesheet(
-        Rule(ClsBtn,
-            Padding(Rem(0.5), Rem(1)),
-            BorderRadius(RadiusSm),
-            Cursor(Pointer),
-            FontSize(TextBase),
+        rule(ClsBtn,
+            padding(rem(0.5), rem(1)),
+            borderRadius(radiusSm),
+            cursor(pointer),
+            fontSize(textBase),
         ),
-        Rule(ClsPrimary,
-            Background(ColorPrimary),
-            Color(ColorOnPrimary),
+        rule(ClsPrimary,
+            background(ColorPrimary),
+            color(ColorOnPrimary),
         ),
-        Rule(ClsPrimary.Hover(),
-            Opacity(0.9),
+        rule(Hover(ClsPrimary),
+            opacity(0.9),
         ),
     )
 }
 ```
 
-## 2. Criterios de evaluación
+## 2. Evaluation Criteria
 
-Para responder con honestidad hay que fijar qué significa "mejor". Estos son los tres criterios que el usuario enunció:
+To answer honestly, we must define what "better" means. These are the three criteria defined:
 
-| Criterio | Definición operativa |
+| Criterion | Operational Definition |
 |---|---|
-| **Intuitivo** | Un desarrollador que sabe CSS reconoce la intención en segundos sin leer documentación. |
-| **Legible** | Un lector que no escribió el código puede volver semanas después y reconstruir el modelo mental sin esfuerzo. |
-| **Profesional** | Coherente con prácticas establecidas en frameworks consolidados; soporta refactor, tests, herramientas de IDE. |
+| **Intuitive** | A developer who knows CSS recognizes the intent in seconds without reading documentation. |
+| **Readable** | A reader who did not write the code can return weeks later and reconstruct the mental model effortlessly. |
+| **Professional** | Coherent with established practices in consolidated frameworks; supports refactoring, testing, and IDE tools. |
 
-A esos tres añado dos criterios técnicos no negociables del ecosistema tinywasm, porque son los que descalifican a varias alternativas teóricamente válidas:
+To these, I add two non-negotiable technical criteria of the tinywasm ecosystem, because they disqualify several theoretically valid alternatives:
 
-| Criterio técnico | Razón |
+| Technical Criterion | Reason |
 |---|---|
-| **Cero CSS en el binario WASM** | El framework optimiza tamaño con TinyGo. Cualquier solución que arrastre código de generación de CSS al frontend está descalificada. |
-| **Sin generadores** | `go generate` y herramientas externas añaden deuda; el ecosistema ya rechazó esa vía. |
+| **Zero CSS in the WASM binary** | The framework optimizes size with TinyGo. Any solution that drags CSS generation code into the frontend is disqualified. |
+| **No generators** | `go generate` and external tools add debt; the ecosystem has already rejected this path. |
 
 ---
 
-## 3. Evaluación frente a los criterios
+## 3. Evaluation Against Criteria
 
-### 3.1 Intuitivo — ¿se entiende sin documentación?
+### 3.1 Intuitive — Is it understood without documentation?
 
-**Sí, con dos asunciones razonables.**
+**Yes, with two reasonable assumptions.**
 
-| Línea en el DSL | Equivalente CSS evidente |
+| Line in the DSL | Obvious CSS Equivalent |
 |---|---|
-| `Rule(ClsPrimary, Background(ColorPrimary))` | `.btn-primary { background: var(--color-primary); }` |
-| `Rule(ClsPrimary.Hover(), Opacity(0.9))` | `.btn-primary:hover { opacity: 0.9; }` |
-| `Padding(Rem(0.5), Rem(1))` | `padding: 0.5rem 1rem;` |
+| `rule(ClsPrimary, background(ColorPrimary))` | `.btn-primary { background: var(--color-primary); }` |
+| `rule(Hover(ClsPrimary), opacity(0.9))` | `.btn-primary:hover { opacity: 0.9; }` |
+| `padding(rem(0.5), rem(1))` | `padding: 0.5rem 1rem;` |
 
-La única traducción no trivial es `Cls<X>` ↔ selector de clase. Una vez aprendida (un párrafo de README) el mapeo es 1:1. Comparado con TypeScript-CSS-in-JS (donde hay que aprender camelCase, units como strings vs numbers, theme objects, variants), la barrera es claramente menor.
+The only non-trivial mapping is `Cls<X>` ↔ class selector. Once learned (one paragraph in README) the mapping is 1:1. Compared to TypeScript-CSS-in-JS (where one has to learn camelCase, units as strings vs numbers, theme objects, variants), the barrier is clearly lower.
 
-### 3.2 Legible — ¿sobrevive seis meses después?
+### 3.2 Readable — Does it survive six months later?
 
-**Mejor que el CSS string actual.** Tres razones:
+**Better than the current raw CSS string.** Three reasons:
 
-1. **Los tokens son nombres, no valores duplicados.** Hoy en `button.css` se lee `var(--color-primary, #00ADD8)` — el lector tiene que decidir si el `#00ADD8` es un fallback intencional o basura desactualizada. Con el DSL se lee `Background(ColorPrimary)`: cero ambigüedad.
-2. **Los selectores son referencias, no strings.** `ClsPrimary.Hover()` impide el typo silencioso `.btn-primry:hover {}` que hoy es invisible hasta abrir el navegador.
-3. **El IDE colabora.** "Find references" sobre `ColorPrimary` lista todos los usos en el repo. Sobre `--color-primary` en strings, el IDE da resultados parciales y mezclados con falsos positivos.
+1. **Tokens are names, not duplicated values.** Today in `button.css` one reads `var(--color-primary, #00ADD8)` — the reader has to decide if `#00ADD8` is an intentional fallback or outdated junk. With the DSL, it reads `background(ColorPrimary)`: zero ambiguity.
+2. **Selectors are references, not strings.** `Hover(ClsPrimary)` prevents the silent typo `.btn-primry:hover {}` which today is invisible until opening the browser.
+3. **The IDE assists.** "Find references" on `ColorPrimary` lists all uses in the repository. On `--color-primary` in strings, the IDE gives partial and mixed false-positive results.
 
-**Pierde frente al CSS crudo en un punto:** densidad visual. `padding: 0.5rem 1rem;` ocupa menos pixeles que `Padding(Rem(0.5), Rem(1))`. Esto se mitiga con el dot-import (sin él sería peor) pero no se elimina. Es el coste honesto.
+**Loses to raw CSS in one point:** visual density. `padding: 0.5rem 1rem;` takes fewer pixels than `padding(rem(0.5), rem(1))`. This is mitigated with the dot-import (without it, it would be worse) but not eliminated. This is the honest cost.
 
-### 3.3 Profesional — ¿se sostiene con el rigor de la industria?
+### 3.3 Professional — Does it hold up under industry rigor?
 
-**Sí, con precedente directo.** El patrón (DSL tipado + tokens como constantes + clases como identificadores tipados + extracción estática a CSS) es exactamente lo que hacen:
+**Yes, with direct precedent.** The pattern (typed DSL + tokens as constants + classes as typed identifiers + static CSS extraction) is exactly what the following do:
 
-| Sistema | Lenguaje | Patrón equivalente |
+| System | Language | Equivalent Pattern |
 |---|---|---|
-| **vanilla-extract** | TypeScript | `style({ background: vars.color.primary })` → CSS extraído en build |
-| **Linaria** | TypeScript | Tagged templates con extracción estática |
-| **Stitches** | TypeScript | `styled('button', { variants: {...} })`, tokens tipados |
-| **JetBrains Compose HTML** | Kotlin | DSL builder de reglas, tokens tipados |
-| **ScalaCSS** | Scala | DSL puro Scala, class names generadas |
-| **W3C Design Tokens CG** | (especificación) | Estandariza el concepto de "token" como entidad tipada |
+| **vanilla-extract** | TypeScript | `style({ background: vars.color.primary })` → CSS extracted in build |
+| **Linaria** | TypeScript | Tagged templates with static extraction |
+| **Stitches** | TypeScript | `styled('button', { variants: {...} })`, typed tokens |
+| **JetBrains Compose HTML** | Kotlin | Rule builder DSL, typed tokens |
+| **ScalaCSS** | Scala | Pure Scala DSL, generated class names |
+| **W3C Design Tokens CG** | (specification) | Standardizes the concept of "token" as a typed entity |
 
-No es invención local. Es la convergencia industrial de la última década aplicada a Go. La diferencia: TypeScript necesita un compilador adicional (vanilla-extract usa Babel/esbuild plugin); en Go basta `//go:build !wasm` para que el código exista solo en el servidor.
+This is not a local invention. It is the industrial convergence of the last decade applied to Go. The difference: TypeScript needs an additional compiler (vanilla-extract uses a Babel/esbuild plugin); in Go, `//go:build !wasm` is enough for the code to exist only on the server.
 
-### 3.4 Cero CSS en el binario WASM
+### 3.4 Zero CSS in the WASM binary
 
-**Garantizado por construcción.** El layout del paquete `tinywasm/css`:
+**Guaranteed by construction.** The layout of the `tinywasm/css` package:
 
-| Archivo | Build tag | Compila a WASM |
+| File | Build tag | Compiles to WASM |
 |---|---|---|
-| `tokens.go` (Class, Token, constantes) | ninguno | ✅ |
-| `dsl.go` (Stylesheet, Rule, propiedades) | `!wasm` | ❌ |
+| `tokens.go` (Class, Token, constants) | none | ✅ |
+| `dsl.go` (Stylesheet, Rule, properties) | `!wasm` | ❌ |
 | `css.go` (RootCSS, RenderCSS) | `!wasm` | ❌ |
 
-Lo único que cruza al binario WASM son las strings con nombres de clase (`"btn-primary"`) que el HTML necesita emitir. TinyGo además elimina por dead-code los tokens no referenciados. El generador de CSS no existe en el frontend.
+The only things that cross to the WASM binary are the class name strings (`"btn-primary"`) that the HTML needs to emit. TinyGo also eliminates unreferenced tokens via dead-code elimination. The CSS generator does not exist in the frontend.
 
-### 3.5 Sin generadores
+### 3.5 No generators
 
-**Cumplido.** No hay `go generate`, no hay `theme.css`, no hay paso de build adicional. El compilador Go es la única herramienta.
+**Fulfilled.** There is no `go generate`, no `theme.css`, no additional build step. The Go compiler is the only tool.
 
 ---
 
-## 4. Alternativas evaluadas y descartadas
+## 4. Alternatives Evaluated and Discarded
 
-| Alternativa | Razón de descarte |
+| Alternative | Reason for Discarding |
 |---|---|
-| **Mantener `.css` + `//go:embed`** (estado actual) | Stringly-typed; ningún error se detecta hasta abrir el navegador; renombrar tokens es manual y propenso a drift. |
-| **`.css` + linter externo** | Resuelve detección de typos pero añade herramienta externa; sigue siendo dos lenguajes. |
-| **Generador `theme.css → tokens.go`** | Mantiene dos representaciones; el generador es deuda permanente; contradice "sin generadores". |
-| **CSS-in-Go runtime estilo styled-components** | Arrastra el motor CSS al binario WASM. Descalifica de inmediato. |
-| **Templates de texto (`text/template`)** | Devuelve a strings sin tipo; pierde validación del compilador. |
-| **DSL fluido (builder con `.Padding(...).Color(...)`)** | Equivalente expresivo al constructor variádico, peor para reglas largas (encadenamiento vertical incómodo); el variádico aplana mejor. |
-| **Sub-paquete `tinywasm/css/cssgo`** | Obliga dos imports, rompe el dot-import. Sin valor real. |
+| **Keep `.css` + `//go:embed`** (current state) | Stringly-typed; no errors are detected until opening the browser; renaming tokens is manual and prone to drift. |
+| **`.css` + external linter** | Solves typo detection but adds external tool; still two languages. |
+| **`theme.css → tokens.go` generator** | Maintains two representations; generator is permanent debt; contradicts "no generators". |
+| **CSS-in-Go runtime styled-components style** | Drags the CSS engine into the WASM binary. Disqualified immediately. |
+| **Text templates (`text/template`)** | Returns to untyped strings; loses compiler validation. |
+| **Fluent DSL (builder with `.Padding(...).Color(...)`)** | Expressively equivalent to the variadic constructor, worse for long rules (uncomfortable vertical chaining); variadic flattens better. |
+| **Sub-package `tinywasm/css/cssgo`** | Forces two imports, breaks dot-import. No real value. |
 
 ---
 
-## 5. Riesgos honestos (no se ocultan)
+## 5. Honest Risks (Not Hidden)
 
-Un análisis profesional debe nombrar lo que el patrón pierde o complica:
+A professional analysis must name what the pattern loses or complicates:
 
-1. **Verbosidad relativa al CSS crudo.** `Padding(Rem(0.5), Rem(1))` es más caracteres que `padding: 0.5rem 1rem`. Mitigación: dot-import; los autores aprenden a escanear visualmente la estructura `Rule(sel, ...decls)`.
+1. **Verbosity relative to raw CSS.** `padding(rem(0.5), rem(1))` is more characters than `padding: 0.5rem 1rem`. Mitigation: dot-import; authors learn to visually scan the `rule(sel, ...decls)` structure.
 
-2. **`@media` y selectores raros pasan por `Selector("...")` o `Media("...")`.** Para `@container`, attribute selectors complejos, `:nth-child(...)`, la API se vuelve un escape hatch a string. No es elegante pero es honesto: cubrir 100% de CSS spec en Go tipado es esfuerzo desproporcionado. El DSL prioriza el 90% común.
+2. **`@media` and rare selectors go through `selector("...")` or `media("...")`.** For `@container`, complex attribute selectors, `:nth-child(...)`, the API becomes a string escape hatch. It is not elegant but it is honest: covering 100% of the CSS spec in typed Go is a disproportionate effort. The DSL prioritizes the common 90%.
 
-3. **`css.go` puede crecer.** Un componente con 200 líneas de CSS se convierte en 200 líneas de Go en `css.go`. Es el mismo volumen, no más. Si duele en algún componente puntual, se permite un `css_styles.go` en el mismo package como excepción.
+3. **`css.go` can grow.** A component with 200 lines of CSS becomes 200 lines of Go in `css.go`. It is the same volume, no more. If it hurts in some specific component, a `css_styles.go` in the same package is allowed as an exception.
 
-4. **Curva de adopción inicial.** Un colaborador que solo conoce CSS clásico necesita media hora para internalizar el mapeo. Coste único; el beneficio es permanente.
+4. **Initial adoption curve.** A contributor who only knows classic CSS needs half an hour to internalize the mapping. Unique cost; the benefit is permanent.
 
-5. **No hay tooling de formato CSS-aware.** `gofmt` no sabe alinear declaraciones como `prettier` alinea CSS. Mitigación: el constructor variádico produce naturalmente una declaración por línea; el formateo es predecible.
+5. **No CSS-aware formatting tooling.** `gofmt` does not know how to align declarations like `prettier` aligns CSS. Mitigation: the variadic constructor naturally produces one declaration per line; formatting is predictable.
 
-### 5.1 Sobre la verbosidad: ¿unidades variádicas?
+### 5.1 On Verbosity: Variadic Units?
 
-Pregunta natural: si `Padding(Rem(0.5), Rem(1))` es más largo que `padding: 0.5rem 1rem`, ¿por qué no hacer `Rem` variádico → `Padding(Rem(0.5, 1))`?
+Natural question: if `padding(rem(0.5), rem(1))` is longer than `padding: 0.5rem 1rem`, why not make `rem` variadic → `padding(rem(0.5, 1))`?
 
-**Descartado.** Razones, en orden de peso:
+**Discarded.** Reasons, in order of weight:
 
-1. **Muddle de tipos.** `Rem` es *una unidad*, no una lista. Hacerlo variádico convierte `Value` en "valor atómico o secuencia serializada", contaminando todo el sistema. Habilita basura compilable como `Color(Rem(0.5, 1))` → `color: 0.5rem 1rem`.
-2. **Ahorro despreciable.** ~5 caracteres × ~15% de declaraciones shorthand = ~75 chars en todo el proyecto.
-3. **El DSL ya resuelve shorthand en el lugar correcto**: la propiedad (`Padding`) es variádica, igual que la gramática CSS (`padding: <length>{1,4}`). Mover variadicidad a la unidad traslada la responsabilidad al lugar equivocado.
-4. **Bloquea unidades mixtas reales**: `BoxShadow(Em(0.1), Em(0.1), Em(0.2), ColorSurface)` mezcla `em` con un token — imposible si `Em` o `Rem` se vuelven variádicos.
+1. **Type muddle.** `rem` is *a unit*, not a list. Making it variadic turns `Value` into "atomic value or serialized sequence", contaminating the whole system. It enables compileable junk like `color(rem(0.5, 1))` → `color: 0.5rem 1rem;`.
+2. **Negligible savings.** ~5 characters × ~15% shorthand declarations = ~75 chars in the whole project.
+3. **The DSL already resolves shorthand in the right place:** the property (`padding`) is variadic, just like the CSS grammar (`padding: <length>{1,4}`). Moving variadicity to the unit shifts responsibility to the wrong place.
+4. **Blocks real mixed units:** `boxShadow(em(0.1), em(0.1), em(0.2), ColorSurface)` mixes `em` with a token — impossible if `em` or `rem` become variadic.
 
-Si el equipo decide en el futuro que la densidad importa más que la pureza de tipos, el camino correcto sería *floats directos con unidad implícita por propiedad* (`Padding(0.5, 1)` → rem), no unidades variádicas. Análisis aparte.
-
----
-
-## 6. ¿Es *la mejor* o solo *una buena*?
-
-Aquí hay que distinguir dos preguntas:
-
-### 6.1 ¿Es la mejor forma de escribir CSS en un lenguaje tipado?
-Hay debate legítimo. **vanilla-extract en TypeScript** es probablemente más maduro hoy en absoluto. Pero para un proyecto **Go-first + TinyGo + sin generadores**, las restricciones eliminan a TypeScript del set de soluciones aplicables.
-
-### 6.2 ¿Es la mejor forma de escribir CSS en Go para tinywasm?
-**Sí, dentro del set de soluciones compatibles con las restricciones del proyecto.** No conozco una alternativa que cumpla simultáneamente:
-- Cero CSS en binario WASM
-- Sin generadores
-- Detección de typos en compile-time
-- Tokens como entidades de primera clase
-- Compartir nombres de clase entre HTML y CSS
-- Una sola forma de hacerlo
-
-Las cinco primeras existen aisladas en otras propuestas; ninguna las junta todas.
+If the team decides in the future that density matters more than type purity, the correct path would be *direct floats with implicit unit per property* (`padding(0.5, 1)` → rem), not variadic units. Separate analysis.
 
 ---
 
-## 7. Veredicto
+## 6. Is it *the Best* or Only *a Good One*?
 
-**Sí, es la forma más intuitiva, legible y profesional de escribir CSS en Go para tinywasm**, condicionado a que se acepten los costes nombrados en la sección 5 (sobre todo: verbosidad y curva inicial). Es defendible profesionalmente porque replica un patrón con ~10 años de adopción industrial en otros lenguajes tipados, adaptado a las restricciones específicas de Go + TinyGo + arquitectura SSR del proyecto.
+Here we must distinguish two questions:
 
-Si la respuesta no convence, los puntos a cuestionar primero son:
-1. ¿Los costes de la sección 5 son aceptables para tu equipo?
-2. ¿La cobertura del 90% de CSS (con escape hatch para el resto) es suficiente, o el proyecto necesita CSS-spec completo?
-3. ¿El dot-import es aceptable como convención del ecosistema?
+### 6.1 Is it the best way to write CSS in a typed language?
+There is a legitimate debate. **vanilla-extract in TypeScript** is probably more mature today in absolute terms. But for a **Go-first + TinyGo + no generators** project, constraints eliminate TypeScript from the set of applicable solutions.
 
-Si los tres son "sí", el patrón es el indicado. Si alguno es "no", hay que revisitar el análisis antes de ejecutar los PLAN.md.
+### 6.2 Is it the best way to write CSS in Go for tinywasm?
+**Yes, within the set of solutions compatible with the project's constraints.** I do not know of an alternative that simultaneously fulfills:
+- Zero CSS in WASM binary
+- No generators
+- Compile-time typo detection
+- Tokens as first-class entities
+- Shared class names between HTML and CSS
+- A single way to do it
+
+The first five exist isolated in other proposals; none gathers them all.
 
 ---
 
-## Referencias
+## 7. Verdict
+
+**Yes, it is the most intuitive, readable, and professional way to write CSS in Go for tinywasm**, conditioned on accepting the costs named in section 5 (especially verbosity and the initial curve). It is professionally defensible because it replicates a pattern with ~10 years of industrial adoption in other typed languages, adapted to the specific constraints of Go + TinyGo + SSR architecture of the project.
+
+If the verdict does not convince, the points to question first are:
+1. Are the costs of section 5 acceptable to your team?
+2. Is the 90% CSS coverage (with escape hatch for the rest) sufficient, or does the project need the full CSS spec?
+3. Is dot-import acceptable as an ecosystem convention?
+
+If all three are "yes", the pattern is the right one. If any is "no", the analysis must be revisited before executing the plans.
+
+---
+
+## References
 
 - W3C Design Tokens Community Group: <https://design-tokens.github.io/community-group/>
 - vanilla-extract: <https://vanilla-extract.style/>
 - Linaria: <https://linaria.dev/>
-- Stitches (archivado pero referencia conceptual): <https://stitches.dev/>
-- Lightning Design System (origen del término "design token"): <https://www.lightningdesignsystem.com/design-tokens/>
-- Plan técnico de implementación: [`PLAN_typed_css.md`](./PLAN_typed_css.md)
+- Stitches (archived but conceptual reference): <https://stitches.dev/>
+- Lightning Design System (origin of the term "design token"): <https://www.lightningdesignsystem.com/design-tokens/>

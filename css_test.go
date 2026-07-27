@@ -143,3 +143,53 @@ func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 		t.Errorf("Default value for %s (#654FF0) missing from output", tokenName)
 	}
 }
+
+func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
+	// Gather all known token names from the catalog
+	knownTokens := map[string]bool{}
+	allTokens := []Token{
+		ColorPrimary, ColorOnPrimary, ColorSecondary, ColorOnSecondary, ColorSuccess, ColorOnSuccess, ColorError, ColorOnError,
+		ColorBackground, ColorSurface, ColorSurfaceSunken, ColorOnSurface, ColorOutline, ColorMuted, ColorHover, ColorSelection, ColorOnSelection, ColorDisabled, ColorOnDisabled,
+		ColorBackgroundLight, ColorBackgroundDark, ColorSurfaceLight, ColorSurfaceDark, ColorSurfaceSunkenLight, ColorSurfaceSunkenDark,
+		ColorOnSurfaceLight, ColorOnSurfaceDark, ColorOutlineLight, ColorOutlineDark, ColorMutedLight, ColorMutedDark, ColorHoverLight, ColorHoverDark,
+		ColorSelectionLight, ColorSelectionDark, ColorOnSelectionLight, ColorOnSelectionDark,
+		ColorDisabledLight, ColorDisabledDark, ColorOnDisabledLight, ColorOnDisabledDark,
+		TextXs, TextSm, TextBase, TextLg, TextXl, Text2xl,
+		LeadingTight, LeadingNormal, LeadingRelaxed, FontWeightRegular, FontWeightMedium, FontWeightBold, TrackingTight, TrackingNormal, TrackingWide,
+		Space0, Space1, Space2, Space3, Space4, Space6, Space8, Space12,
+		RadiusSm, RadiusMd, RadiusLg, RadiusFull,
+		ShadowSm, ShadowMd, ShadowLg, ShadowXl,
+		DurationFast, DurationBase, DurationSlow, EaseIn, EaseOut, EaseInOut,
+		ZBase, ZDropdown, ZSticky, ZModal, ZToast, ZTooltip,
+		BpSm, BpMd, BpLg, BpXl,
+		MaxWProse, MaxWContent, MaxWScreen,
+	}
+	for _, tok := range allTokens {
+		knownTokens[tok.Name] = true
+	}
+
+	cssStr := RootCSS().String() + "\n" + RenderCSS().String()
+
+	idx := 0
+	for {
+		start := strings.Index(cssStr[idx:], "--")
+		if start == -1 {
+			break
+		}
+		startIdx := idx + start
+		endIdx := startIdx
+		for endIdx < len(cssStr) {
+			c := cssStr[endIdx]
+			if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' {
+				endIdx++
+			} else {
+				break
+			}
+		}
+		propName := cssStr[startIdx:endIdx]
+		if !knownTokens[propName] {
+			t.Errorf("Undeclared token found in emitted CSS: %s", propName)
+		}
+		idx = endIdx
+	}
+}

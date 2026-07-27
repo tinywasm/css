@@ -1,20 +1,13 @@
 package css
 
 import (
-	"github.com/tinywasm/fmt"
+	"github.com/tinywasm/widget"
 )
 
 // Class is a CSS class name. Shared by HTML emission (WASM) and CSS emission (SSR).
 // Only the string identity crosses the WASM boundary; pseudo-class helpers
 // (Hover/Focus/Disabled) live in dsl.go (!wasm) because they only feed Rule().
-type Class string
-
-func (c Class) String() string { return string(c) }
-
-// AsAttr returns a KeyValue attribute for this class to be used in element construction.
-func (c Class) AsAttr() fmt.KeyValue {
-	return fmt.KeyValue{Key: "class", Value: string(c)}
-}
+type Class = widget.Class
 
 // Token is a design token: a named visual decision with a fallback value.
 // Industry-standard term (W3C Design Tokens CG, Material, Carbon, Primer, Spectrum).
@@ -25,39 +18,51 @@ func (t Token) Var() string { return "var(" + t.Name + "," + t.Fallback + ")" }
 // Token catalog — every token from the legacy theme.css.
 var (
 	// Brand colors
-	ColorPrimary     = Token{"--color-primary", "#00ADD8"}
-	ColorOnPrimary   = Token{"--color-on-primary", "#1C1C1E"}
+	ColorPrimary     = Token{"--color-primary", "#1E6B9E"}
+	ColorOnPrimary   = Token{"--color-on-primary", "#FFFFFF"}
 	ColorSecondary   = Token{"--color-secondary", "#654FF0"}
 	ColorOnSecondary = Token{"--color-on-secondary", "#FFFFFF"}
-	ColorSuccess     = Token{"--color-success", "#3FB950"}
-	ColorError       = Token{"--color-error", "#E34F26"}
+	ColorSuccess     = Token{"--color-success", "#1F7A31"}
+	ColorOnSuccess   = Token{"--color-on-success", "#FFFFFF"}
+	ColorError       = Token{"--color-error", "#D12200"}
+	ColorOnError     = Token{"--color-on-error", "#FFFFFF"}
 
 	// Theme — active layer (consumed by components)
-	ColorBackground  = Token{"--color-background", "#FFFFFF"}
-	ColorSurface     = Token{"--color-surface", "#F2F2F7"}
-	ColorOnSurface   = Token{"--color-on-surface", "#1C1C1E"}
-	ColorMuted       = Token{"--color-muted", "#6E6E73"}
-	ColorHover       = Token{"--color-hover", "#B8860B"}
-	ColorSelection   = Token{"--color-selection", "#f5a623"}    // selected/active highlight
-	ColorOnSelection = Token{"--color-on-selection", "#1C1C1E"} // text on a selected row
+	ColorBackground    = Token{"--color-background", "#FFFFFF"}
+	ColorSurface       = Token{"--color-surface", "#F2F2F7"}
+	ColorSurfaceSunken = Token{"--color-surface-sunken", "#E5E5EA"}
+	ColorOnSurface     = Token{"--color-on-surface", "#1C1C1E"}
+	ColorOutline       = Token{"--color-outline", "#D1D1D6"}
+	ColorMuted         = Token{"--color-muted", "#6E6E73"}
+	ColorHover         = Token{"--color-hover", "#B8860B"}
+	ColorSelection     = Token{"--color-selection", "#f5a623"}    // selected/active highlight
+	ColorOnSelection   = Token{"--color-on-selection", "#1C1C1E"} // text on a selected row
+	ColorDisabled      = Token{"--color-disabled", "#E5E5EA"}
+	ColorOnDisabled    = Token{"--color-on-disabled", "#666666"}
 
 	// Theme — source layer (apps redeclare these for rebrand)
-	ColorBackgroundLight = Token{"--color-background-light", "#FFFFFF"}
-	ColorBackgroundDark  = Token{"--color-background-dark", "#0D1117"}
-	ColorSurfaceLight    = Token{"--color-surface-light", "#F2F2F7"}
-	ColorSurfaceDark     = Token{"--color-surface-dark", "#161B22"}
-	ColorOnSurfaceLight  = Token{"--color-on-surface-light", "#1C1C1E"}
-	ColorOnSurfaceDark   = Token{"--color-on-surface-dark", "#E6EDF3"}
-	ColorMutedLight      = Token{"--color-muted-light", "#6E6E73"}
-	ColorMutedDark       = Token{"--color-muted-dark", "#8B949E"}
-	ColorHoverLight      = Token{"--color-hover-light", "#B8860B"}
-	ColorHoverDark       = Token{"--color-hover-dark", "#F7DF1E"}
-	// Selection highlight: bright orange on light, muted amber on dark (a full
-	// #f5a623 reads too hot against a dark surface). Text flips dark→white.
-	ColorSelectionLight   = Token{"--color-selection-light", "#f5a623"}
-	ColorSelectionDark    = Token{"--color-selection-dark", "#9e6a2e"}
-	ColorOnSelectionLight = Token{"--color-on-selection-light", "#1C1C1E"}
-	ColorOnSelectionDark  = Token{"--color-on-selection-dark", "#FFFFFF"}
+	ColorBackgroundLight    = Token{"--color-background-light", "#FFFFFF"}
+	ColorBackgroundDark     = Token{"--color-background-dark", "#0D1117"}
+	ColorSurfaceLight       = Token{"--color-surface-light", "#F2F2F7"}
+	ColorSurfaceDark        = Token{"--color-surface-dark", "#161B22"}
+	ColorSurfaceSunkenLight = Token{"--color-surface-sunken-light", "#E5E5EA"}
+	ColorSurfaceSunkenDark  = Token{"--color-surface-sunken-dark", "#21262D"}
+	ColorOnSurfaceLight     = Token{"--color-on-surface-light", "#1C1C1E"}
+	ColorOnSurfaceDark      = Token{"--color-on-surface-dark", "#E6EDF3"}
+	ColorOutlineLight       = Token{"--color-outline-light", "#D1D1D6"}
+	ColorOutlineDark        = Token{"--color-outline-dark", "#30363D"}
+	ColorMutedLight         = Token{"--color-muted-light", "#6E6E73"}
+	ColorMutedDark          = Token{"--color-muted-dark", "#8B949E"}
+	ColorHoverLight         = Token{"--color-hover-light", "#B8860B"}
+	ColorHoverDark          = Token{"--color-hover-dark", "#F7DF1E"}
+	ColorSelectionLight     = Token{"--color-selection-light", "#f5a623"}
+	ColorSelectionDark      = Token{"--color-selection-dark", "#9e6a2e"}
+	ColorOnSelectionLight   = Token{"--color-on-selection-light", "#1C1C1E"}
+	ColorOnSelectionDark    = Token{"--color-on-selection-dark", "#FFFFFF"}
+	ColorDisabledLight      = Token{"--color-disabled-light", "#E5E5EA"}
+	ColorDisabledDark       = Token{"--color-disabled-dark", "#21262D"}
+	ColorOnDisabledLight    = Token{"--color-on-disabled-light", "#666666"}
+	ColorOnDisabledDark     = Token{"--color-on-disabled-dark", "#8B949E"}
 
 	// Typography size scale
 	TextXs   = Token{"--text-xs", "0.75rem"}
@@ -79,6 +84,7 @@ var (
 	TrackingWide      = Token{"--tracking-wide", "0.05em"}
 
 	// Spacing (4px grid)
+	Space0  = Token{"--space-0", "0"}
 	Space1  = Token{"--space-1", "0.25rem"}
 	Space2  = Token{"--space-2", "0.5rem"}
 	Space3  = Token{"--space-3", "0.75rem"}
@@ -125,4 +131,19 @@ var (
 	MaxWProse   = Token{"--max-w-prose", "65ch"}
 	MaxWContent = Token{"--max-w-content", "1200px"}
 	MaxWScreen  = Token{"--max-w-screen", "1440px"}
+)
+
+// Pair es una decisión de superficie completa. Un fondo nunca se declara sin su
+// texto — impide por tipo el bug de rightpanel/css.go:17, donde ColorOnSurface
+// (un color de TEXTO) se declaró como fondo de panel.
+type Pair struct{ Bg, Fg Token }
+
+var (
+	SurfacePrimary  = Pair{ColorPrimary, ColorOnPrimary}
+	SurfacePanel    = Pair{ColorSurface, ColorOnSurface}
+	SurfaceSunken   = Pair{ColorSurfaceSunken, ColorOnSurface}
+	SurfaceSelected = Pair{ColorSelection, ColorOnSelection}
+	SurfaceDanger   = Pair{ColorError, ColorOnError}
+	SurfaceSuccess  = Pair{ColorSuccess, ColorOnSuccess}
+	SurfaceDisabled = Pair{ColorDisabled, ColorOnDisabled}
 )

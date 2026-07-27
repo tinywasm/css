@@ -21,21 +21,21 @@ func (s *Stylesheet) String() string {
 }
 
 // Selector is a raw CSS selector string used by the DSL.
-type Selector string
+type selector string
 
-func (s Selector) cssValue() string { return string(s) }
+func (s selector) cssValue() string { return string(s) }
 
-// Pseudo-class helpers on Class
-func (c Class) Hover() Selector    { return Selector("." + string(c) + ":hover") }
-func (c Class) Focus() Selector    { return Selector("." + string(c) + ":focus") }
-func (c Class) Disabled() Selector { return Selector("." + string(c) + ":disabled") }
+// Pseudo-class helpers
+func Hover(c Class) selector    { return selector("." + string(c) + ":hover") }
+func Focus(c Class) selector    { return selector("." + string(c) + ":focus") }
+func Disabled(c Class) selector { return selector("." + string(c) + ":disabled") }
 
-type RuleItem struct {
+type ruleItem struct {
 	sel   string
-	decls []Decl
+	decls []decl
 }
 
-func (r RuleItem) writeTo(b *fmt.Builder) {
+func (r ruleItem) writeTo(b *fmt.Builder) {
 	b.WriteString(r.sel)
 	b.WriteString(" {\n")
 	for _, d := range r.decls {
@@ -53,58 +53,69 @@ func (r RuleItem) writeTo(b *fmt.Builder) {
 	b.WriteString("}\n\n")
 }
 
-type RuleContent interface{ ruleContent() }
+type ruleContent interface{ ruleContent() }
 
-func (d Decl) ruleContent()    {}
+func (d decl) ruleContent() {}
 
-type rawRule string
+type rawRuleType string
 
-func (r rawRule) ruleContent() {}
+func (r rawRuleType) ruleContent() {}
 
 // RawRule is a transitional escape hatch. New code SHOULD use the typed DSL.
 // Each RawRule call site SHOULD carry a // TODO(css-dsl): add typed X comment
 // naming the missing property, so reviewers can decide whether to extend the
 // DSL or accept the raw use case (vendor-prefixed, exotic property, etc.).
-func RawRule(s string) rawRule { return rawRule(s) }
+func rawRule(s string) rawRuleType { return rawRuleType(s) }
 
-func Rule(sel any, content ...RuleContent) item {
+func ensureSemicolon(s string) string {
+	i := len(s) - 1
+	for i >= 0 && (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r') {
+		i--
+	}
+	if i >= 0 && s[i] != ';' && s[i] != '}' {
+		return s + ";"
+	}
+	return s
+}
+
+func rule(sel any, content ...ruleContent) item {
 	var s string
 	switch v := sel.(type) {
 	case Class:
 		s = "." + string(v)
-	case Selector:
+	case selector:
 		s = string(v)
 	case string:
 		s = v
 	}
-	decls := make([]Decl, 0, len(content))
+	decls := make([]decl, 0, len(content))
 	for _, c := range content {
 		switch v := c.(type) {
-		case Decl:
+		case decl:
 			decls = append(decls, v)
-		case rawRule:
-			decls = append(decls, Decl{Prop: "raw", Val: string(v)})
+		case rawRuleType:
+			decls = append(decls, decl{Prop: "raw", Val: ensureSemicolon(string(v))})
 		}
 	}
-	return RuleItem{sel: s, decls: decls}
+	return ruleItem{sel: s, decls: decls}
 }
 
-func Root(decls ...Decl) item {
-	return RuleItem{sel: ":root", decls: decls}
+func root(decls ...decl) item {
+	return ruleItem{sel: ":root", decls: decls}
 }
 
-type MediaItem struct {
+type mediaItem struct {
 	query string
 	items []item
 }
 
-func (m MediaItem) writeTo(b *fmt.Builder) {
+func (m mediaItem) writeTo(b *fmt.Builder) {
 	b.WriteString("@media ")
 	b.WriteString(m.query)
 	b.WriteString(" {\n")
 	for _, it := range m.items {
 		switch s := it.(type) {
-		case RuleItem:
+		case ruleItem:
 			b.WriteString("  ")
 			b.WriteString(s.sel)
 			b.WriteString(" {\n")
@@ -122,7 +133,7 @@ func (m MediaItem) writeTo(b *fmt.Builder) {
 				b.WriteString(";\n")
 			}
 			b.WriteString("  }\n\n")
-		case *RuleItem:
+		case *ruleItem:
 			b.WriteString("  ")
 			b.WriteString(s.sel)
 			b.WriteString(" {\n")
@@ -147,45 +158,45 @@ func (m MediaItem) writeTo(b *fmt.Builder) {
 	b.WriteString("}\n\n")
 }
 
-func Media(query string, items ...item) item {
-	return MediaItem{query: query, items: items}
+func media(query string, items ...item) item {
+	return mediaItem{query: query, items: items}
 }
 
-func MediaPrefersDark(items ...item) item {
-	return Media("(prefers-color-scheme: dark)", items...)
+func mediaPrefersDark(items ...item) item {
+	return media("(prefers-color-scheme: dark)", items...)
 }
 
 // MediaDesktop wraps the canonical "landscape + hover" media query used by
 // tinywasm layouts to distinguish desktop from mobile.
 // Reference: appears 4 times verbatim in platformd Appendix A.
-func MediaDesktop(items ...item) item {
-	return Media("(orientation: landscape) and (hover: hover)", items...)
+func mediaDesktop(items ...item) item {
+	return media("(orientation: landscape) and (hover: hover)", items...)
 }
 
 // KeyframeStep is one step of a keyframes animation.
 // At is the percentage or named position ("0%", "50%", "100%", "from", "to").
-type KeyframeStep struct {
-	At    string
-	Decls []Decl
+type keyframeStep struct {
+	at    string
+	Decls []decl
 }
 
 // At builds a KeyframeStep. Variadic Decls match the DSL's existing rule shape.
-func At(at string, decls ...Decl) KeyframeStep {
-	return KeyframeStep{At: at, Decls: decls}
+func at(at string, decls ...decl) keyframeStep {
+	return keyframeStep{at: at, Decls: decls}
 }
 
-type KeyframesItem struct {
+type keyframesItem struct {
 	name  string
-	steps []KeyframeStep
+	steps []keyframeStep
 }
 
-func (k KeyframesItem) writeTo(b *fmt.Builder) {
+func (k keyframesItem) writeTo(b *fmt.Builder) {
 	b.WriteString("@keyframes ")
 	b.WriteString(k.name)
 	b.WriteString(" {\n")
 	for _, s := range k.steps {
 		b.WriteString("  ")
-		b.WriteString(s.At)
+		b.WriteString(s.at)
 		b.WriteString(" {\n")
 		for _, d := range s.Decls {
 			b.WriteString("    ")
@@ -200,22 +211,22 @@ func (k KeyframesItem) writeTo(b *fmt.Builder) {
 }
 
 // Keyframes builds an @keyframes at-rule.
-func Keyframes(name string, steps ...KeyframeStep) item {
-	return KeyframesItem{name: name, steps: steps}
+func keyframes(name string, steps ...keyframeStep) item {
+	return keyframesItem{name: name, steps: steps}
 }
 
-type RawItem string
+type rawItem string
 
-func (r RawItem) writeTo(b *fmt.Builder) {
+func (r rawItem) writeTo(b *fmt.Builder) {
 	b.WriteString(string(r))
 	b.WriteString("\n\n")
 }
 
-func Raw(css string) item { return RawItem(css) }
+func raw(css string) item { return rawItem(css) }
 
-type Decl struct{ Prop, Val string }
+type decl struct{ Prop, Val string }
 
-type Value interface{ cssValue() string }
+type value interface{ cssValue() string }
 
 func (t Token) cssValue() string { return t.Var() }
 
@@ -223,146 +234,150 @@ type stringValue string
 
 func (s stringValue) cssValue() string { return string(s) }
 
-func Px(n int) Value      { return stringValue(fmt.Sprintf("%dpx", n)) }
-func Rem(f float64) Value { return stringValue(fmt.Sprintf("%grem", f)) }
-func Em(f float64) Value  { return stringValue(fmt.Sprintf("%gem", f)) }
-func Pct(n int) Value     { return stringValue(fmt.Sprintf("%d%%", n)) }
-func Vw(f float64) Value  { return stringValue(fmt.Sprintf("%gvw", f)) }
-func Vh(f float64) Value  { return stringValue(fmt.Sprintf("%gvh", f)) }
-func Calc(expr string) Value { return stringValue(fmt.Sprintf("calc(%s)", expr)) }
-func Hex(s string) Value  { return stringValue(s) }
-func Str(s string) Value  { return stringValue(s) }
+func px(n int) value         { return stringValue(fmt.Sprintf("%dpx", n)) }
+func rem(f float64) value    { return stringValue(fmt.Sprintf("%grem", f)) }
+func em(f float64) value     { return stringValue(fmt.Sprintf("%gem", f)) }
+func pct(n int) value        { return stringValue(fmt.Sprintf("%d%%", n)) }
+func vw(f float64) value     { return stringValue(fmt.Sprintf("%gvw", f)) }
+func vh(f float64) value     { return stringValue(fmt.Sprintf("%gvh", f)) }
+func calc(expr string) value { return stringValue(fmt.Sprintf("calc(%s)", expr)) }
+func hex(s string) value     { return stringValue(s) }
+func str(s string) value     { return stringValue(s) }
 
 type kw string
 
 func (k kw) cssValue() string { return string(k) }
 
 var (
-	Auto    Value = kw("auto")
-	None    Value = kw("none")
-	Block   Value = kw("block")
-	Flex_   Value = kw("flex")
-	Grid    Value = kw("grid")
-	Inline  Value = kw("inline-block")
-	Center  Value = kw("center")
-	Zero    Value = kw("0")
-	Pointer Value = kw("pointer")
+	auto    value = kw("auto")
+	none    value = kw("none")
+	block   value = kw("block")
+	flex_   value = kw("flex")
+	grid    value = kw("grid")
+	inline  value = kw("inline-block")
+	center  value = kw("center")
+	zero    value = kw("0")
+	pointer value = kw("pointer")
 
-	Fixed       Value = kw("fixed")
-	Absolute    Value = kw("absolute")
-	Unset       Value = kw("unset")
-	Initial     Value = kw("initial")
-	FlexEnd     Value = kw("flex-end")
-	SpaceAround Value = kw("space-around")
-	Row         Value = kw("row")
-	Column      Value = kw("column")
-	Hidden      Value = kw("hidden")
-	Visible     Value = kw("visible")
-	Uppercase   Value = kw("uppercase")
-	Capitalize  Value = kw("capitalize")
-	RightText   Value = kw("right")
+	fixed       value = kw("fixed")
+	absolute    value = kw("absolute")
+	unset       value = kw("unset")
+	initial     value = kw("initial")
+	flexEnd     value = kw("flex-end")
+	spaceAround value = kw("space-around")
+	row         value = kw("row")
+	column      value = kw("column")
+	hidden      value = kw("hidden")
+	visible     value = kw("visible")
+	uppercase   value = kw("uppercase")
+	capitalize  value = kw("capitalize")
+	rightText   value = kw("right")
 
-	Relative     Value = kw("relative")
-	SpaceBetween Value = kw("space-between")
-	InlineFlex   Value = kw("inline-flex")
-	Wrap         Value = kw("wrap")
-	FlexStart    Value = kw("flex-start")
-	NoRepeat     Value = kw("no-repeat")
+	relative     value = kw("relative")
+	spaceBetween value = kw("space-between")
+	inlineFlex   value = kw("inline-flex")
+	wrap         value = kw("wrap")
+	flexStart    value = kw("flex-start")
+	noRepeat     value = kw("no-repeat")
 )
 
-func joinValues(vs []Value) string {
+func joinValues(vs []value) string {
+	parts := make([]string, len(vs))
+	for i, v := range vs {
+		parts[i] = v.cssValue()
+	}
 	b := fmt.GetConv()
 	defer b.PutConv()
-	for i, v := range vs {
+	for i, p := range parts {
 		if i > 0 {
 			b.WriteString(" ")
 		}
-		b.WriteString(v.cssValue())
+		b.WriteString(p)
 	}
 	return b.String()
 }
 
-func Background(v Value) Decl      { return Decl{"background", v.cssValue()} }
-func BackgroundColor(v Value) Decl { return Decl{"background-color", v.cssValue()} }
-func BackgroundImage(v Value) Decl { return Decl{"background-image", v.cssValue()} }
-func Color(v Value) Decl           { return Decl{"color", v.cssValue()} }
-func Padding(v ...Value) Decl      { return Decl{"padding", joinValues(v)} }
-func Margin(v ...Value) Decl       { return Decl{"margin", joinValues(v)} }
-func Border(v ...Value) Decl       { return Decl{"border", joinValues(v)} }
-func BorderColor(v Value) Decl     { return Decl{"border-color", v.cssValue()} }
-func BorderRadius(v ...Value) Decl { return Decl{"border-radius", joinValues(v)} }
-func BoxShadow(v Value) Decl       { return Decl{"box-shadow", v.cssValue()} }
-func BoxSizing(v Value) Decl       { return Decl{"box-sizing", v.cssValue()} }
-func Display(v Value) Decl         { return Decl{"display", v.cssValue()} }
-func Flex(v ...Value) Decl         { return Decl{"flex", joinValues(v)} }
-func FlexDirection(v Value) Decl   { return Decl{"flex-direction", v.cssValue()} }
-func Gap(v Value) Decl             { return Decl{"gap", v.cssValue()} }
-func JustifyContent(v Value) Decl  { return Decl{"justify-content", v.cssValue()} }
-func AlignItems(v Value) Decl      { return Decl{"align-items", v.cssValue()} }
-func Width(v Value) Decl           { return Decl{"width", v.cssValue()} }
-func Height(v Value) Decl          { return Decl{"height", v.cssValue()} }
-func MaxWidth(v Value) Decl        { return Decl{"max-width", v.cssValue()} }
-func MinHeight(v Value) Decl       { return Decl{"min-height", v.cssValue()} }
-func FontSize(v Value) Decl        { return Decl{"font-size", v.cssValue()} }
-func FontWeight(v Value) Decl      { return Decl{"font-weight", v.cssValue()} }
-func LineHeight(v Value) Decl      { return Decl{"line-height", v.cssValue()} }
-func LetterSpacing(v Value) Decl   { return Decl{"letter-spacing", v.cssValue()} }
-func Transition(v ...Value) Decl   { return Decl{"transition", joinValues(v)} }
-func Animation(v ...Value) Decl    { return Decl{"animation", joinValues(v)} }
-func Transform(v Value) Decl       { return Decl{"transform", v.cssValue()} }
-func Cursor(v Value) Decl          { return Decl{"cursor", v.cssValue()} }
-func Outline(v Value) Decl         { return Decl{"outline", v.cssValue()} }
-func OutlineOffset(v Value) Decl   { return Decl{"outline-offset", v.cssValue()} }
-func Opacity(v float64) Decl       { return Decl{"opacity", fmt.Sprintf("%g", v)} }
-func PointerEvents(v Value) Decl   { return Decl{"pointer-events", v.cssValue()} }
-func Position(v Value) Decl        { return Decl{"position", v.cssValue()} }
-func Top(v Value) Decl             { return Decl{"top", v.cssValue()} }
-func Right(v Value) Decl           { return Decl{"right", v.cssValue()} }
-func Bottom(v Value) Decl          { return Decl{"bottom", v.cssValue()} }
-func Left(v Value) Decl            { return Decl{"left", v.cssValue()} }
-func ZIndex(v Value) Decl          { return Decl{"z-index", v.cssValue()} }
-func FontFamily(v Value) Decl      { return Decl{"font-family", v.cssValue()} }
-func MinWidth(v Value) Decl        { return Decl{"min-width", v.cssValue()} }
-func MaxHeight(v Value) Decl       { return Decl{"max-height", v.cssValue()} }
-func AlignSelf(v Value) Decl       { return Decl{"align-self", v.cssValue()} }
-func Overflow(v Value) Decl        { return Decl{"overflow", v.cssValue()} }
-func Visibility(v Value) Decl      { return Decl{"visibility", v.cssValue()} }
-func TextAlign(v Value) Decl       { return Decl{"text-align", v.cssValue()} }
-func TextTransform(v Value) Decl   { return Decl{"text-transform", v.cssValue()} }
-func TextDecoration(v Value) Decl  { return Decl{"text-decoration", v.cssValue()} }
-func TextShadow(v ...Value) Decl   { return Decl{"text-shadow", joinValues(v)} }
-func UserSelect(v Value) Decl      { return Decl{"user-select", v.cssValue()} }
-func TouchAction(v Value) Decl     { return Decl{"touch-action", v.cssValue()} }
-func ListStyleType(v Value) Decl   { return Decl{"list-style-type", v.cssValue()} }
-func GridArea(v Value) Decl        { return Decl{"grid-area", v.cssValue()} }
-func GridTemplate(v Value) Decl    { return Decl{"grid-template", v.cssValue()} }
-func MarginLeft(v Value) Decl      { return Decl{"margin-left", v.cssValue()} }
-func MarginRight(v Value) Decl     { return Decl{"margin-right", v.cssValue()} }
-func PaddingBottom(v Value) Decl   { return Decl{"padding-bottom", v.cssValue()} }
-func ListStyle(v Value) Decl       { return Decl{"list-style", v.cssValue()} }
-func All(v Value) Decl             { return Decl{"all", v.cssValue()} }
-func OverflowY(v Value) Decl       { return Decl{"overflow-y", v.cssValue()} }
-func GridTemplateRows(v Value) Decl    { return Decl{"grid-template-rows", v.cssValue()} }
-func GridTemplateColumns(v Value) Decl { return Decl{"grid-template-columns", v.cssValue()} }
-func BorderRight(v ...Value) Decl      { return Decl{"border-right", joinValues(v)} }
-func PaddingTop(v Value) Decl           { return Decl{"padding-top", v.cssValue()} }
-func PaddingLeft(v Value) Decl          { return Decl{"padding-left", v.cssValue()} }
-func PaddingRight(v Value) Decl         { return Decl{"padding-right", v.cssValue()} }
-func MarginTop(v Value) Decl            { return Decl{"margin-top", v.cssValue()} }
-func MarginBottom(v Value) Decl         { return Decl{"margin-bottom", v.cssValue()} }
-func FlexWrap(v Value) Decl             { return Decl{"flex-wrap", v.cssValue()} }
-func FlexGrow(v Value) Decl             { return Decl{"flex-grow", v.cssValue()} }
-func AlignContent(v Value) Decl         { return Decl{"align-content", v.cssValue()} }
-func BorderBottom(v ...Value) Decl      { return Decl{"border-bottom", joinValues(v)} }
-func BorderLeft(v ...Value) Decl        { return Decl{"border-left", joinValues(v)} }
-func BackgroundSize(v Value) Decl       { return Decl{"background-size", v.cssValue()} }
-func BackgroundPosition(v Value) Decl   { return Decl{"background-position", v.cssValue()} }
-func BackgroundRepeat(v Value) Decl     { return Decl{"background-repeat", v.cssValue()} }
+func background(v value) decl          { return decl{"background", v.cssValue()} }
+func backgroundColor(v value) decl     { return decl{"background-color", v.cssValue()} }
+func backgroundImage(v value) decl     { return decl{"background-image", v.cssValue()} }
+func color(v value) decl               { return decl{"color", v.cssValue()} }
+func padding(v ...value) decl          { return decl{"padding", joinValues(v)} }
+func margin(v ...value) decl           { return decl{"margin", joinValues(v)} }
+func border(v ...value) decl           { return decl{"border", joinValues(v)} }
+func borderColor(v value) decl         { return decl{"border-color", v.cssValue()} }
+func borderRadius(v ...value) decl     { return decl{"border-radius", joinValues(v)} }
+func boxShadow(v value) decl           { return decl{"box-shadow", v.cssValue()} }
+func boxSizing(v value) decl           { return decl{"box-sizing", v.cssValue()} }
+func display(v value) decl             { return decl{"display", v.cssValue()} }
+func flex(v ...value) decl             { return decl{"flex", joinValues(v)} }
+func flexDirection(v value) decl       { return decl{"flex-direction", v.cssValue()} }
+func gap(v value) decl                 { return decl{"gap", v.cssValue()} }
+func justifyContent(v value) decl      { return decl{"justify-content", v.cssValue()} }
+func alignItems(v value) decl          { return decl{"align-items", v.cssValue()} }
+func width(v value) decl               { return decl{"width", v.cssValue()} }
+func height(v value) decl              { return decl{"height", v.cssValue()} }
+func maxWidth(v value) decl            { return decl{"max-width", v.cssValue()} }
+func minHeight(v value) decl           { return decl{"min-height", v.cssValue()} }
+func fontSize(v value) decl            { return decl{"font-size", v.cssValue()} }
+func fontWeight(v value) decl          { return decl{"font-weight", v.cssValue()} }
+func lineHeight(v value) decl          { return decl{"line-height", v.cssValue()} }
+func letterSpacing(v value) decl       { return decl{"letter-spacing", v.cssValue()} }
+func transition(v ...value) decl       { return decl{"transition", joinValues(v)} }
+func animation(v ...value) decl        { return decl{"animation", joinValues(v)} }
+func transform(v value) decl           { return decl{"transform", v.cssValue()} }
+func cursor(v value) decl              { return decl{"cursor", v.cssValue()} }
+func outline(v value) decl             { return decl{"outline", v.cssValue()} }
+func outlineOffset(v value) decl       { return decl{"outline-offset", v.cssValue()} }
+func opacity(v float64) decl           { return decl{"opacity", fmt.Sprintf("%g", v)} }
+func pointerEvents(v value) decl       { return decl{"pointer-events", v.cssValue()} }
+func position(v value) decl            { return decl{"position", v.cssValue()} }
+func top(v value) decl                 { return decl{"top", v.cssValue()} }
+func right(v value) decl               { return decl{"right", v.cssValue()} }
+func bottom(v value) decl              { return decl{"bottom", v.cssValue()} }
+func left(v value) decl                { return decl{"left", v.cssValue()} }
+func zIndex(v value) decl              { return decl{"z-index", v.cssValue()} }
+func fontFamily(v value) decl          { return decl{"font-family", v.cssValue()} }
+func minWidth(v value) decl            { return decl{"min-width", v.cssValue()} }
+func maxHeight(v value) decl           { return decl{"max-height", v.cssValue()} }
+func alignSelf(v value) decl           { return decl{"align-self", v.cssValue()} }
+func overflow(v value) decl            { return decl{"overflow", v.cssValue()} }
+func visibility(v value) decl          { return decl{"visibility", v.cssValue()} }
+func textAlign(v value) decl           { return decl{"text-align", v.cssValue()} }
+func textTransform(v value) decl       { return decl{"text-transform", v.cssValue()} }
+func textDecoration(v value) decl      { return decl{"text-decoration", v.cssValue()} }
+func textShadow(v ...value) decl       { return decl{"text-shadow", joinValues(v)} }
+func userSelect(v value) decl          { return decl{"user-select", v.cssValue()} }
+func touchAction(v value) decl         { return decl{"touch-action", v.cssValue()} }
+func listStyleType(v value) decl       { return decl{"list-style-type", v.cssValue()} }
+func gridArea(v value) decl            { return decl{"grid-area", v.cssValue()} }
+func gridTemplate(v value) decl        { return decl{"grid-template", v.cssValue()} }
+func marginLeft(v value) decl          { return decl{"margin-left", v.cssValue()} }
+func marginRight(v value) decl         { return decl{"margin-right", v.cssValue()} }
+func paddingBottom(v value) decl       { return decl{"padding-bottom", v.cssValue()} }
+func listStyle(v value) decl           { return decl{"list-style", v.cssValue()} }
+func all(v value) decl                 { return decl{"all", v.cssValue()} }
+func overflowY(v value) decl           { return decl{"overflow-y", v.cssValue()} }
+func gridTemplateRows(v value) decl    { return decl{"grid-template-rows", v.cssValue()} }
+func gridTemplateColumns(v value) decl { return decl{"grid-template-columns", v.cssValue()} }
+func borderRight(v ...value) decl      { return decl{"border-right", joinValues(v)} }
+func paddingTop(v value) decl          { return decl{"padding-top", v.cssValue()} }
+func paddingLeft(v value) decl         { return decl{"padding-left", v.cssValue()} }
+func paddingRight(v value) decl        { return decl{"padding-right", v.cssValue()} }
+func marginTop(v value) decl           { return decl{"margin-top", v.cssValue()} }
+func marginBottom(v value) decl        { return decl{"margin-bottom", v.cssValue()} }
+func flexWrap(v value) decl            { return decl{"flex-wrap", v.cssValue()} }
+func flexGrow(v value) decl            { return decl{"flex-grow", v.cssValue()} }
+func alignContent(v value) decl        { return decl{"align-content", v.cssValue()} }
+func borderBottom(v ...value) decl     { return decl{"border-bottom", joinValues(v)} }
+func borderLeft(v ...value) decl       { return decl{"border-left", joinValues(v)} }
+func backgroundSize(v value) decl      { return decl{"background-size", v.cssValue()} }
+func backgroundPosition(v value) decl  { return decl{"background-position", v.cssValue()} }
+func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssValue()} }
 
-func Declare(t Token, value string) Decl {
-	return Decl{t.Name, value}
+func declare(t Token, value string) decl {
+	return decl{t.Name, value}
 }
 
-func Bind(active, source Token) Decl {
-	return Decl{active.Name, source.Var()}
+func bind(active, source Token) decl {
+	return decl{active.Name, source.Var()}
 }

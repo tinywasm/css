@@ -4,176 +4,203 @@ package css
 
 func RootCSS() *Stylesheet {
 	return NewStylesheet(
-		Root(
+		root(
 			// Brand group — Pa100T reference palette: steel blue with white text.
-			Declare(ColorPrimary, "#3f88bf"),
-			Declare(ColorOnPrimary, "#FFFFFF"),
-			Declare(ColorSecondary, "#654FF0"),
-			Declare(ColorOnSecondary, "#FFFFFF"),
-			Declare(ColorSuccess, "#3FB950"),
-			Declare(ColorError, "#E34F26"),
+			declare(ColorPrimary, "#3f88bf"),
+			declare(ColorOnPrimary, "#FFFFFF"),
+			declare(ColorSecondary, "#654FF0"),
+			declare(ColorOnSecondary, "#FFFFFF"),
+			declare(ColorSuccess, "#3FB950"),
+			declare(ColorOnSuccess, "#FFFFFF"),
+			declare(ColorError, "#E34F26"),
+			declare(ColorOnError, "#FFFFFF"),
 		),
-		Root(
+		root(
 			// Theme group
-			Declare(ColorBackgroundLight, "#FFFFFF"),
-			Declare(ColorBackgroundDark, "#0D1117"),
-			Declare(ColorSurfaceLight, "#F2F2F7"),
-			Declare(ColorSurfaceDark, "#161B22"),
-			Declare(ColorOnSurfaceLight, "#1C1C1E"),
-			Declare(ColorOnSurfaceDark, "#E6EDF3"),
-			Declare(ColorMutedLight, "#6E6E73"),
-			Declare(ColorMutedDark, "#8B949E"),
-			Declare(ColorHoverLight, "#B8860B"),
-			Declare(ColorHoverDark, "#F7DF1E"),
-			Declare(ColorSelectionLight, "#f5a623"),
-			Declare(ColorSelectionDark, "#9e6a2e"),
-			Declare(ColorOnSelectionLight, "#1C1C1E"),
-			Declare(ColorOnSelectionDark, "#FFFFFF"),
+			declare(ColorBackgroundLight, "#FFFFFF"),
+			declare(ColorBackgroundDark, "#0D1117"),
+			declare(ColorSurfaceLight, "#F2F2F7"),
+			declare(ColorSurfaceDark, "#161B22"),
+			declare(ColorSurfaceSunkenLight, "#E5E5EA"),
+			declare(ColorSurfaceSunkenDark, "#21262D"),
+			declare(ColorOnSurfaceLight, "#1C1C1E"),
+			declare(ColorOnSurfaceDark, "#E6EDF3"),
+			declare(ColorOutlineLight, "#D1D1D6"),
+			declare(ColorOutlineDark, "#30363D"),
+			declare(ColorMutedLight, "#6E6E73"),
+			declare(ColorMutedDark, "#8B949E"),
+			declare(ColorHoverLight, "#B8860B"),
+			declare(ColorHoverDark, "#F7DF1E"),
+			declare(ColorSelectionLight, "#f5a623"),
+			declare(ColorSelectionDark, "#9e6a2e"),
+			declare(ColorOnSelectionLight, "#1C1C1E"),
+			declare(ColorOnSelectionDark, "#FFFFFF"),
+			declare(ColorDisabledLight, "#E5E5EA"),
+			declare(ColorDisabledDark, "#21262D"),
+			declare(ColorOnDisabledLight, "#8E8E93"),
+			declare(ColorOnDisabledDark, "#6E7681"),
 		),
-		Root(
+		root(
 			// Typography scale
-			Declare(TextXs, "0.75rem"),
-			Declare(TextSm, "0.875rem"),
-			Declare(TextBase, "1rem"),
-			Declare(TextLg, "1.25rem"),
-			Declare(TextXl, "1.5rem"),
-			Declare(Text2xl, "2rem"),
+			declare(TextXs, "0.75rem"),
+			declare(TextSm, "0.875rem"),
+			declare(TextBase, "1rem"),
+			declare(TextLg, "1.25rem"),
+			declare(TextXl, "1.5rem"),
+			declare(Text2xl, "2rem"),
 		),
-		Root(
+		root(
 			// Spacing scale
-			Declare(Space1, "0.25rem"),
-			Declare(Space2, "0.5rem"),
-			Declare(Space3, "0.75rem"),
-			Declare(Space4, "1rem"),
-			Declare(Space6, "1.5rem"),
-			Declare(Space8, "2rem"),
-			Declare(Space12, "3rem"),
+			declare(Space0, "0"),
+			declare(Space1, "0.25rem"),
+			declare(Space2, "0.5rem"),
+			declare(Space3, "0.75rem"),
+			declare(Space4, "1rem"),
+			declare(Space6, "1.5rem"),
+			declare(Space8, "2rem"),
+			declare(Space12, "3rem"),
 		),
-		Root(
+		root(
 			// Border-radius scale
-			Declare(RadiusSm, "4px"),
-			Declare(RadiusMd, "8px"),
-			Declare(RadiusLg, "16px"),
-			Declare(RadiusFull, "9999px"),
+			declare(RadiusSm, "4px"),
+			declare(RadiusMd, "8px"),
+			declare(RadiusLg, "16px"),
+			declare(RadiusFull, "9999px"),
 		),
-		Root(
+		root(
 			// Typography
-			Declare(LeadingTight, "1.25"),
-			Declare(LeadingNormal, "1.5"),
-			Declare(LeadingRelaxed, "1.75"),
-			Declare(FontWeightRegular, "400"),
-			Declare(FontWeightMedium, "500"),
-			Declare(FontWeightBold, "700"),
-			Declare(TrackingTight, "-0.02em"),
-			Declare(TrackingNormal, "0"),
-			Declare(TrackingWide, "0.05em"),
+			declare(LeadingTight, "1.25"),
+			declare(LeadingNormal, "1.5"),
+			declare(LeadingRelaxed, "1.75"),
+			declare(FontWeightRegular, "400"),
+			declare(FontWeightMedium, "500"),
+			declare(FontWeightBold, "700"),
+			declare(TrackingTight, "-0.02em"),
+			declare(TrackingNormal, "0"),
+			declare(TrackingWide, "0.05em"),
 		),
-		Root(
+		root(
 			// Elevation
-			Declare(ShadowSm, "0 1px 2px rgba(0, 0, 0, 0.05)"),
-			Declare(ShadowMd, "0 4px 6px rgba(0, 0, 0, 0.10)"),
-			Declare(ShadowLg, "0 10px 15px rgba(0, 0, 0, 0.10)"),
-			Declare(ShadowXl, "0 20px 25px rgba(0, 0, 0, 0.15)"),
+			declare(ShadowSm, "0 1px 2px rgba(0, 0, 0, 0.05)"),
+			declare(ShadowMd, "0 4px 6px rgba(0, 0, 0, 0.10)"),
+			declare(ShadowLg, "0 10px 15px rgba(0, 0, 0, 0.10)"),
+			declare(ShadowXl, "0 20px 25px rgba(0, 0, 0, 0.15)"),
 		),
-		Root(
+		root(
 			// Motion
-			Declare(DurationFast, "150ms"),
-			Declare(DurationBase, "250ms"),
-			Declare(DurationSlow, "400ms"),
-			Declare(EaseIn, "cubic-bezier(0.4, 0,   1,   1)"),
-			Declare(EaseOut, "cubic-bezier(0,   0,   0.2, 1)"),
-			Declare(EaseInOut, "cubic-bezier(0.4, 0,   0.2, 1)"),
+			declare(DurationFast, "150ms"),
+			declare(DurationBase, "250ms"),
+			declare(DurationSlow, "400ms"),
+			declare(EaseIn, "cubic-bezier(0.4, 0,   1,   1)"),
+			declare(EaseOut, "cubic-bezier(0,   0,   0.2, 1)"),
+			declare(EaseInOut, "cubic-bezier(0.4, 0,   0.2, 1)"),
 		),
-		Root(
+		root(
 			// Z-index
-			Declare(ZBase, "0"),
-			Declare(ZDropdown, "100"),
-			Declare(ZSticky, "200"),
-			Declare(ZModal, "300"),
-			Declare(ZToast, "400"),
-			Declare(ZTooltip, "500"),
+			declare(ZBase, "0"),
+			declare(ZDropdown, "100"),
+			declare(ZSticky, "200"),
+			declare(ZModal, "300"),
+			declare(ZToast, "400"),
+			declare(ZTooltip, "500"),
 		),
-		Root(
+		root(
 			// Breakpoints
-			Declare(BpSm, "640px"),
-			Declare(BpMd, "768px"),
-			Declare(BpLg, "1024px"),
-			Declare(BpXl, "1280px"),
+			declare(BpSm, "640px"),
+			declare(BpMd, "768px"),
+			declare(BpLg, "1024px"),
+			declare(BpXl, "1280px"),
 		),
-		Root(
+		root(
 			// Container widths
-			Declare(MaxWProse, "65ch"),
-			Declare(MaxWContent, "1200px"),
-			Declare(MaxWScreen, "1440px"),
+			declare(MaxWProse, "65ch"),
+			declare(MaxWContent, "1200px"),
+			declare(MaxWScreen, "1440px"),
 		),
 	)
 }
 
 func RenderCSS() *Stylesheet {
 	return NewStylesheet(
-		Rule(Selector("*, *::before, *::after"),
-			BoxSizing(Str("border-box")),
+		rule(selector("*, *::before, *::after"),
+			boxSizing(str("border-box")),
 		),
-		Rule(Selector("html"),
-			RawRule("  -webkit-text-size-adjust: 100%;\n  text-size-adjust: 100%;"),
+		rule(selector("html"),
+			rawRule("  -webkit-text-size-adjust: 100%;\n  text-size-adjust: 100%;"),
 		),
-		Rule(Selector("body"),
-			Margin(Zero),
-			FontFamily(Str("system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif")),
-			FontSize(TextBase),
-			LineHeight(LeadingNormal),
-			Color(ColorOnSurface),
-			Background(ColorBackground),
+		rule(selector("body"),
+			margin(zero),
+			fontFamily(str("system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif")),
+			fontSize(TextBase),
+			lineHeight(LeadingNormal),
+			color(ColorOnSurface),
+			background(ColorBackground),
 		),
-		Rule(Selector(":focus-visible"),
-			Outline(Str("2px solid "+ColorPrimary.Var())),
-			OutlineOffset(Px(2)),
+		rule(selector(":focus-visible"),
+			outline(str("2px solid "+ColorPrimary.Var())),
+			outlineOffset(px(2)),
 		),
-		Rule(Selector("img, svg, video"),
-			Display(Block),
-			MaxWidth(Pct(100)),
+		rule(selector("img, svg, video"),
+			display(block),
+			maxWidth(pct(100)),
 		),
-		Root(
-			Bind(ColorBackground, ColorBackgroundLight),
-			Bind(ColorSurface, ColorSurfaceLight),
-			Bind(ColorOnSurface, ColorOnSurfaceLight),
-			Bind(ColorMuted, ColorMutedLight),
-			Bind(ColorHover, ColorHoverLight),
-			Bind(ColorSelection, ColorSelectionLight),
-			Bind(ColorOnSelection, ColorOnSelectionLight),
+		root(
+			bind(ColorBackground, ColorBackgroundLight),
+			bind(ColorSurface, ColorSurfaceLight),
+			bind(ColorSurfaceSunken, ColorSurfaceSunkenLight),
+			bind(ColorOnSurface, ColorOnSurfaceLight),
+			bind(ColorOutline, ColorOutlineLight),
+			bind(ColorMuted, ColorMutedLight),
+			bind(ColorHover, ColorHoverLight),
+			bind(ColorSelection, ColorSelectionLight),
+			bind(ColorOnSelection, ColorOnSelectionLight),
+			bind(ColorDisabled, ColorDisabledLight),
+			bind(ColorOnDisabled, ColorOnDisabledLight),
 		),
-		MediaPrefersDark(
-			Root(
-				Bind(ColorBackground, ColorBackgroundDark),
-				Bind(ColorSurface, ColorSurfaceDark),
-				Bind(ColorOnSurface, ColorOnSurfaceDark),
-				Bind(ColorMuted, ColorMutedDark),
-				Bind(ColorHover, ColorHoverDark),
-				Bind(ColorSelection, ColorSelectionDark),
-				Bind(ColorOnSelection, ColorOnSelectionDark),
+		mediaPrefersDark(
+			root(
+				bind(ColorBackground, ColorBackgroundDark),
+				bind(ColorSurface, ColorSurfaceDark),
+				bind(ColorSurfaceSunken, ColorSurfaceSunkenDark),
+				bind(ColorOnSurface, ColorOnSurfaceDark),
+				bind(ColorOutline, ColorOutlineDark),
+				bind(ColorMuted, ColorMutedDark),
+				bind(ColorHover, ColorHoverDark),
+				bind(ColorSelection, ColorSelectionDark),
+				bind(ColorOnSelection, ColorOnSelectionDark),
+				bind(ColorDisabled, ColorDisabledDark),
+				bind(ColorOnDisabled, ColorOnDisabledDark),
 			),
 		),
 		// Explicit theme override via the [data-theme] attribute (set by a theme
 		// toggle on <html>). These come after the :root/@media defaults and have
 		// higher specificity, so a manual choice wins over the OS preference.
 		// Removing the attribute (ThemeAuto) falls back to the @media query above.
-		Rule(Selector("[data-theme=\"light\"]"),
-			Bind(ColorBackground, ColorBackgroundLight),
-			Bind(ColorSurface, ColorSurfaceLight),
-			Bind(ColorOnSurface, ColorOnSurfaceLight),
-			Bind(ColorMuted, ColorMutedLight),
-			Bind(ColorHover, ColorHoverLight),
-			Bind(ColorSelection, ColorSelectionLight),
-			Bind(ColorOnSelection, ColorOnSelectionLight),
+		rule(selector("[data-theme=\"light\"]"),
+			bind(ColorBackground, ColorBackgroundLight),
+			bind(ColorSurface, ColorSurfaceLight),
+			bind(ColorSurfaceSunken, ColorSurfaceSunkenLight),
+			bind(ColorOnSurface, ColorOnSurfaceLight),
+			bind(ColorOutline, ColorOutlineLight),
+			bind(ColorMuted, ColorMutedLight),
+			bind(ColorHover, ColorHoverLight),
+			bind(ColorSelection, ColorSelectionLight),
+			bind(ColorOnSelection, ColorOnSelectionLight),
+			bind(ColorDisabled, ColorDisabledLight),
+			bind(ColorOnDisabled, ColorOnDisabledLight),
 		),
-		Rule(Selector("[data-theme=\"dark\"]"),
-			Bind(ColorBackground, ColorBackgroundDark),
-			Bind(ColorSurface, ColorSurfaceDark),
-			Bind(ColorOnSurface, ColorOnSurfaceDark),
-			Bind(ColorMuted, ColorMutedDark),
-			Bind(ColorHover, ColorHoverDark),
-			Bind(ColorSelection, ColorSelectionDark),
-			Bind(ColorOnSelection, ColorOnSelectionDark),
+		rule(selector("[data-theme=\"dark\"]"),
+			bind(ColorBackground, ColorBackgroundDark),
+			bind(ColorSurface, ColorSurfaceDark),
+			bind(ColorSurfaceSunken, ColorSurfaceSunkenDark),
+			bind(ColorOnSurface, ColorOnSurfaceDark),
+			bind(ColorOutline, ColorOutlineDark),
+			bind(ColorMuted, ColorMutedDark),
+			bind(ColorHover, ColorHoverDark),
+			bind(ColorSelection, ColorSelectionDark),
+			bind(ColorOnSelection, ColorOnSelectionDark),
+			bind(ColorDisabled, ColorDisabledDark),
+			bind(ColorOnDisabled, ColorOnDisabledDark),
 		),
 	)
 }
@@ -192,15 +219,15 @@ func Set(t Token, value string) Override { return Override{t, value} }
 // Pensado como el RootCSS() del proyecto raíz — assetmin REEMPLAZA el :root de css por el de
 // la app, por eso trae el catálogo entero, no solo los overrides.
 func Theme(overrides ...Override) *Stylesheet {
-	root := RootCSS() // catálogo por defecto
+	catalog := RootCSS() // catálogo por defecto
 	if len(overrides) == 0 {
-		return root
+		return catalog
 	}
-	decls := make([]Decl, len(overrides))
+	decls := make([]decl, len(overrides))
 	for i, o := range overrides {
-		decls[i] = Declare(o.token, o.value)
+		decls[i] = declare(o.token, o.value)
 	}
-	return withRootTail(root, Root(decls...))
+	return withRootTail(catalog, root(decls...))
 }
 
 func withRootTail(s *Stylesheet, it item) *Stylesheet {

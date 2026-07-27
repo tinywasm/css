@@ -2,12 +2,6 @@
 PLAN: "`tinywasm/css`: cerrar el catálogo de tokens y retirar el DSL que refleja CSS"
 ---
 
-> Depende de: [`PLAN.md`](PLAN.md) (§1 diagnóstico), [`PLAN_WIDGET`](PLAN_WIDGET.md)
-> (§3 tabla de `Surface`, que define exactamente qué tokens faltan).
-> Rompe API en la Etapa 5, y solo cuando ya no queda ningún consumidor del DSL viejo.
-
----
-
 ## Qué se conserva y qué se retira
 
 `tinywasm/css` hace hoy **dos** cosas y solo una está bien:

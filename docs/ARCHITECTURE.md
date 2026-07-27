@@ -1,30 +1,30 @@
-# Arquitectura de Theming
+# Theming Architecture
 
-## RootCSS y el Slot de un solo ganador
+## RootCSS and the Single-Winner Slot
 
-En el pipeline SSR de `tinywasm`, `assetmin` descubre los bloques `RootCSS()` del grafo de dependencias. El bloque `:root` (el vocabulario de tokens) es un **slot de un solo ganador por reemplazo**:
+In the `tinywasm` SSR pipeline, `assetmin` discovers the `RootCSS()` blocks of the dependency graph. The `:root` block (the token vocabulary) is a **single-winner slot by replacement**:
 
-1. Si la aplicación (el proyecto raíz) declara `func RootCSS() *css.Stylesheet`, ese bloque **reemplaza por completo** el `RootCSS()` por defecto de la librería `tinywasm/css`.
-2. `RenderCSS()` (la lógica de reglas y bindings) es **aditivo**: se concatenan las contribuciones de todos los módulos.
+1. If the application (the root project) declares `func RootCSS() *css.Stylesheet`, that block **completely replaces** the default `RootCSS()` of the `tinywasm/css` library.
+2. `RenderCSS()` (the rule and binding logic) is **additive**: the contributions of all modules are concatenated.
 
 ## Entrypoint: `Theme()`
 
-Para facilitar el rebrand sin perder el catálogo completo de tokens (escalas de espacio, tipografía, etc.), la librería provee `css.Theme(...Override)`.
+To facilitate rebranding without losing the complete token catalog (spacing scales, typography, etc.), the library provides `css.Theme(...Override)`.
 
-`Theme()` obtiene el catálogo por defecto mediante `RootCSS()` y añade un bloque `:root` final con los overrides proporcionados. Esto garantiza que:
+`Theme()` obtains the default catalog via `RootCSS()` and appends a final `:root` block with the provided overrides. This ensures that:
 
-- La aplicación no tenga que redeclarar tokens que no desea cambiar.
-- Los cambios de la aplicación ganen en la cascada de CSS al aparecer al final del bloque.
-- El catálogo se mantenga íntegro para que los componentes sigan funcionando.
+- The application does not need to redeclare tokens it does not want to change.
+- The application's changes win the CSS cascade by appearing at the end of the block.
+- The catalog remains complete so that components continue to function.
 
-## Type-Safety con `Override`
+## Type-Safety with `Override`
 
-El tipo `Override` es opaco y solo puede construirse mediante `css.Set(Token, value)`. Esto impide estados ilegales como intentar inyectar propiedades CSS arbitrarias en el bloque `:root` a través del entrypoint de tema, forzando a que solo se sobreescriban tokens del catálogo tipado.
+The `Override` type is opaque and can only be constructed using `css.Set(Token, value)`. This prevents illegal states such as trying to inject arbitrary CSS properties into the `:root` block through the theme entrypoint, forcing only typed catalog tokens to be overridden.
 
 ```go
-// Uso correcto
+// Correct usage
 css.Theme(css.Set(css.ColorPrimary, "#hex"))
 
-// No compila (Set exige un Token)
+// Does not compile (Set requires a Token)
 // css.Theme(css.Set("padding", "20px"))
 ```

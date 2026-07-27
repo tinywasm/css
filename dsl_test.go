@@ -9,67 +9,97 @@ import (
 
 func TestDSL_Rule(t *testing.T) {
 	sheet := NewStylesheet(
-		Rule(".btn",
-			BackgroundColor(Hex("#fff")),
-			Color(ColorPrimary),
+		rule(".btn",
+			backgroundColor(hex("#fff")),
+			color(ColorPrimary),
 		),
 	)
 	got := sheet.String()
-	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#00ADD8);\n}\n\n"
+	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#1E6B9E);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
 }
 
+func TestDSL_Padding_JoinValues(t *testing.T) {
+	sheet := NewStylesheet(
+		rule(".test",
+			padding(Space1, Space2, Space3, Space4),
+		),
+	)
+	got := sheet.String()
+	want := "  padding: var(--space-1,0.25rem) var(--space-2,0.5rem) var(--space-3,0.75rem) var(--space-4,1rem);\n"
+	if !strings.Contains(got, want) {
+		t.Errorf("got:\n%s\nexpected it to contain:\n%s", got, want)
+	}
+}
+
+func TestDSL_RawRule_Semicolon(t *testing.T) {
+	sheet := NewStylesheet(
+		rule(".test",
+			rawRule("grid-template: 1fr"),
+			rawRule("gap: 1rem"),
+			rawRule("  -webkit-text-size-adjust: 100%;\n  text-size-adjust: 100%;"),
+		),
+	)
+	got := sheet.String()
+	want1 := "grid-template: 1fr;\n"
+	want2 := "gap: 1rem;\n"
+	want3 := "  -webkit-text-size-adjust: 100%;\n  text-size-adjust: 100%;\n"
+	if !strings.Contains(got, want1) || !strings.Contains(got, want2) || !strings.Contains(got, want3) {
+		t.Errorf("got:\n%s\nmissing expected raw rules with semicolon", got)
+	}
+}
+
 func TestDSL_NewAdditions(t *testing.T) {
 	sheet := NewStylesheet(
-		Rule(".test",
-			MinWidth(Px(100)),
-			MaxHeight(Vh(50)),
-			AlignSelf(FlexEnd),
-			Overflow(Hidden),
-			Visibility(Visible),
-			TextAlign(RightText),
-			TextTransform(Uppercase),
-			TextDecoration(None),
-			TextShadow(Px(1), Px(1), Hex("#000")),
-			UserSelect(None),
-			TouchAction(Auto),
-			ListStyleType(None),
-			GridArea(Str("content")),
-			GridTemplate(Calc("100% - 20px")),
-			Width(Vw(80)),
-			Position(Fixed),
-			Top(Unset),
-			Bottom(Initial),
-			FlexDirection(Row),
-			JustifyContent(SpaceAround),
-			MarginLeft(Px(5)),
-			MarginRight(Rem(0.4)),
-			PaddingBottom(Space1),
-			ListStyle(None),
-			All(Initial),
-			OverflowY(Auto),
-			GridTemplateRows(Str("auto 1fr")),
-			GridTemplateColumns(Str("1fr 3fr 1fr")),
-			BorderRight(Vw(0.1), Str("solid"), Hex("#ccc")),
-			PaddingTop(Px(10)),
-			PaddingLeft(Px(15)),
-			PaddingRight(Px(20)),
-			MarginTop(Rem(0.5)),
-			MarginBottom(Rem(0.8)),
-			FlexWrap(Wrap),
-			FlexGrow(Px(1)),
-			AlignContent(SpaceBetween),
-			BorderBottom(Px(2), Str("solid"), Hex("#000")),
-			BorderLeft(Px(1), Str("dashed"), Hex("#999")),
-			BackgroundSize(Str("cover")),
-			BackgroundPosition(Center),
-			BackgroundRepeat(NoRepeat),
-			Position(Relative),
+		rule(".test",
+			minWidth(px(100)),
+			maxHeight(vh(50)),
+			alignSelf(flexEnd),
+			overflow(hidden),
+			visibility(visible),
+			textAlign(rightText),
+			textTransform(uppercase),
+			textDecoration(none),
+			textShadow(px(1), px(1), hex("#000")),
+			userSelect(none),
+			touchAction(auto),
+			listStyleType(none),
+			gridArea(str("content")),
+			gridTemplate(calc("100% - 20px")),
+			width(vw(80)),
+			position(fixed),
+			top(unset),
+			bottom(initial),
+			flexDirection(row),
+			justifyContent(spaceAround),
+			marginLeft(px(5)),
+			marginRight(rem(0.4)),
+			paddingBottom(Space1),
+			listStyle(none),
+			all(initial),
+			overflowY(auto),
+			gridTemplateRows(str("auto 1fr")),
+			gridTemplateColumns(str("1fr 3fr 1fr")),
+			borderRight(vw(0.1), str("solid"), hex("#ccc")),
+			paddingTop(px(10)),
+			paddingLeft(px(15)),
+			paddingRight(px(20)),
+			marginTop(rem(0.5)),
+			marginBottom(rem(0.8)),
+			flexWrap(wrap),
+			flexGrow(px(1)),
+			alignContent(spaceBetween),
+			borderBottom(px(2), str("solid"), hex("#000")),
+			borderLeft(px(1), str("dashed"), hex("#999")),
+			backgroundSize(str("cover")),
+			backgroundPosition(center),
+			backgroundRepeat(noRepeat),
+			position(relative),
 		),
-		MediaDesktop(
-			Rule(".desktop", Display(Grid), FlexDirection(Column)),
+		mediaDesktop(
+			rule(".desktop", display(grid), flexDirection(column)),
 		),
 	)
 	got := sheet.String()
@@ -131,20 +161,20 @@ func TestDSL_NewAdditions(t *testing.T) {
 
 func TestDSL_Keyframes(t *testing.T) {
 	sheet := NewStylesheet(
-		Keyframes("pulse",
-			At("0%",
-				Transform(Str("scale(1)")),
-				Opacity(1),
+		keyframes("pulse",
+			at("0%",
+				transform(str("scale(1)")),
+				opacity(1),
 			),
-			At("100%",
-				Transform(Str("scale(1.1)")),
-				Opacity(0),
-				Color(ColorPrimary),
+			at("100%",
+				transform(str("scale(1.1)")),
+				opacity(0),
+				color(ColorPrimary),
 			),
 		),
 	)
 	got := sheet.String()
-	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#00ADD8);\n  }\n}\n\n"
+	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#1E6B9E);\n  }\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -152,9 +182,9 @@ func TestDSL_Keyframes(t *testing.T) {
 
 func TestDSL_Root(t *testing.T) {
 	sheet := NewStylesheet(
-		Root(
-			Declare(ColorPrimary, "#00ADD8"),
-			Bind(ColorBackground, ColorBackgroundLight),
+		root(
+			declare(ColorPrimary, "#00ADD8"),
+			bind(ColorBackground, ColorBackgroundLight),
 		),
 	)
 	got := sheet.String()
@@ -166,8 +196,8 @@ func TestDSL_Root(t *testing.T) {
 
 func TestDSL_Media(t *testing.T) {
 	sheet := NewStylesheet(
-		MediaPrefersDark(
-			Root(Bind(ColorBackground, ColorBackgroundDark)),
+		mediaPrefersDark(
+			root(bind(ColorBackground, ColorBackgroundDark)),
 		),
 	)
 	got := sheet.String()
@@ -182,8 +212,8 @@ func TestDSL_Media(t *testing.T) {
 func TestDSL_Pseudo(t *testing.T) {
 	btn := Class("btn")
 	sheet := NewStylesheet(
-		Rule(btn.Hover(),
-			Opacity(0.8),
+		rule(Hover(btn),
+			opacity(0.8),
 		),
 	)
 	got := sheet.String()

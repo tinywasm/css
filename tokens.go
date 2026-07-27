@@ -133,9 +133,9 @@ var (
 	MaxWScreen  = Token{"--max-w-screen", "1440px"}
 )
 
-// Pair es una decisión de superficie completa. Un fondo nunca se declara sin su
-// texto — impide por tipo el bug de rightpanel/css.go:17, donde ColorOnSurface
-// (un color de TEXTO) se declaró como fondo de panel.
+// Pair represents a complete surface decision: background and foreground colors coupled.
+// A background is never declared without its foreground, preventing the type of bug
+// where a text color is accidentally used as a panel background.
 type Pair struct{ Bg, Fg Token }
 
 var (

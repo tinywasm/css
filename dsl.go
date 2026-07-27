@@ -215,14 +215,14 @@ func keyframes(name string, steps ...keyframeStep) item {
 	return keyframesItem{name: name, steps: steps}
 }
 
-type rawItem string
+type RawItem string
 
-func (r rawItem) writeTo(b *fmt.Builder) {
+func (r RawItem) writeTo(b *fmt.Builder) {
 	b.WriteString(string(r))
 	b.WriteString("\n\n")
 }
 
-func raw(css string) item { return rawItem(css) }
+func Raw(css string) item { return RawItem(css) }
 
 type decl struct{ Prop, Val string }
 

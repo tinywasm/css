@@ -10,29 +10,24 @@
 //go:build !wasm
 package button
 
-import . "github.com/tinywasm/css"
-
-var (
-    ClsBtn     Class = "btn"
-    ClsPrimary Class = "btn-primary"
+import (
+	"github.com/tinywasm/widget"
+	"github.com/tinywasm/widget/style"
 )
 
-func (b *Button) RenderCSS() *Stylesheet {
-    return NewStylesheet(
-        rule(ClsBtn,
-            padding(rem(0.5), rem(1)),
-            borderRadius(radiusSm),
-            cursor(pointer),
-            fontSize(textBase),
-        ),
-        rule(ClsPrimary,
-            background(ColorPrimary),
-            color(ColorOnPrimary),
-        ),
-        rule(Hover(ClsPrimary),
-            opacity(0.9),
-        ),
-    )
+const (
+	nameButton  = widget.Name("btn")
+	partIcon    = widget.Part("icon")
+)
+
+func (b *Button) WidgetName() widget.Name { return nameButton }
+func (b *Button) WidgetKind() widget.Kind { return widget.Region }
+
+func (b *Button) Style() *style.Sheet {
+	return style.Of(nameButton).
+		Root(style.Row(style.Space2), style.On(style.Panel), style.Pad(style.Space2), style.Round(style.RadiusSm)).
+		Part(partIcon, style.Center(), style.On(style.Accent)).
+		When(widget.Disabled, partIcon, style.On(style.Disabled))
 }
 ```
 

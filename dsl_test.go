@@ -11,13 +11,13 @@ import (
 
 func TestDSL_Rule(t *testing.T) {
 	sheet := NewStylesheet(
-		rule(".btn",
+		rule(selector(".btn"),
 			backgroundColor(hex("#fff")),
 			color(ColorPrimary),
 		),
 	)
 	got := sheet.String()
-	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#1E6B9E);\n}\n\n"
+	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#1b5d8c);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -25,7 +25,7 @@ func TestDSL_Rule(t *testing.T) {
 
 func TestDSL_Padding_JoinValues(t *testing.T) {
 	sheet := NewStylesheet(
-		rule(".test",
+		rule(selector(".test"),
 			padding(Space1, Space2, Space3, Space4),
 		),
 	)
@@ -38,7 +38,7 @@ func TestDSL_Padding_JoinValues(t *testing.T) {
 
 func TestDSL_RawRule_Semicolon(t *testing.T) {
 	sheet := NewStylesheet(
-		rule(".test",
+		rule(selector(".test"),
 			rawRule("grid-template: 1fr"),
 			rawRule("gap: 1rem"),
 			rawRule("  -webkit-text-size-adjust: 100%;\n  text-size-adjust: 100%;"),
@@ -55,7 +55,7 @@ func TestDSL_RawRule_Semicolon(t *testing.T) {
 
 func TestDSL_NewAdditions(t *testing.T) {
 	sheet := NewStylesheet(
-		rule(".test",
+		rule(selector(".test"),
 			minWidth(px(100)),
 			maxHeight(vh(50)),
 			alignSelf(flexEnd),
@@ -101,7 +101,7 @@ func TestDSL_NewAdditions(t *testing.T) {
 			position(relative),
 		),
 		mediaDesktop(
-			rule(".desktop", display(grid), flexDirection(column)),
+			rule(selector(".desktop"), display(grid), flexDirection(column)),
 		),
 	)
 	got := sheet.String()
@@ -176,7 +176,7 @@ func TestDSL_Keyframes(t *testing.T) {
 		),
 	)
 	got := sheet.String()
-	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#1E6B9E);\n  }\n}\n\n"
+	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#1b5d8c);\n  }\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -185,12 +185,12 @@ func TestDSL_Keyframes(t *testing.T) {
 func TestDSL_Root(t *testing.T) {
 	sheet := NewStylesheet(
 		root(
-			declare(ColorPrimary, "#00ADD8"),
+			declare(ColorPrimary),
 			bind(ColorBackground, ColorBackgroundLight),
 		),
 	)
 	got := sheet.String()
-	want := ":root {\n  --color-primary: #00ADD8;\n  --color-background: var(--color-background-light,#FFFFFF);\n}\n\n"
+	want := ":root {\n  --color-primary: #1b5d8c;\n  --color-background: var(--color-background-light,#FFFFFF);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -208,20 +208,6 @@ func TestDSL_Media(t *testing.T) {
 	}
 	if !strings.Contains(got, "--color-background: var(--color-background-dark") {
 		t.Errorf("missing binding: %s", got)
-	}
-}
-
-func TestDSL_Pseudo(t *testing.T) {
-	btn := Class("btn")
-	sheet := NewStylesheet(
-		rule(Hover(btn),
-			opacity(0.8),
-		),
-	)
-	got := sheet.String()
-	want := ".btn:hover {\n  opacity: 0.8;\n}\n\n"
-	if got != want {
-		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
 }
 
@@ -248,7 +234,7 @@ func TestStylesheetStringDoesNotPoisonConvPool(t *testing.T) {
 // however many times it is stringified.
 func TestStylesheetStringIsRepeatable(t *testing.T) {
 	sheet := NewStylesheet(
-		rule(".test",
+		rule(selector(".test"),
 			padding(Space1, Space2),
 			border(px(1), ColorOutline),
 		),

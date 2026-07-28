@@ -44,40 +44,13 @@ func contrastRatio(hex1, hex2 string) float64 {
 }
 
 func TestContrastRatios(t *testing.T) {
-	pairs := []struct {
-		name string
-		bg   Token
-		fg   Token
-		min  float64
-	}{
-		{"SurfacePrimary", ColorPrimary, ColorOnPrimary, 4.5},
-		{"SurfacePanel", ColorSurface, ColorOnSurface, 4.5},
-		{"SurfaceSunken", ColorSurfaceSunken, ColorOnSurface, 4.5},
-		{"SurfaceSelected", ColorSelection, ColorOnSelection, 4.5},
-		{"SurfaceDanger", ColorError, ColorOnError, 4.5},
-		{"SurfaceSuccess", ColorSuccess, ColorOnSuccess, 4.5},
-		{"SurfaceDisabled", ColorDisabled, ColorOnDisabled, 4.5},
-
-		// Light twins
-		{"SurfacePanelLight", ColorSurfaceLight, ColorOnSurfaceLight, 4.5},
-		{"SurfaceSunkenLight", ColorSurfaceSunkenLight, ColorOnSurfaceLight, 4.5},
-		{"SurfaceSelectedLight", ColorSelectionLight, ColorOnSelectionLight, 4.5},
-		{"SurfaceDisabledLight", ColorDisabledLight, ColorOnDisabledLight, 4.5},
-
-		// Dark twins
-		{"SurfacePanelDark", ColorSurfaceDark, ColorOnSurfaceDark, 4.5},
-		{"SurfaceSunkenDark", ColorSurfaceSunkenDark, ColorOnSurfaceDark, 4.5},
-		{"SurfaceSelectedDark", ColorSelectionDark, ColorOnSelectionDark, 4.5},
-		{"SurfaceDisabledDark", ColorDisabledDark, ColorOnDisabledDark, 4.5},
-	}
-
-	for _, tc := range pairs {
-		ratio := contrastRatio(tc.bg.Fallback, tc.fg.Fallback)
-		if ratio < tc.min {
+	for _, tc := range AllPairs() {
+		ratio := contrastRatio(tc.Bg.GetFallback(), tc.Fg.GetFallback())
+		if ratio < tc.Min {
 			t.Errorf("Pair %s (Bg: %s %s, Fg: %s %s) has contrast ratio %.2f:1, expected >= %.2f:1",
-				tc.name, tc.bg.Name, tc.bg.Fallback, tc.fg.Name, tc.fg.Fallback, ratio, tc.min)
+				tc.Name, tc.Bg.GetName(), tc.Bg.GetFallback(), tc.Fg.GetName(), tc.Fg.GetFallback(), ratio, tc.Min)
 		} else {
-			t.Logf("Pair %s (Bg: %s, Fg: %s) contrast ratio is %.2f:1 (PASS)", tc.name, tc.bg.Fallback, tc.fg.Fallback, ratio)
+			t.Logf("Pair %s (Bg: %s, Fg: %s) contrast ratio is %.2f:1 (PASS)", tc.Name, tc.Bg.GetFallback(), tc.Fg.GetFallback(), ratio)
 		}
 	}
 }

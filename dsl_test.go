@@ -5,6 +5,8 @@ package css
 import (
 	"strings"
 	"testing"
+
+	"github.com/tinywasm/fmt"
 )
 
 func TestDSL_Rule(t *testing.T) {
@@ -220,5 +222,48 @@ func TestDSL_Pseudo(t *testing.T) {
 	want := ".btn:hover {\n  opacity: 0.8;\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
+	}
+}
+
+// Stylesheet.String() must not release its Conv twice: Conv.String() already
+// returns the object to the pool, so an extra PutConv leaves the same pointer
+// in the pool twice and two later Convert() calls share one buffer.
+func TestStylesheetStringDoesNotPoisonConvPool(t *testing.T) {
+	_ = NewStylesheet(Raw(".x{color:red}")).String()
+
+	outer := fmt.Convert()
+	outer.WriteString("outer-")
+	inner := fmt.Convert()
+	inner.WriteString("inner")
+
+	if got := inner.String(); got != "inner" {
+		t.Fatalf("inner Conv shares its buffer with the outer one: got %q, want %q", got, "inner")
+	}
+	if got := outer.String(); got != "outer-" {
+		t.Fatalf("outer Conv was clobbered: got %q, want %q", got, "outer-")
+	}
+}
+
+// joinValues has the same contract, and the whole sheet must render identically
+// however many times it is stringified.
+func TestStylesheetStringIsRepeatable(t *testing.T) {
+	sheet := NewStylesheet(
+		rule(".test",
+			padding(Space1, Space2),
+			border(px(1), ColorOutline),
+		),
+	)
+
+	first := sheet.String()
+	for i := 0; i < 3; i++ {
+		// Interleave an unrelated Conv so a poisoned pool would surface here.
+		scratch := fmt.Convert()
+		scratch.WriteString("scratch")
+		if got := scratch.String(); got != "scratch" {
+			t.Fatalf("scratch Conv contaminated on pass %d: got %q", i, got)
+		}
+		if got := sheet.String(); got != first {
+			t.Fatalf("pass %d differs:\ngot:\n%q\nfirst:\n%q", i, got, first)
+		}
 	}
 }

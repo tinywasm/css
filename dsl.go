@@ -12,8 +12,10 @@ type item interface{ writeTo(b *fmt.Builder) }
 func NewStylesheet(items ...item) *Stylesheet { return &Stylesheet{items} }
 
 func (s *Stylesheet) String() string {
+	// No PutConv here: Conv.String() already returns the object to the pool.
+	// Releasing it twice puts the same pointer in the pool twice, so two later
+	// Convert() calls hand back the same buffer and corrupt each other.
 	b := fmt.GetConv()
-	defer b.PutConv()
 	for _, it := range s.items {
 		it.writeTo(b)
 	}
@@ -286,8 +288,8 @@ func joinValues(vs []value) string {
 	for i, v := range vs {
 		parts[i] = v.cssValue()
 	}
+	// See Stylesheet.String: Conv.String() already releases b to the pool.
 	b := fmt.GetConv()
-	defer b.PutConv()
 	for i, p := range parts {
 		if i > 0 {
 			b.WriteString(" ")

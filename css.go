@@ -6,116 +6,168 @@ func RootCSS() *Stylesheet {
 	return NewStylesheet(
 		root(
 			// Brand group — Pa100T reference palette: steel blue with white text.
-			declare(ColorPrimary, "#3f88bf"),
-			declare(ColorOnPrimary, "#FFFFFF"),
-			declare(ColorSecondary, "#654FF0"),
-			declare(ColorOnSecondary, "#FFFFFF"),
-			declare(ColorSuccess, "#3FB950"),
-			declare(ColorOnSuccess, "#FFFFFF"),
-			declare(ColorError, "#E34F26"),
-			declare(ColorOnError, "#FFFFFF"),
+			declare(ColorPrimary),
+			declare(ColorOnPrimary),
+			declare(ColorSecondary),
+			declare(ColorOnSecondary),
+			declare(ColorSuccess),
+			declare(ColorOnSuccess),
+			declare(ColorError),
+			declare(ColorOnError),
 		),
 		root(
 			// Theme group
-			declare(ColorBackgroundLight, "#FFFFFF"),
-			declare(ColorBackgroundDark, "#0D1117"),
-			declare(ColorSurfaceLight, "#F2F2F7"),
-			declare(ColorSurfaceDark, "#161B22"),
-			declare(ColorSurfaceSunkenLight, "#E5E5EA"),
-			declare(ColorSurfaceSunkenDark, "#21262D"),
-			declare(ColorOnSurfaceLight, "#1C1C1E"),
-			declare(ColorOnSurfaceDark, "#E6EDF3"),
-			declare(ColorOutlineLight, "#D1D1D6"),
-			declare(ColorOutlineDark, "#30363D"),
-			declare(ColorMutedLight, "#6E6E73"),
-			declare(ColorMutedDark, "#8B949E"),
-			declare(ColorHoverLight, "#B8860B"),
-			declare(ColorHoverDark, "#F7DF1E"),
-			declare(ColorSelectionLight, "#f5a623"),
-			declare(ColorSelectionDark, "#9e6a2e"),
-			declare(ColorOnSelectionLight, "#1C1C1E"),
-			declare(ColorOnSelectionDark, "#FFFFFF"),
-			declare(ColorDisabledLight, "#E5E5EA"),
-			declare(ColorDisabledDark, "#21262D"),
-			declare(ColorOnDisabledLight, "#8E8E93"),
-			declare(ColorOnDisabledDark, "#6E7681"),
+			declareSource(ColorBackgroundLight),
+			declareSource(ColorBackgroundDark),
+			declareSource(ColorSurfaceLight),
+			declareSource(ColorSurfaceDark),
+			declareSource(ColorSurfaceSunkenLight),
+			declareSource(ColorSurfaceSunkenDark),
+			declareSource(ColorOnSurfaceLight),
+			declareSource(ColorOnSurfaceDark),
+			declareSource(ColorOutlineLight),
+			declareSource(ColorOutlineDark),
+			declareSource(ColorMutedLight),
+			declareSource(ColorMutedDark),
+			declareSource(ColorHoverLight),
+			declareSource(ColorHoverDark),
+			declareSource(ColorSelectionLight),
+			declareSource(ColorSelectionDark),
+			declareSource(ColorOnSelectionLight),
+			declareSource(ColorOnSelectionDark),
+			declareSource(ColorDisabledLight),
+			declareSource(ColorDisabledDark),
+			declareSource(ColorOnDisabledLight),
+			declareSource(ColorOnDisabledDark),
+		),
+		root(
+			// Active group
+			declare(ColorBackground),
+			declare(ColorSurface),
+			declare(ColorSurfaceSunken),
+			declare(ColorOnSurface),
+			declare(ColorOutline),
+			declare(ColorMuted),
+			declare(ColorHover),
+			declare(ColorSelection),
+			declare(ColorOnSelection),
+			declare(ColorDisabled),
+			declare(ColorOnDisabled),
 		),
 		root(
 			// Typography scale
-			declare(TextXs, "0.75rem"),
-			declare(TextSm, "0.875rem"),
-			declare(TextBase, "1rem"),
-			declare(TextLg, "1.25rem"),
-			declare(TextXl, "1.5rem"),
-			declare(Text2xl, "2rem"),
+			declare(TextXs),
+			declare(TextSm),
+			declare(TextBase),
+			declare(TextLg),
+			declare(TextXl),
+			declare(Text2xl),
 		),
 		root(
 			// Spacing scale
-			declare(Space0, "0"),
-			declare(Space1, "0.25rem"),
-			declare(Space2, "0.5rem"),
-			declare(Space3, "0.75rem"),
-			declare(Space4, "1rem"),
-			declare(Space6, "1.5rem"),
-			declare(Space8, "2rem"),
-			declare(Space12, "3rem"),
+			declare(Space0),
+			declare(Space1),
+			declare(Space2),
+			declare(Space3),
+			declare(Space4),
+			declare(Space6),
+			declare(Space8),
+			declare(Space12),
 		),
 		root(
 			// Border-radius scale
-			declare(RadiusSm, "4px"),
-			declare(RadiusMd, "8px"),
-			declare(RadiusLg, "16px"),
-			declare(RadiusFull, "9999px"),
+			declare(RadiusSm),
+			declare(RadiusMd),
+			declare(RadiusLg),
+			declare(RadiusFull),
 		),
 		root(
 			// Typography
-			declare(LeadingTight, "1.25"),
-			declare(LeadingNormal, "1.5"),
-			declare(LeadingRelaxed, "1.75"),
-			declare(FontWeightRegular, "400"),
-			declare(FontWeightMedium, "500"),
-			declare(FontWeightBold, "700"),
-			declare(TrackingTight, "-0.02em"),
-			declare(TrackingNormal, "0"),
-			declare(TrackingWide, "0.05em"),
+			declare(LeadingNormal),
+			declare(FontWeightRegular),
+			declare(FontWeightMedium),
+			declare(FontWeightBold),
 		),
 		root(
 			// Elevation
-			declare(ShadowSm, "0 1px 2px rgba(0, 0, 0, 0.05)"),
-			declare(ShadowMd, "0 4px 6px rgba(0, 0, 0, 0.10)"),
-			declare(ShadowLg, "0 10px 15px rgba(0, 0, 0, 0.10)"),
-			declare(ShadowXl, "0 20px 25px rgba(0, 0, 0, 0.15)"),
+			declare(ShadowSm),
+			declare(ShadowMd),
+			declare(ShadowLg),
 		),
 		root(
 			// Motion
-			declare(DurationFast, "150ms"),
-			declare(DurationBase, "250ms"),
-			declare(DurationSlow, "400ms"),
-			declare(EaseIn, "cubic-bezier(0.4, 0,   1,   1)"),
-			declare(EaseOut, "cubic-bezier(0,   0,   0.2, 1)"),
-			declare(EaseInOut, "cubic-bezier(0.4, 0,   0.2, 1)"),
+			declare(DurationFast),
+			declare(DurationBase),
+			declare(DurationSlow),
+			declare(EaseInOut),
 		),
 		root(
 			// Z-index
-			declare(ZBase, "0"),
-			declare(ZDropdown, "100"),
-			declare(ZSticky, "200"),
-			declare(ZModal, "300"),
-			declare(ZToast, "400"),
-			declare(ZTooltip, "500"),
+			declare(ZBase),
+			declare(ZDropdown),
+			declare(ZSticky),
+			declare(ZModal),
+			declare(ZToast),
+			declare(ZTooltip),
 		),
 		root(
 			// Breakpoints
-			declare(BpSm, "640px"),
-			declare(BpMd, "768px"),
-			declare(BpLg, "1024px"),
-			declare(BpXl, "1280px"),
+			declare(BpSm),
+			declare(BpMd),
+			declare(BpLg),
+			declare(BpXl),
 		),
 		root(
 			// Container widths
-			declare(MaxWProse, "65ch"),
-			declare(MaxWContent, "1200px"),
-			declare(MaxWScreen, "1440px"),
+			declare(MaxWReadable),
+		),
+		root(
+			// Grid columns
+			declare(ColumnNarrow),
+			declare(ColumnMedium),
+			declare(ColumnWide),
+		),
+		root(
+			// Focus ring
+			declare(ColorFocusRing),
+		),
+		root(
+			// Interactive colors — hover, focus, press states
+			declare(ColorPrimaryHover),
+			declare(ColorPrimaryFocus),
+			declare(ColorPrimaryPress),
+
+			declare(ColorSecondaryHover),
+			declare(ColorSecondaryFocus),
+			declare(ColorSecondaryPress),
+
+			declare(ColorSuccessHover),
+			declare(ColorSuccessFocus),
+			declare(ColorSuccessPress),
+
+			declare(ColorDangerHover),
+			declare(ColorDangerFocus),
+			declare(ColorDangerPress),
+
+			declare(ColorErrorHover),
+			declare(ColorErrorFocus),
+			declare(ColorErrorPress),
+
+			declare(ColorWarningHover),
+			declare(ColorWarningFocus),
+			declare(ColorWarningPress),
+
+			declare(ColorInfoHover),
+			declare(ColorInfoFocus),
+			declare(ColorInfoPress),
+
+			declare(ColorNeutralHover),
+			declare(ColorNeutralFocus),
+			declare(ColorNeutralPress),
+
+			declare(ColorMutedHover),
+			declare(ColorMutedFocus),
+			declare(ColorMutedPress),
 		),
 	)
 }
@@ -137,7 +189,7 @@ func RenderCSS() *Stylesheet {
 			background(ColorBackground),
 		),
 		rule(selector(":focus-visible"),
-			outline(str("2px solid "+ColorPrimary.Var())),
+			outline(str("2px solid "+ColorFocusRing.Var())),
 			outlineOffset(px(2)),
 		),
 		rule(selector("img, svg, video"),
@@ -207,13 +259,13 @@ func RenderCSS() *Stylesheet {
 
 // Override es el cambio de valor de UN token. Campos no exportados: solo Set lo construye.
 type Override struct {
-	token Token
+	token Source
 	value string
 }
 
 // Set declara el override de un token del catálogo. Token tipado (no un nombre libre);
 // value es el borde de I/O.
-func Set(t Token, value string) Override { return Override{t, value} }
+func Set(t Source, value string) Override { return Override{t, value} }
 
 // Theme devuelve el catálogo :root COMPLETO (como RootCSS) con los overrides al final.
 // Pensado como el RootCSS() del proyecto raíz — assetmin REEMPLAZA el :root de css por el de
@@ -225,7 +277,7 @@ func Theme(overrides ...Override) *Stylesheet {
 	}
 	decls := make([]decl, len(overrides))
 	for i, o := range overrides {
-		decls[i] = declare(o.token, o.value)
+		decls[i] = decl{o.token.Name, o.value}
 	}
 	return withRootTail(catalog, root(decls...))
 }

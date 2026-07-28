@@ -53,7 +53,7 @@ func TestGoldenEquivalence(t *testing.T) {
 	// RootCSS golden test (partial, checking key values are present as we don't expect exact string match due to formatting)
 	root := RootCSS().String()
 	tokens := []string{
-		"--color-primary: #3f88bf",
+		"--color-primary: #1b5d8c",
 		"--text-base: 1rem",
 		"--space-4: 1rem",
 		"--radius-md: 8px",
@@ -61,7 +61,6 @@ func TestGoldenEquivalence(t *testing.T) {
 		"--duration-base: 250ms",
 		"--z-modal: 300",
 		"--bp-md: 768px",
-		"--max-w-content: 1200px",
 	}
 	for _, tok := range tokens {
 		if !strings.Contains(root, tok) {
@@ -75,7 +74,7 @@ func TestGoldenEquivalence(t *testing.T) {
 		"box-sizing: border-box",
 		"margin: 0",
 		"font-size: var(--text-base",
-		"outline: 2px solid var(--color-primary",
+		"outline: 2px solid var(--color-focus-ring",
 		"display: block",
 		"--color-background: var(--color-background-light",
 		"@media (prefers-color-scheme: dark)",
@@ -97,7 +96,7 @@ func TestTheme_NoOverrides(t *testing.T) {
 }
 
 func TestTheme_ContainsFullCatalog(t *testing.T) {
-	got := Theme(Set(ColorPrimary, "#FF0000")).String()
+	got := Theme(Set(ColorSurfaceLight, "#FF0000")).String()
 	tokens := []string{
 		"--space-2",
 		"--radius-md",
@@ -113,10 +112,10 @@ func TestTheme_ContainsFullCatalog(t *testing.T) {
 
 func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 	overrideVal := "#3f88bf"
-	got := Theme(Set(ColorSecondary, overrideVal)).String()
+	got := Theme(Set(ColorSurfaceLight, overrideVal)).String()
 
-	// Find all occurrences of --color-secondary
-	tokenName := "--color-secondary"
+	// Find all occurrences of --color-surface-light
+	tokenName := "--color-surface-light"
 	indices := []int{}
 	lastIdx := 0
 	for {
@@ -139,15 +138,15 @@ func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 	}
 
 	// Verify the default value is also present (as Theme appends overrides)
-	if !strings.Contains(got, "#654FF0") {
-		t.Errorf("Default value for %s (#654FF0) missing from output", tokenName)
+	if !strings.Contains(got, "#F2F2F7") {
+		t.Errorf("Default value for %s (#F2F2F7) missing from output", tokenName)
 	}
 }
 
 func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	// Gather all known token names from the catalog
 	knownTokens := map[string]bool{}
-	allTokens := []Token{
+	allTokens := []ValueGetter{
 		ColorPrimary, ColorOnPrimary, ColorSecondary, ColorOnSecondary, ColorSuccess, ColorOnSuccess, ColorError, ColorOnError,
 		ColorBackground, ColorSurface, ColorSurfaceSunken, ColorOnSurface, ColorOutline, ColorMuted, ColorHover, ColorSelection, ColorOnSelection, ColorDisabled, ColorOnDisabled,
 		ColorBackgroundLight, ColorBackgroundDark, ColorSurfaceLight, ColorSurfaceDark, ColorSurfaceSunkenLight, ColorSurfaceSunkenDark,
@@ -155,17 +154,28 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		ColorSelectionLight, ColorSelectionDark, ColorOnSelectionLight, ColorOnSelectionDark,
 		ColorDisabledLight, ColorDisabledDark, ColorOnDisabledLight, ColorOnDisabledDark,
 		TextXs, TextSm, TextBase, TextLg, TextXl, Text2xl,
-		LeadingTight, LeadingNormal, LeadingRelaxed, FontWeightRegular, FontWeightMedium, FontWeightBold, TrackingTight, TrackingNormal, TrackingWide,
+		LeadingNormal, FontWeightRegular, FontWeightMedium, FontWeightBold,
 		Space0, Space1, Space2, Space3, Space4, Space6, Space8, Space12,
 		RadiusSm, RadiusMd, RadiusLg, RadiusFull,
-		ShadowSm, ShadowMd, ShadowLg, ShadowXl,
-		DurationFast, DurationBase, DurationSlow, EaseIn, EaseOut, EaseInOut,
+		ShadowSm, ShadowMd, ShadowLg,
+		DurationFast, DurationBase, DurationSlow, EaseInOut,
 		ZBase, ZDropdown, ZSticky, ZModal, ZToast, ZTooltip,
 		BpSm, BpMd, BpLg, BpXl,
-		MaxWProse, MaxWContent, MaxWScreen,
+		MaxWReadable,
+		ColumnNarrow, ColumnMedium, ColumnWide,
+		ColorFocusRing,
+		ColorPrimaryHover, ColorPrimaryFocus, ColorPrimaryPress,
+		ColorSecondaryHover, ColorSecondaryFocus, ColorSecondaryPress,
+		ColorSuccessHover, ColorSuccessFocus, ColorSuccessPress,
+		ColorDangerHover, ColorDangerFocus, ColorDangerPress,
+		ColorErrorHover, ColorErrorFocus, ColorErrorPress,
+		ColorWarningHover, ColorWarningFocus, ColorWarningPress,
+		ColorInfoHover, ColorInfoFocus, ColorInfoPress,
+		ColorNeutralHover, ColorNeutralFocus, ColorNeutralPress,
+		ColorMutedHover, ColorMutedFocus, ColorMutedPress,
 	}
 	for _, tok := range allTokens {
-		knownTokens[tok.Name] = true
+		knownTokens[tok.GetName()] = true
 	}
 
 	cssStr := RootCSS().String() + "\n" + RenderCSS().String()

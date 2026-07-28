@@ -124,4 +124,7 @@ Tokens are the single source of truth for all design decisions.
 - **Two-layer color pattern** — Separates *source* values (per mode) from *active* tokens (used by components). `@media (prefers-color-scheme)` switches modes without JS.
 - **Single override point** — Apps only need to change source-layer or scale variables; the rest cascades automatically.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for more details on the theming system.
+## Documentation
+
+- [Theming Architecture](docs/ARCHITECTURE.md) — Detailed guide on RootCSS, single-winner slot, theme overrides, and type safety constraints.
+- [Go-Typed CSS DSL Justification](docs/JUSTIFICACION_DSL.md) — Deep-dive on design rationale, technical constraints, and comparison with alternatives.

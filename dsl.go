@@ -27,10 +27,6 @@ type selector string
 
 func (s selector) cssValue() string { return string(s) }
 
-// Pseudo-class helpers
-func Hover(c Class) selector    { return selector("." + string(c) + ":hover") }
-func Focus(c Class) selector    { return selector("." + string(c) + ":focus") }
-func Disabled(c Class) selector { return selector("." + string(c) + ":disabled") }
 
 type ruleItem struct {
 	sel   string
@@ -80,16 +76,8 @@ func ensureSemicolon(s string) string {
 	return s
 }
 
-func rule(sel any, content ...ruleContent) item {
-	var s string
-	switch v := sel.(type) {
-	case Class:
-		s = "." + string(v)
-	case selector:
-		s = string(v)
-	case string:
-		s = v
-	}
+func rule(sel selector, content ...ruleContent) item {
+	s := string(sel)
 	decls := make([]decl, 0, len(content))
 	for _, c := range content {
 		switch v := c.(type) {
@@ -376,10 +364,14 @@ func backgroundSize(v value) decl      { return decl{"background-size", v.cssVal
 func backgroundPosition(v value) decl  { return decl{"background-position", v.cssValue()} }
 func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssValue()} }
 
-func declare(t Token, value string) decl {
-	return decl{t.Name, value}
+func declare(t Token) decl {
+	return decl{t.Name, t.Fallback}
 }
 
-func bind(active, source Token) decl {
-	return decl{active.Name, source.Var()}
+func declareSource(s Source) decl {
+	return decl{s.Name, s.Fallback}
+}
+
+func bind(active Token, source Source) decl {
+	return decl{active.Name, "var(" + source.Name + "," + source.Fallback + ")"}
 }

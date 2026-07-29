@@ -1,8 +1,9 @@
 ---
 PLAN: "refactor: variables de color minimas"
 TAG: v0.2.0
-STATUS: running
+STATUS: review
 SESSION: 8043312389241111971
+PR: https://github.com/tinywasm/css/pull/10
 ---
 
 # problema:

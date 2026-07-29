@@ -75,9 +75,8 @@ import "github.com/tinywasm/css"
 func RootCSS() *css.Stylesheet {
     return css.Theme(
         css.Set(css.ColorPrimary, "#FF6B35"),
-        css.Set(css.ColorSecondary, "#3F88BF"),
-        css.Set(css.ColorBackgroundLight, "#FAFAFA"),
-        css.Set(css.ColorBackgroundDark, "#121212"),
+        css.Set(css.ColorBackground, "light-dark(#FAFAFA, #121212)"),
+        css.Set(css.ColorSurface, "light-dark(#F2F2F7, #161B22)"),
     )
 }
 ```
@@ -89,7 +88,7 @@ The app **does not** need to redeclare active layer bindings (`--color-surface`,
 | Action | API |
 |---|---|
 | Rebrand brand color | `css.Set(css.ColorPrimary, "#hex")` |
-| Change light background | `css.Set(css.ColorBackgroundLight, "#hex")` |
+| Change background | `css.Set(css.ColorBackground, "light-dark(#hexLight, #hexDark)")` |
 | Adjust global border-radius | `css.Set(css.RadiusMd, "12px")` |
 | Adjust typographic scale | `css.Set(css.TextBase, "1.1rem")` |
 
@@ -126,5 +125,6 @@ Tokens are the single source of truth for all design decisions.
 
 ## Documentation
 
+- [Technical Specifications](docs/SPECS.md) — Detailed specifications of all active design tokens, browser-level light-dark handling, and the complete library contract.
 - [Theming Architecture](docs/ARCHITECTURE.md) — Detailed guide on RootCSS, single-winner slot, theme overrides, and type safety constraints.
 - [Go-Typed CSS DSL Justification](docs/JUSTIFICACION_DSL.md) — Deep-dive on design rationale, technical constraints, and comparison with alternatives.

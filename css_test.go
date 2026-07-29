@@ -35,25 +35,19 @@ func TestRootCSS_DoesNotContainSwitchingLogic(t *testing.T) {
 	}
 }
 
-func TestRenderCSS_ContainsDarkModeQuery(t *testing.T) {
+func TestRenderCSS_ContainsColorScheme(t *testing.T) {
 	got := RenderCSS().String()
-	if !strings.Contains(got, "@media (prefers-color-scheme: dark)") {
-		t.Errorf("RenderCSS() output does not contain dark mode media query\nGot:\n%s", got)
-	}
-}
-
-func TestRenderCSS_BindsActiveTokens(t *testing.T) {
-	got := RenderCSS().String()
-	if !strings.Contains(got, "--color-background: var(--color-background-light") {
-		t.Errorf("RenderCSS() must bind active tokens to source-layer variables\nGot:\n%s", got)
+	if !strings.Contains(got, "color-scheme: light dark;") {
+		t.Errorf("RenderCSS() output does not contain standard light-dark color-scheme on :root\nGot:\n%s", got)
 	}
 }
 
 func TestGoldenEquivalence(t *testing.T) {
-	// RootCSS golden test (partial, checking key values are present as we don't expect exact string match due to formatting)
+	// RootCSS golden test (partial, checking key values are present)
 	root := RootCSS().String()
 	tokens := []string{
 		"--color-primary: #1b5d8c",
+		"--color-background: light-dark(#FFFFFF, #0D1117)",
 		"--text-base: 1rem",
 		"--space-4: 1rem",
 		"--radius-md: 8px",
@@ -74,11 +68,11 @@ func TestGoldenEquivalence(t *testing.T) {
 		"box-sizing: border-box",
 		"margin: 0",
 		"font-size: var(--text-base",
-		"outline: 2px solid var(--color-focus-ring",
+		"outline: 2px solid var(--color-primary",
 		"display: block",
-		"--color-background: var(--color-background-light",
-		"@media (prefers-color-scheme: dark)",
-		"--color-background: var(--color-background-dark",
+		"color-scheme: light dark",
+		"color-scheme: light",
+		"color-scheme: dark",
 	}
 	for _, rule := range rules {
 		if !strings.Contains(render, rule) {
@@ -96,12 +90,12 @@ func TestTheme_NoOverrides(t *testing.T) {
 }
 
 func TestTheme_ContainsFullCatalog(t *testing.T) {
-	got := Theme(Set(ColorSurfaceLight, "#FF0000")).String()
+	got := Theme(Set(ColorSurface, "#FF0000")).String()
 	tokens := []string{
 		"--space-2",
 		"--radius-md",
 		"--text-xl",
-		"--color-surface-light",
+		"--color-surface",
 	}
 	for _, tok := range tokens {
 		if !strings.Contains(got, tok) {
@@ -112,10 +106,10 @@ func TestTheme_ContainsFullCatalog(t *testing.T) {
 
 func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 	overrideVal := "#3f88bf"
-	got := Theme(Set(ColorSurfaceLight, overrideVal)).String()
+	got := Theme(Set(ColorSurface, overrideVal)).String()
 
-	// Find all occurrences of --color-surface-light
-	tokenName := "--color-surface-light"
+	// Find all occurrences of --color-surface
+	tokenName := "--color-surface"
 	indices := []int{}
 	lastIdx := 0
 	for {
@@ -138,8 +132,8 @@ func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 	}
 
 	// Verify the default value is also present (as Theme appends overrides)
-	if !strings.Contains(got, "#F2F2F7") {
-		t.Errorf("Default value for %s (#F2F2F7) missing from output", tokenName)
+	if !strings.Contains(got, "light-dark(#F2F2F7, #161B22)") {
+		t.Errorf("Default value for %s (light-dark(#F2F2F7, #161B22)) missing from output", tokenName)
 	}
 }
 
@@ -147,12 +141,8 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	// Gather all known token names from the catalog
 	knownTokens := map[string]bool{}
 	allTokens := []ValueGetter{
-		ColorPrimary, ColorOnPrimary, ColorSecondary, ColorOnSecondary, ColorSuccess, ColorOnSuccess, ColorError, ColorOnError,
-		ColorBackground, ColorSurface, ColorSurfaceSunken, ColorOnSurface, ColorOutline, ColorMuted, ColorHover, ColorSelection, ColorOnSelection, ColorDisabled, ColorOnDisabled,
-		ColorBackgroundLight, ColorBackgroundDark, ColorSurfaceLight, ColorSurfaceDark, ColorSurfaceSunkenLight, ColorSurfaceSunkenDark,
-		ColorOnSurfaceLight, ColorOnSurfaceDark, ColorOutlineLight, ColorOutlineDark, ColorMutedLight, ColorMutedDark, ColorHoverLight, ColorHoverDark,
-		ColorSelectionLight, ColorSelectionDark, ColorOnSelectionLight, ColorOnSelectionDark,
-		ColorDisabledLight, ColorDisabledDark, ColorOnDisabledLight, ColorOnDisabledDark,
+		ColorPrimary, ColorOnPrimary, ColorSuccess, ColorOnSuccess, ColorDanger, ColorOnDanger,
+		ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted,
 		TextXs, TextSm, TextBase, TextLg, TextXl, Text2xl,
 		LeadingNormal, FontWeightRegular, FontWeightMedium, FontWeightBold,
 		Space0, Space1, Space2, Space3, Space4, Space6, Space8, Space12,
@@ -163,16 +153,6 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		BpSm, BpMd, BpLg, BpXl,
 		MaxWReadable,
 		ColumnNarrow, ColumnMedium, ColumnWide,
-		ColorFocusRing,
-		ColorPrimaryHover, ColorPrimaryFocus, ColorPrimaryPress,
-		ColorSecondaryHover, ColorSecondaryFocus, ColorSecondaryPress,
-		ColorSuccessHover, ColorSuccessFocus, ColorSuccessPress,
-		ColorDangerHover, ColorDangerFocus, ColorDangerPress,
-		ColorErrorHover, ColorErrorFocus, ColorErrorPress,
-		ColorWarningHover, ColorWarningFocus, ColorWarningPress,
-		ColorInfoHover, ColorInfoFocus, ColorInfoPress,
-		ColorNeutralHover, ColorNeutralFocus, ColorNeutralPress,
-		ColorMutedHover, ColorMutedFocus, ColorMutedPress,
 	}
 	for _, tok := range allTokens {
 		knownTokens[tok.GetName()] = true

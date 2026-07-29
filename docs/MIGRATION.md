@@ -1,4 +1,4 @@
-# Migration Guide: Upgrading to tinywasm/css v0.4.0 (12-Token System)
+# Migration Guide: Upgrading to tinywasm/css v0.3.3 (Interaction Derivation API)
 
 This guide provides instructions and mapping specifications to upgrade applications and dependent libraries from the legacy 69-color-token system to the modernized, streamlined 12-token system. This document is optimized for both human reading and direct consumption by Large Language Models (LLMs) to perform automated code migrations.
 
@@ -52,16 +52,37 @@ Use the following lookup table to replace legacy variables with the new 12 activ
 | `ColorOutline` | `ColorOutline` | `--color-outline` | `#D1D1D6` | `#30363D` |
 | `ColorMuted` | `ColorMuted` | `--color-muted` | `#6E6E73` | `#8B949E` |
 
-### Obsolete/Calculated Group (No longer registered in CSS)
-The following tokens are completely removed from the registered `:root` custom properties and Go catalog. They are replaced by browser-level dynamic calculations or standard parent variables:
+### Restored as computed tokens (registered in `:root`)
+The following tokens were removed in v0.3.0 and restored in v0.3.3 as computed
+values that reference live `var()` expressions instead of hardcoded hex:
 
+| Token | CSS Property | Fallback (v0.3.3) |
+|---|---|---|
+| `ColorSurfaceSunken` | `--color-surface-sunken` | `color-mix(in oklab, var(--color-surface), var(--color-on-surface) 8%)` |
+| `ColorSelection` | `--color-selection` | `color-mix(in oklab, var(--color-primary), transparent 85%)` |
+| `ColorOnSelection` | `--color-on-selection` | `var(--color-on-surface)` |
+
+These are declared in `:root` and can be overridden with `css.Set()` like any
+other token. Consumers must NOT re-derive them inline — use the token.
+
+### Replaced by CSS API (no token needed)
+The following concepts no longer have dedicated tokens but are covered by
+`css.Hover/Focus/Press()` functions:
+
+- **27 Interactive Hover/Focus/Press Twins** (`ColorPrimaryHover`…): use
+  `css.Hover(css.ColorPrimary)`, `css.Focus(css.ColorSurface)`, etc. The
+  derivation (color-mix toward `light-dark(black, white)`) is centralised in
+  `css`; component-level `color-mix()` is prohibited.
 - **`ColorFocusRing`**: Replace references with `ColorPrimary`.
-- **`ColorSelection` / `ColorOnSelection`**: Replaced by inline CSS calculations: `color-mix(in oklab, var(--color-primary), transparent 85%)`.
-- **`ColorDisabled` / `ColorOnDisabled`**: Replaced by using `ColorSurface` (for background) and `ColorMuted` (for foreground/text).
-- **`ColorSurfaceSunken`**: Replaced by using `color-mix(in oklab, var(--color-surface), var(--color-background))` or `ColorBackground` directly.
-- **`ColorHover`**: Replaced by custom/active `color-mix` declarations.
-- **22 Light/Dark Source Twins** (`ColorBackgroundLight`, `ColorBackgroundDark`, etc.): Deleted entirely. All mode logic resides inside the main token's `light-dark()` definition.
-- **27 Interactive Hover/Focus/Press Twins** (`ColorPrimaryHover`, `ColorPrimaryFocus`, `ColorPrimaryPress`, etc.): Removed. Calculations are performed at the component-level using `color-mix()`.
+- **`ColorHover`**: Use `css.Hover(css.ColorSurface)`.
+- **`ColorDisabled` / `ColorOnDisabled`**: Use `ColorSurface` / `ColorMuted`.
+
+### Deleted entirely
+- **22 Light/Dark Source Twins** (`ColorBackgroundLight`, `ColorBackgroundDark`,
+  etc.): Deleted. All mode logic resides inside the main token's `light-dark()`.
+- **Source type**: Deleted. Use `Token`.
+- **`ColorSecondary` / `ColorOnSecondary`**: Deleted. Use `ColorSurface` / `ColorOnSurface`.
+- **`ColorError` / `ColorOnError`**: Renamed to `ColorDanger` / `ColorOnDanger`.
 
 ---
 
@@ -73,8 +94,8 @@ If you reference design system `css.Pair` variables, use this mapping:
 |---|---|---|---|
 | `SurfacePrimary` | `SurfacePrimary` | `ColorPrimary` | `ColorOnPrimary` |
 | `SurfacePanel` | `SurfacePanel` | `ColorSurface` | `ColorOnSurface` |
-| `SurfaceSunken` | `SurfaceSunken` | `Token{"--color-surface-sunken", "color-mix(...)"}` | `ColorOnSurface` |
-| `SurfaceSelected` | `SurfaceSelected` | `Token{"--color-selection", "color-mix(...)"}` | `ColorOnSurface` |
+| `SurfaceSunken` | `SurfaceSunken` | `ColorSurfaceSunken` | `ColorOnSurface` |
+| `SurfaceSelected` | `SurfaceSelected` | `ColorSelection` | `ColorOnSelection` |
 | `SurfaceDanger` | `SurfaceDanger` | `ColorDanger` | `ColorOnDanger` |
 | `SurfaceSuccess` | `SurfaceSuccess` | `ColorSuccess` | `ColorOnSuccess` |
 | `SurfaceDisabled` | `SurfaceDisabled` | `Token{"--color-disabled", "var(--color-surface)"}` | `Token{"--color-on-disabled", "var(--color-muted)"}` |
@@ -96,12 +117,13 @@ func RootCSS() *css.Stylesheet {
 }
 ```
 
-#### New Code (v0.4.0):
+#### New Code (v0.3.3):
 ```go
 func RootCSS() *css.Stylesheet {
     return css.Theme(
         css.Set(css.ColorPrimary, "#FF6B35"),
         css.SetTheme(css.ColorBackground, "#FAFAFA", "#121212"),
+        css.Set(css.MixHover, "22%"),
     )
 }
 ```

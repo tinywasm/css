@@ -95,11 +95,14 @@ This is not a local invention. It is the industrial convergence of the last deca
 
 | File | Build tag | Compiles to WASM |
 |---|---|---|
-| `tokens.go` (Class, Token, constants) | none | ✅ |
+| `tokens.go` (Token, Pair, ValueGetter, AllPairs) | `!wasm` | ❌ |
+| `catalog.go` (constants) | `!wasm` | ❌ |
 | `dsl.go` (Stylesheet, Rule, properties) | `!wasm` | ❌ |
 | `css.go` (RootCSS, RenderCSS) | `!wasm` | ❌ |
 
-The only things that cross to the WASM binary are the class name strings (`"btn-primary"`) that the HTML needs to emit. TinyGo also eliminates unreferenced tokens via dead-code elimination. The CSS generator does not exist in the frontend.
+Nothing crosses to the WASM binary. The identity-layer logic (class names,
+part names) that the HTML needs to emit lives in `tinywasm/widget`, which is
+identity-only and WASM-safe. The CSS generator does not exist in the frontend.
 
 ### 3.5 No generators
 

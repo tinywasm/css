@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package css
 
 // Token is a design token: a named visual decision with a fallback value.
@@ -44,7 +46,9 @@ type NamedPair struct {
 	Min  float64
 }
 
-// AllPairs returns the 5 functional design decision pairs for automated contrast auditing.
+// AllPairs returns the 7 functional design decision pairs for automated contrast auditing.
+// SurfaceSunken and SurfaceSelected are excluded: their values are color-mix()
+// expressions that resolveColor() cannot evaluate (known gap, documented in SPECS).
 func AllPairs() []NamedPair {
 	return []NamedPair{
 		{"SurfacePrimary", ColorPrimary, ColorOnPrimary, 4.5},

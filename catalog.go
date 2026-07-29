@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package css
 
 var (
@@ -14,6 +16,12 @@ var (
 	ColorOnSurface    = Token{Name: "--color-on-surface", Light: "#1C1C1E", Dark: "#E6EDF3"}
 	ColorOutline      = Token{Name: "--color-outline", Light: "#D1D1D6", Dark: "#30363D"}
 	ColorMuted        = Token{Name: "--color-muted", Light: "#6E6E73", Dark: "#8B949E"}
+
+	// Computed semantic tokens — derived from live var() references, no hex drift.
+
+	ColorSurfaceSunken = Token{Name: "--color-surface-sunken", Dark: "color-mix(in oklab, var(--color-surface), var(--color-on-surface) 8%)"}
+	ColorSelection     = Token{Name: "--color-selection", Dark: "color-mix(in oklab, var(--color-primary), transparent 85%)"}
+	ColorOnSelection   = Token{Name: "--color-on-selection", Dark: "var(--color-on-surface)"}
 
 	TextXs   = Token{Name: "--text-xs", Dark: "0.75rem"}
 	TextSm   = Token{Name: "--text-sm", Dark: "0.875rem"}
@@ -67,12 +75,20 @@ var (
 	ColumnNarrow = Token{Name: "--column-narrow", Dark: "12rem"}
 	ColumnMedium = Token{Name: "--column-medium", Dark: "20rem"}
 	ColumnWide   = Token{Name: "--column-wide", Dark: "30rem"}
+
+	// Interaction intensities — how far a state moves from its base colour.
+
+	MixHover = Token{Name: "--mix-hover", Dark: "15%"}
+	MixFocus = Token{Name: "--mix-focus", Dark: "30%"}
+	MixPress = Token{Name: "--mix-press", Dark: "45%"}
 )
 
 var (
 	SurfacePrimary    = Pair{ColorPrimary, ColorOnPrimary}
 	SurfacePanel      = Pair{ColorSurface, ColorOnSurface}
 	SurfaceBackground = Pair{ColorBackground, ColorOnBackground}
+	SurfaceSunken     = Pair{ColorSurfaceSunken, ColorOnSurface}
+	SurfaceSelected   = Pair{ColorSelection, ColorOnSelection}
 	SurfaceDanger     = Pair{ColorDanger, ColorOnDanger}
 	SurfaceSuccess    = Pair{ColorSuccess, ColorOnSuccess}
 )

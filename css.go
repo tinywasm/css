@@ -21,6 +21,15 @@ func RootCSS() *Stylesheet {
 			declare(ColorOnSurface),
 			declare(ColorOutline),
 			declare(ColorMuted),
+			declare(ColorSurfaceSunken),
+			declare(ColorSelection),
+			declare(ColorOnSelection),
+		),
+		root(
+			// Interaction intensities
+			declare(MixHover),
+			declare(MixFocus),
+			declare(MixPress),
 		),
 		root(
 			// Typography scale
@@ -164,4 +173,17 @@ func Theme(overrides ...Override) *Stylesheet {
 func withRootTail(s *Stylesheet, it item) *Stylesheet {
 	s.items = append(s.items, it)
 	return s
+}
+
+// Hover, Focus and Press return the standard interaction-state derivation for
+// any base token: the base mixed toward the theme's contrasting extreme.
+// The mixer is light-dark(black, white) so a hover darkens on a light theme
+// and lightens on a dark one. The intensity is a token, so an app can retune
+// it with Theme(Set(MixHover, "22%")) without republishing this package.
+func Hover(t Token) string  { return mixToward(t, MixHover) }
+func Focus(t Token) string  { return mixToward(t, MixFocus) }
+func Press(t Token) string  { return mixToward(t, MixPress) }
+
+func mixToward(t, amount Token) string {
+	return "color-mix(in oklab, " + t.Var() + ", light-dark(black, white) " + amount.Var() + ")"
 }

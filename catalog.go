@@ -76,6 +76,10 @@ var (
 	ColumnMedium = Token{Name: "--column-medium", Dark: "20rem"}
 	ColumnWide   = Token{Name: "--column-wide", Dark: "30rem"}
 
+	// Rail widths — the fixed column of a Sidebar layout.
+	RailNarrow = Token{Name: "--rail-narrow", Dark: "3.5rem"}
+	RailWide   = Token{Name: "--rail-wide", Dark: "12rem"}
+
 	// Interaction intensities — how far a state moves from its base colour.
 
 	MixHover = Token{Name: "--mix-hover", Dark: "15%"}

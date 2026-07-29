@@ -18,6 +18,7 @@ The public API consists solely of:
 - `Token` and `Pair` design tokens.
 - The design token catalog (e.g., `ColorPrimary`, `ColorSurface`, `Space2`, `MixHover`, etc.).
 - `Hover(t)`, `Focus(t)`, `Press(t)` — interaction derivations via `color-mix()`.
+- `Device`, `Mobile`, `Tablet`, `Desktop`, `Query(...)` — typed viewport classes for media queries.
 - `Stylesheet` and `NewStylesheet` for compilation.
 - `Theme`, `Set`, `SetTheme` for rebranded app themes.
 
@@ -114,8 +115,10 @@ Tokens are the single source of truth for all design decisions.
 | Elevation | Box-shadow scale |
 | Motion | Animation timing + easing curves |
 | Z-index | Stacking contract |
-| Breakpoints | Viewport widths (container queries / JS) |
+| Viewport classes | Typed media-query enum (`Mobile`, `Tablet`, `Desktop`) for responsive layout |
+| Breakpoints | Viewport widths (`BpSm`/`BpMd`/`BpLg`/`BpXl` — container queries / JS only, not usable in `@media`) |
 | Container widths | Max-width primitives |
+| Rail widths | Sidebar/fixed-column scale (`RailNarrow`, `RailWide`) |
 
 ---
 
@@ -131,5 +134,6 @@ Tokens are the single source of truth for all design decisions.
 
 - [AGENTS.md](AGENTS.md) — Constraints for anyone (human or agent) changing this library: the WASM boundary, the no-duplicated-value rule, and the checklist for adding a token.
 - [Technical Specifications](docs/SPECS.md) — Detailed specifications of all active design tokens, browser-level light-dark handling, and the complete library contract.
+- [Migration Guide](docs/MIGRATION.md) — Upgrade paths between releases.
 - [Theming Architecture](docs/ARCHITECTURE.md) — Detailed guide on RootCSS, single-winner slot, theme overrides, and type safety constraints.
 - [Go-Typed CSS DSL Justification](docs/JUSTIFICACION_DSL.md) — Deep-dive on design rationale, technical constraints, and comparison with alternatives.

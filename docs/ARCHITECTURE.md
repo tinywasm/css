@@ -44,3 +44,23 @@ css.Theme(css.Set(css.ColorSurfaceLight, "#FAFAFA"))
 // Declares the default fallback value defined exactly once in tokens.go
 declare(ColorPrimary)
 ```
+
+## Breakpoint Literals vs Custom Properties
+
+Media-query conditions are evaluated before custom properties resolve. A `var()`
+inside `@media` is silently invalid — the query never matches. Therefore the
+pixel thresholds (`640px`, `1024px`) that define viewport classes must be baked
+into Go string constants, not read from a `Token`.
+
+The library provides both mechanisms:
+
+- **`Device`** (`device.go`): a closed enum (`Mobile` / `Tablet` / `Desktop`)
+  whose `Query()` returns the literal media condition. This is the sanctioned
+  building block for responsive layout in `widget/style`.
+- **`BpSm` / `BpMd` / `BpLg` / `BpXl`** (`catalog.go`): declared as `--bp-*`
+  custom properties. They are usable in container queries, JS, and any CSS
+  context where `var()` is valid — but **not** inside `@media`.
+
+This split ensures that the single source of truth for breakpoint values is
+the Go code, while the same numbers are available to non-media contexts via
+custom properties. No consumer in the ecosystem should re-state a pixel value.

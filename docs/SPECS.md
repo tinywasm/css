@@ -92,6 +92,15 @@ Values reproduce the legacy hex scale (`#164d74`/`#123e5d`/`#0e304a` from `#1b5d
 These are declared in `:root` for discoverability and can be overridden with
 `Set(MixHover, "22%")`.
 
+### Grid Columns
+- `ColumnNarrow` (`--column-narrow`): `12rem`
+- `ColumnMedium` (`--column-medium`): `20rem`
+- `ColumnWide` (`--column-wide`): `30rem`
+
+### Rail Widths
+- `RailNarrow` (`--rail-narrow`): `3.5rem` — icon-only sidebar column
+- `RailWide` (`--rail-wide`): `12rem` — icon + label sidebar column
+
 ---
 
 ## 4. API Surface & Asset Generation
@@ -176,3 +185,66 @@ it invalid at computed-value time (the `background-color` becomes `unset`). The
 `var()` fallback covers "undefined", not "ill-defined". Override with valid CSS.
 
 This generates the baseline design catalog variables first, then appends custom overridden definitions at the end of the `:root` block to let the CSS cascade natively pick up overridden decisions.
+
+---
+
+## 6. Device Viewport Classes
+
+`Device` is a closed enum of three viewport-width classes used in media queries.
+A custom property (`var()`) cannot appear inside an `@media` condition — the
+pixel thresholds must be baked into the Go string at build time. The `BpSm` /
+`BpMd` / `BpLg` / `BpXl` tokens remain useful for container queries and JS.
+
+### Definition
+
+```go
+type Device uint8
+
+const (
+    Mobile  Device = iota // (max-width: 639.98px)
+    Tablet                // (min-width: 640px) and (max-width: 1023.98px)
+    Desktop               // (min-width: 1024px)
+)
+```
+
+### Query strings
+
+| Class | Media condition | Covers |
+|---|---|---|
+| `Mobile` | `(max-width: 639.98px)` | 0 – 639.98px |
+| `Tablet` | `(min-width: 640px) and (max-width: 1023.98px)` | 640px – 1023.98px |
+| `Desktop` | `(min-width: 1024px)` | 1024px+ |
+
+The `.98px` fractions avoid a half-pixel gap where no class matches due to
+fractional viewport widths (zoom, scrollbar, device pixel ratio).
+
+The three classes are mutually exclusive and jointly exhaustive: every viewport
+width matches exactly one.
+
+### Join function
+
+```go
+Query(devices ...Device) string
+```
+
+Joins multiple device conditions into an OR-list (`, ` separator). Duplicates
+are dropped; order is always Mobile, Tablet, Desktop for deterministic emission.
+
+### Rule: no `var()` in `@media`
+
+A token's value (`--bp-sm: 640px`) cannot be used inside a media query because
+custom properties are not resolved at `@media` evaluation time. The literal
+pixel values live exclusively in `device.go`. Consumers that need the same
+thresholds in a container query or JS should reference the `BpSm`/`BpMd`/`BpLg`/`BpXl`
+tokens. Those tokens are NOT a substitute for a `Device` media condition.
+
+### Rule: the two copies of each threshold are guarded, not trusted
+
+`640` and `1024` necessarily appear twice — once as a literal in `device.go` and
+once as a `--bp-*` token value — because the media condition cannot read the
+token. That duplication is the only sanctioned exception to "never state a value
+twice", and it is safe solely because `TestDeviceThresholdsMatchBreakpointTokens`
+ties the two together: it parses `BpSm`/`BpLg` and asserts that `Tablet` and
+`Desktop` open exactly at those widths, and that `Mobile` and `Tablet` close
+`0.02px` below them. Changing a breakpoint token without changing `device.go`
+fails the build. Do not delete or weaken that test.

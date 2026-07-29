@@ -103,6 +103,9 @@ func RootCSS() *Stylesheet {
 			declare(ColumnNarrow),
 			declare(ColumnMedium),
 			declare(ColumnWide),
+			// Rail widths
+			declare(RailNarrow),
+			declare(RailWide),
 		),
 	)
 }

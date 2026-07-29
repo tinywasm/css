@@ -146,3 +146,31 @@ Ensure your theme switcher toggle continues to apply `data-theme="light"` or `da
 }
 ```
 The browser's CSS rendering engine will immediately resolve all `light-dark()` tokens accordingly. No JavaScript variable injection is required.
+
+---
+
+## 6. Upgrading to v0.4.0 (Device viewport classes + rail widths)
+
+This release is purely additive. No consumer changes are required.
+
+### What was added
+
+- **`Device`** — closed enum (`Mobile`, `Tablet`, `Desktop`) with typed
+  `Query()` strings. This is the sanctioned replacement for any hand-written
+  `@media` condition in `widget/style` and in components.
+- **`Query(devices ...Device) string`** — joins multiple conditions into a
+  deterministic OR-list.
+- **`RailNarrow` / `RailWide`** — width tokens for sidebar/fixed-column
+  layouts, declared in `:root`.
+
+### Migration guide
+
+| Before (hand-written, prohibited going forward) | After |
+|---|---|
+| `"@media (min-width: 1024px)"` | `css.Desktop.Query()` |
+| `"@media (max-width: 639.98px), (min-width: 1024px)"` | `css.Query(css.Mobile, css.Desktop)` |
+| hardcoded `3.5rem` rail width | `css.RailNarrow.Var()` |
+| hardcoded `12rem` rail width | `css.RailWide.Var()` |
+
+No code changes are forced. New responsive layout code should use `Device`;
+existing code can migrate at any time.

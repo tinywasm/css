@@ -365,5 +365,5 @@ func backgroundPosition(v value) decl  { return decl{"background-position", v.cs
 func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssValue()} }
 
 func declare(t Token) decl {
-	return decl{t.Name, t.Fallback}
+	return decl{t.Name, t.GetFallback()}
 }

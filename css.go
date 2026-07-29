@@ -143,6 +143,11 @@ type Override struct {
 // Set builds an Override for a designated Token with the specified custom value.
 func Set(t Token, value string) Override { return Override{t, value} }
 
+// SetTheme builds an Override for a theme-aware Token with a custom light/dark pair.
+func SetTheme(t Token, light, dark string) Override {
+	return Override{t, "light-dark(" + light + ", " + dark + ")"}
+}
+
 // Theme returns the entire RootCSS() catalog with custom overrides appended.
 func Theme(overrides ...Override) *Stylesheet {
 	catalog := RootCSS() // default catalog

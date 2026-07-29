@@ -1,4 +1,4 @@
-# Migration Guide: Upgrading to tinywasm/css v0.2.0 (12-Token System)
+# Migration Guide: Upgrading to tinywasm/css v0.4.0 (12-Token System)
 
 This guide provides instructions and mapping specifications to upgrade applications and dependent libraries from the legacy 69-color-token system to the modernized, streamlined 12-token system. This document is optimized for both human reading and direct consumption by Large Language Models (LLMs) to perform automated code migrations.
 
@@ -43,14 +43,14 @@ Use the following lookup table to replace legacy variables with the new 12 activ
 
 ### Theme/Canvas Group
 
-| Legacy Go Variable | New Go Variable | CSS Custom Property | Default Fallback Value |
-|---|---|---|---|
-| `ColorBackground` | `ColorBackground` | `--color-background` | `light-dark(#FFFFFF, #0D1117)` |
-| — | `ColorOnBackground` | `--color-on-background` | `light-dark(#1C1C1E, #E6EDF3)` |
-| `ColorSurface` | `ColorSurface` | `--color-surface` | `light-dark(#F2F2F7, #161B22)` |
-| `ColorOnSurface` | `ColorOnSurface` | `--color-on-surface` | `light-dark(#1C1C1E, #E6EDF3)` |
-| `ColorOutline` | `ColorOutline` | `--color-outline` | `light-dark(#D1D1D6, #30363D)` |
-| `ColorMuted` | `ColorMuted` | `--color-muted` | `light-dark(#6E6E73, #8B949E)` |
+| Legacy Go Variable | New Go Variable | CSS Custom Property | Light | Dark |
+|---|---|---|---|---|
+| `ColorBackground` | `ColorBackground` | `--color-background` | `#FFFFFF` | `#0D1117` |
+| — | `ColorOnBackground` | `--color-on-background` | `#1C1C1E` | `#E6EDF3` |
+| `ColorSurface` | `ColorSurface` | `--color-surface` | `#F2F2F7` | `#161B22` |
+| `ColorOnSurface` | `ColorOnSurface` | `--color-on-surface` | `#1C1C1E` | `#E6EDF3` |
+| `ColorOutline` | `ColorOutline` | `--color-outline` | `#D1D1D6` | `#30363D` |
+| `ColorMuted` | `ColorMuted` | `--color-muted` | `#6E6E73` | `#8B949E` |
 
 ### Obsolete/Calculated Group (No longer registered in CSS)
 The following tokens are completely removed from the registered `:root` custom properties and Go catalog. They are replaced by browser-level dynamic calculations or standard parent variables:
@@ -96,12 +96,12 @@ func RootCSS() *css.Stylesheet {
 }
 ```
 
-#### New Code (v0.2.0):
+#### New Code (v0.4.0):
 ```go
 func RootCSS() *css.Stylesheet {
     return css.Theme(
         css.Set(css.ColorPrimary, "#FF6B35"),
-        css.Set(css.ColorBackground, "light-dark(#FAFAFA, #121212)"),
+        css.SetTheme(css.ColorBackground, "#FAFAFA", "#121212"),
     )
 }
 ```

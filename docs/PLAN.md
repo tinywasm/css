@@ -1,6 +1,8 @@
 ---
 PLAN: "refactor: variables de color minimas"
 TAG: v0.2.0
+STATUS: running
+SESSION: 8043312389241111971
 ---
 
 # problema:

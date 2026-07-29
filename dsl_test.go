@@ -186,11 +186,11 @@ func TestDSL_Root(t *testing.T) {
 	sheet := NewStylesheet(
 		root(
 			declare(ColorPrimary),
-			bind(ColorBackground, ColorBackgroundLight),
+			declare(ColorBackground),
 		),
 	)
 	got := sheet.String()
-	want := ":root {\n  --color-primary: #1b5d8c;\n  --color-background: var(--color-background-light,#FFFFFF);\n}\n\n"
+	want := ":root {\n  --color-primary: #1b5d8c;\n  --color-background: light-dark(#FFFFFF, #0D1117);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -199,15 +199,15 @@ func TestDSL_Root(t *testing.T) {
 func TestDSL_Media(t *testing.T) {
 	sheet := NewStylesheet(
 		mediaPrefersDark(
-			root(bind(ColorBackground, ColorBackgroundDark)),
+			rule(selector("body"), background(ColorBackground)),
 		),
 	)
 	got := sheet.String()
 	if !strings.Contains(got, "@media (prefers-color-scheme: dark)") {
 		t.Errorf("missing media query: %s", got)
 	}
-	if !strings.Contains(got, "--color-background: var(--color-background-dark") {
-		t.Errorf("missing binding: %s", got)
+	if !strings.Contains(got, "background: var(--color-background,light-dark(#FFFFFF, #0D1117))") {
+		t.Errorf("missing background: %s", got)
 	}
 }
 

@@ -367,11 +367,3 @@ func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssV
 func declare(t Token) decl {
 	return decl{t.Name, t.Fallback}
 }
-
-func declareSource(s Source) decl {
-	return decl{s.Name, s.Fallback}
-}
-
-func bind(active Token, source Source) decl {
-	return decl{active.Name, "var(" + source.Name + "," + source.Fallback + ")"}
-}

@@ -108,8 +108,9 @@ func RootCSS() *Stylesheet {
 			// Rail widths
 			declare(RailNarrow),
 			declare(RailWide),
-			// Shared control height
+			// Shared control height and chip width
 			declare(ControlHeight),
+			declare(ChipWidth),
 		),
 	)
 }
@@ -146,6 +147,14 @@ func RenderCSS() *Stylesheet {
 		// what its rule declares.
 		rule(selector("h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd"),
 			margin(zero),
+		),
+		// Heading sizes are the DSL's business, not the user agent's. An <h1>
+		// carries font-size: 2em by default, which compounds against whatever
+		// the part around it declares and makes a title three times the size a
+		// component asked for. FontSize()/FontWeight() say what a heading looks
+		// like; its level stays a semantic choice.
+		rule(selector("h1, h2, h3, h4, h5, h6"),
+			rawRule("  font-size: inherit;\n  font-weight: inherit;"),
 		),
 		rule(selector("ol, ul"),
 			rawRule("  list-style: none;"),

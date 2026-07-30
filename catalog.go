@@ -78,6 +78,10 @@ var (
 	ColumnMedium = Token{Name: "--column-medium", Dark: "20rem"}
 	ColumnWide   = Token{Name: "--column-wide", Dark: "30rem"}
 
+	// The width every chip shares — a field's legend, a row's badge — so a
+	// column of them lines up instead of each one hugging its own text.
+	ChipWidth = Token{Name: "--chip-width", Dark: "7rem"}
+
 	// The height every interactive row shares — a list row, a form field —
 	// so the two read as the same rhythm instead of drifting apart.
 	ControlHeight = Token{Name: "--control-height", Dark: "4.5rem"}

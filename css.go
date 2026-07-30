@@ -134,6 +134,28 @@ func RenderCSS() *Stylesheet {
 			outline(str("2px solid "+ColorPrimary.Var())),
 			outlineOffset(px(2)),
 		),
+		// User-agent margins and list chrome are geometry the style DSL cannot
+		// express and cannot see. A <ul> used as a nav rail carries 40px of
+		// padding-inline-start it never asked for, an <h1> carries 0.67em of
+		// block margin: both silently widen or heighten the component around
+		// them. Zero them here, in the lowest layer, so a part's box is exactly
+		// what its rule declares.
+		rule(selector("h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd"),
+			margin(zero),
+		),
+		rule(selector("ol, ul"),
+			rawRule("  list-style: none;"),
+			margin(zero),
+			padding(zero),
+		),
+		// A <summary> draws a disclosure triangle the component did not ask
+		// for and cannot style. Components supply their own affordance.
+		rule(selector("summary"),
+			rawRule("  list-style: none;"),
+		),
+		rule(selector("summary::-webkit-details-marker"),
+			display(none),
+		),
 		rule(selector("img, svg, video"),
 			display(block),
 			maxWidth(pct(100)),

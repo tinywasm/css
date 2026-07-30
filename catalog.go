@@ -9,6 +9,8 @@ var (
 	ColorOnSuccess   = Token{Name: "--color-on-success", Dark: "#FFFFFF"}
 	ColorDanger      = Token{Name: "--color-danger", Dark: "#ba2c0d"}
 	ColorOnDanger    = Token{Name: "--color-on-danger", Dark: "#FFFFFF"}
+	ColorAccent      = Token{Name: "--color-accent", Dark: "#e8a33d"}
+	ColorOnAccent    = Token{Name: "--color-on-accent", Dark: "#1C1C1E"}
 
 	ColorBackground   = Token{Name: "--color-background", Light: "#FFFFFF", Dark: "#0D1117"}
 	ColorOnBackground = Token{Name: "--color-on-background", Light: "#1C1C1E", Dark: "#E6EDF3"}
@@ -76,6 +78,10 @@ var (
 	ColumnMedium = Token{Name: "--column-medium", Dark: "20rem"}
 	ColumnWide   = Token{Name: "--column-wide", Dark: "30rem"}
 
+	// The height every interactive row shares — a list row, a form field —
+	// so the two read as the same rhythm instead of drifting apart.
+	ControlHeight = Token{Name: "--control-height", Dark: "4.5rem"}
+
 	// Rail widths — the fixed column of a Sidebar layout.
 	RailNarrow = Token{Name: "--rail-narrow", Dark: "3.5rem"}
 	RailWide   = Token{Name: "--rail-wide", Dark: "12rem"}
@@ -94,5 +100,6 @@ var (
 	SurfaceSunken     = Pair{ColorSurfaceSunken, ColorOnSurface}
 	SurfaceSelected   = Pair{ColorSelection, ColorOnSelection}
 	SurfaceDanger     = Pair{ColorDanger, ColorOnDanger}
+	SurfaceAccent     = Pair{ColorAccent, ColorOnAccent}
 	SurfaceSuccess    = Pair{ColorSuccess, ColorOnSuccess}
 )

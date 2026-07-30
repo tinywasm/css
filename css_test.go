@@ -156,6 +156,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	knownTokens := map[string]bool{}
 	allTokens := []ValueGetter{
 		ColorPrimary, ColorOnPrimary, ColorSuccess, ColorOnSuccess, ColorDanger, ColorOnDanger,
+		ColorAccent, ColorOnAccent,
 		ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted,
 		ColorSurfaceSunken, ColorSelection, ColorOnSelection,
 		MixHover, MixFocus, MixPress,
@@ -170,6 +171,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		MaxWReadable,
 		ColumnNarrow, ColumnMedium, ColumnWide,
 		RailNarrow, RailWide,
+		ControlHeight,
 	}
 	for _, tok := range allTokens {
 		knownTokens[tok.GetName()] = true

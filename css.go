@@ -12,6 +12,8 @@ func RootCSS() *Stylesheet {
 			declare(ColorOnSuccess),
 			declare(ColorDanger),
 			declare(ColorOnDanger),
+			declare(ColorAccent),
+			declare(ColorOnAccent),
 		),
 		root(
 			// Theme group — Adaptive layout colors using CSS light-dark() fallbacks.
@@ -106,6 +108,8 @@ func RootCSS() *Stylesheet {
 			// Rail widths
 			declare(RailNarrow),
 			declare(RailWide),
+			// Shared control height
+			declare(ControlHeight),
 		),
 	)
 }

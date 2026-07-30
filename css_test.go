@@ -42,6 +42,20 @@ func TestRenderCSS_ContainsColorScheme(t *testing.T) {
 	}
 }
 
+func TestRenderCSS_SitsInTheLowestLayer(t *testing.T) {
+	// An unlayered rule outranks every layered one, so an unlayered
+	// `svg { display: block }` would beat a component's
+	// `@layer widgets { .part { display: none } }` and make any icon hidden
+	// by state impossible to hide.
+	got := RenderCSS().String()
+	if !strings.HasPrefix(strings.TrimSpace(got), "@layer tokens {") {
+		t.Errorf("the base reset must be wrapped in @layer tokens\nGot:\n%s", got)
+	}
+	if !strings.Contains(got, "img, svg, video") {
+		t.Errorf("expected the replaced-element reset to survive the layer wrap\nGot:\n%s", got)
+	}
+}
+
 func TestGoldenEquivalence(t *testing.T) {
 	// RootCSS golden test (partial, checking key values are present)
 	root := RootCSS().String()

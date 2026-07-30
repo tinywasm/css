@@ -110,8 +110,12 @@ func RootCSS() *Stylesheet {
 	)
 }
 
+// RenderCSS is the base reset. Every rule sits in the `tokens` layer — the
+// lowest of the four the widget style DSL declares. Unlayered, `svg { display:
+// block }` would beat `@layer widgets { .part { display: none } }` regardless
+// of specificity, so any component hiding an icon by state could not.
 func RenderCSS() *Stylesheet {
-	return NewStylesheet(
+	return NewStylesheet(layer("tokens",
 		rule(selector("*, *::before, *::after"),
 			boxSizing(str("border-box")),
 		),
@@ -143,7 +147,7 @@ func RenderCSS() *Stylesheet {
 		rule(selector("[data-theme=\"dark\"]"),
 			rawRule("color-scheme: dark;"),
 		),
-	)
+	))
 }
 
 // Override is the customized override of a single Token's value.

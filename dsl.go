@@ -94,6 +94,27 @@ func root(decls ...decl) item {
 	return ruleItem{sel: ":root", decls: decls}
 }
 
+// layerItem wraps rules in a cascade layer. An unlayered rule beats every
+// layered one no matter how specific the layered selector is, so the base
+// reset has to sit in the lowest layer or it silently overrides the components
+// that build on it.
+type layerItem struct {
+	name  string
+	items []item
+}
+
+func (l layerItem) writeTo(b *fmt.Builder) {
+	b.WriteString("@layer ")
+	b.WriteString(l.name)
+	b.WriteString(" {\n")
+	for _, it := range l.items {
+		it.writeTo(b)
+	}
+	b.WriteString("}\n")
+}
+
+func layer(name string, items ...item) layerItem { return layerItem{name, items} }
+
 type mediaItem struct {
 	query string
 	items []item

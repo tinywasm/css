@@ -111,6 +111,7 @@ func RootCSS() *Stylesheet {
 			// Shared control height and chip width
 			declare(ControlHeight),
 			declare(ChipWidth),
+			declare(VeilBlur),
 		),
 	)
 }

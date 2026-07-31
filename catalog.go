@@ -78,6 +78,11 @@ var (
 	ColumnMedium = Token{Name: "--column-medium", Dark: "20rem"}
 	ColumnWide   = Token{Name: "--column-wide", Dark: "30rem"}
 
+	// How far a veil blurs what is behind it. A dimmed wash alone still lets
+	// the page compete for attention; softening it is what makes a dialog read
+	// as the only thing in focus.
+	VeilBlur = Token{Name: "--veil-blur", Dark: "6px"}
+
 	// The width every chip shares — a field's legend, a row's badge — so a
 	// column of them lines up instead of each one hugging its own text.
 	ChipWidth = Token{Name: "--chip-width", Dark: "7rem"}

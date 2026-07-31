@@ -81,7 +81,11 @@ var (
 	// How far a veil blurs what is behind it. A dimmed wash alone still lets
 	// the page compete for attention; softening it is what makes a dialog read
 	// as the only thing in focus.
-	VeilBlur = Token{Name: "--veil-blur", Dark: "6px"}
+	// 4px is the common step for this in modern UI — Tailwind's backdrop-blur-sm,
+	// and roughly where design systems land when they blur a scrim at all.
+	// Past ~8px the page stops reading as "behind" and starts reading as
+	// "broken", and it compounds with the 60% wash the veil already applies.
+	VeilBlur = Token{Name: "--veil-blur", Dark: "4px"}
 
 	// The width every chip shares — a field's legend, a row's badge — so a
 	// column of them lines up instead of each one hugging its own text.

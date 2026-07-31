@@ -154,6 +154,13 @@ func RenderCSS() *Stylesheet {
 		// the part around it declares and makes a title three times the size a
 		// component asked for. FontSize()/FontWeight() say what a heading looks
 		// like; its level stays a semantic choice.
+		// An <a> arrives underlined and painted the user agent's link blue, which
+		// fights every surface a component puts it on — a nav item ends up blue
+		// text on a blue button. Components say what a link looks like; the
+		// browser's default is chrome, like the heading sizes below.
+		rule(selector("a"),
+			rawRule("  color: inherit;\n  text-decoration: none;"),
+		),
 		rule(selector("h1, h2, h3, h4, h5, h6"),
 			rawRule("  font-size: inherit;\n  font-weight: inherit;"),
 		),

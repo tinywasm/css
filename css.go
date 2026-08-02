@@ -164,6 +164,14 @@ func RenderCSS() *Stylesheet {
 		rule(selector("h1, h2, h3, h4, h5, h6"),
 			rawRule("  font-size: inherit;\n  font-weight: inherit;"),
 		),
+		// Form controls are the other UA-font holdout: an <input> arrives with
+		// the user agent's family and size (Arial 13px on most platforms), which
+		// shrinks the value inside a field the design measured for the app font.
+		// Inheriting makes the control speak the same type as the text around it;
+		// a part can still override size with FontSize().
+		rule(selector("input, textarea, select"),
+			rawRule("  font: inherit;"),
+		),
 		rule(selector("ol, ul"),
 			rawRule("  list-style: none;"),
 			margin(zero),

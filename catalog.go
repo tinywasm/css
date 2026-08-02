@@ -93,7 +93,7 @@ var (
 
 	// The height every interactive row shares — a list row, a form field —
 	// so the two read as the same rhythm instead of drifting apart.
-	ControlHeight = Token{Name: "--control-height", Dark: "4.5rem"}
+	ControlHeight = Token{Name: "--control-height", Dark: "3.125rem"}
 
 	// Rail widths — the fixed column of a Sidebar layout.
 	RailNarrow = Token{Name: "--rail-narrow", Dark: "3.5rem"}

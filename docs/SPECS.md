@@ -123,9 +123,11 @@ El mezclador es `light-dark(black, white)`, no un blanco o negro fijo, para que
 la dirección del tema sea correcta en ambos modos (oscurece en light, aclara en
 dark).
 
-### RootCSS and RenderCSS
+### RootCSS, RenderCSS and FontFaces
 
-The library provides exactly two functions matching the `assetmin` SSR build pipeline contract:
+The library provides three CSS emitters. `RootCSS` and `RenderCSS` match the
+`assetmin` SSR pipeline contract; `FontFaces` is injected separately by whoever
+serves the font files.
 
 ### 1. `RootCSS() *Stylesheet`
 Emits the core CSS Custom Property `:root` block declarations. It holds the vocabulary of design decisions.
@@ -134,7 +136,67 @@ Emits the core CSS Custom Property `:root` block declarations. It holds the voca
 root := css.RootCSS()
 ```
 
-### 2. `RenderCSS() *Stylesheet`
+### 2. `FontFaces(d font.Declaration, urlPrefix string) *Stylesheet`
+
+Emits one `@font-face` rule per face of the declared family. **Not** part of
+`RootCSS()` or `RenderCSS()`: whoever serves the font files decides when to
+inject the stylesheet (typically `assetmin` with its own URL prefix).
+
+Weight and style are derived from `font.Style` — never received as strings:
+
+| `font.Style` | `font-weight` | `font-style` |
+|---|---|---|
+| `Regular` | 400 | normal |
+| `Bold` | 700 | normal |
+| `Italic` | 400 | italic |
+| `BoldItalic` | 700 | italic |
+
+File names come from `d.Family().Face(s) + ".ttf"` (derivation lives in
+`tinywasm/font`). Format is always `format("truetype")` — one TTF per face for
+web and PDF. Every rule sets `font-display: swap`.
+
+An empty family (`Declare("", …)`) emits an empty stylesheet (no broken rules).
+
+Exact output for `FontFaces(font.Declare("Roboto", "x"), "/assets")`:
+
+```css
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/Roboto-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/Roboto-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/Roboto-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/Roboto-BoldItalic.ttf") format("truetype");
+}
+```
+
+URL prefix joining: `"/assets"`, `"/assets/"` and `""` all produce valid URLs
+(no double slash, no missing slash).
+
+### 3. `RenderCSS() *Stylesheet`
 Emits the actual functional CSS rules (resets, layout, element resets).
 It configures standard `color-scheme` rules on `:root`, `[data-theme="light"]`, and `[data-theme="dark"]`, enabling seamless support for modern CSS `light-dark()` functions:
 

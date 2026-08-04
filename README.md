@@ -21,6 +21,7 @@ The public API consists solely of:
 - `Device`, `Mobile`, `Tablet`, `Desktop`, `Query(...)` — typed viewport classes for media queries.
 - `Stylesheet` and `NewStylesheet` for compilation.
 - `Theme`, `Set`, `SetTheme` for rebranded app themes.
+- `RootCSS`, `RenderCSS`, `FontFaces`, `Raw` — CSS emitters (`FontFaces` is separate from the SSR root/render slots).
 
 All component styling is expressed using the semantic visual intention API in `github.com/tinywasm/widget/style`, which compiles down to CSS rules.
 

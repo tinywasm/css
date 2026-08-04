@@ -1,259 +1,138 @@
 ---
-PLAN: "feat: typed Device viewport classes and rail width tokens"
-TAG: v0.4.0
-EXECUTOR: jules
-REVIEWER: none
+PLAN: "feat: emitir el @font-face de la familia declarada"
+TAG: v0.5.0
 ---
+## Antes de escribir código: lee [CONSTRUCTION_HARNESS.md](CONSTRUCTION_HARNESS.md)
 
-> This plan is dispatched via the CodeJob workflow. See skill: agents-workflow.
+**Es vinculante, no orientativo.**
 
-# Plan — `css`: typed `Device` viewport classes + rail width tokens
-
-## 0. Why this exists (read before touching code)
-
-`tinywasm/layout`'s application chassis (`platformd`) renders a blank page today. The
-root cause chain ends here: the chassis needs to say *"the nav rail is a fixed column on
-desktop and a slide-in drawer on mobile"*, and no library in the ecosystem currently
-offers a **typed, closed, tested** way to name a viewport class. The only thing that ever
-existed was an unexported helper in this repo (`mediaDesktop`, `dsl.go:162`) hardcoding
-`(orientation: landscape) and (hover: hover)`, plus four `--bp-*` custom properties that
-**cannot be used in a media query at all** (see §1.2).
-
-This plan closes that gap in `css` — the layer that owns every value in the ecosystem.
-`widget/style` and components consume what this plan exports; they must never write a
-media query string themselves.
-
-This repo is a **build-time-only** package (`TestPackageIsBuildTimeOnly` in
-`tokens_test.go` enforces it). Everything added here is `//go:build !wasm` or lives in an
-already-untagged file that never reaches a WASM binary. Do not add a `wasm` build tag to
-anything.
+| # | Principio | Cómo se aplica aquí |
+|---|---|---|
+| 4 | One way to do each thing | El texto CSS lo escribe esta pieza. Si `assetmin` formatea un `@font-face`, hay dos formas de escribir CSS. |
+| 5 | Minimal surface | Una función. El prefijo de URL entra como parámetro; `css` no aprende rutas de servidor. |
+| 1 | Typed over `any` | El peso y el estilo se derivan de `font.Style`, no se reciben como strings. |
 
 ---
 
-## 1. Background facts the executor must know
+## 1. El hueco
 
-### 1.1 The DSL is closed on purpose
+`css` ya sabe **nombrar** la tipografía del producto: `FontStack(font.Family)` (`css.go:8`)
+alimenta el token `FontSans` (`catalog.go:28`). Eso resuelve *qué* fuente pedir.
 
-Since v0.3.x every DSL constructor in `dsl.go` is **unexported** (`rule`, `media`, `root`,
-`keyframes`, `at`, …). The only exported construction path is `NewStylesheet(items ...item)`
-and `Raw(css string) item`. **Do not export any existing lowercase helper.** This plan adds
-exactly one new exported type plus one exported function and two tokens — nothing else.
+No sabe **declararla**. No hay forma de emitir el `@font-face` que le dice al navegador
+dónde está el archivo, y sin él `--font-sans: "Roboto", …` cae al `system-ui` de después
+— que es exactamente el síntoma que arrancó todo esto: la app no se ve igual en Safari
+iOS que en Chrome Android.
 
-### 1.2 `var()` does not work inside `@media` — this is the whole reason for the type
+El hueco tiene consecuencia documentada: una versión anterior de este mismo plan proponía
+embeber la fuente en base64 dentro del CSS para esquivarlo, y la versión actual de
+`assetmin/docs/PLAN.md` estuvo a punto de armar la regla con un `fmt.Sprintf` en ese otro
+repo. Las dos son la misma falta —*a fork with a friendlier name*— y las dos desaparecen
+cuando la pieza que posee la sintaxis CSS ofrece la función.
 
-```css
-/* INVALID. Silently never matches. This is not a browser bug. */
-@media (min-width: var(--bp-md)) { … }
-```
+### Por qué la URL entra como parámetro
 
-Media-query *conditions* are evaluated before custom properties resolve. That is why
-`BpSm`/`BpMd`/`BpLg`/`BpXl` (`catalog.go:68-71`) are declared in `:root` but are useless
-for the job. The literal pixel value must be baked into the Go string that produces the
-query. Keeping those literals **in this file and nowhere else** is the point of `Device`.
-
-Do **not** delete the `Bp*` tokens: they remain useful to JS and to container queries.
-Do **not** try to make `Device.Query()` reference them via `var()`.
-
-### 1.3 Existing token shape
-
-`Token` has `Name` and `Dark` fields; a single-value (non-theme) token puts its value in
-`Dark`. See `catalog.go:60-77` for the pattern used by `--z-*` and `--column-*`.
-
-`TestNoUndeclaredTokensInEmittedCSS` (`css_test.go:140`) fails if a token is referenced but
-never declared in `RootCSS()`. Every token added below MUST also be added to `RootCSS()`.
+La regla necesita la URL final del archivo, y esa la decide `assetmin`
+(`AssetsURLPrefix` + `OutputDir`). `css` no la conoce y adivinarla lo acoplaría a una
+convención que no controla. Recibirla como un `string` no es acoplamiento: es el llamador
+diciendo dónde sirve sus assets.
 
 ---
 
-## 2. Stage 1 — `Device`: the closed set of viewport classes
+## 2. Cambio
 
-Create a new file **`device.go`** at the repo root (untagged — it declares no DSL item and
-must be readable from anywhere).
+Archivo nuevo `css.fontface.go`, con el mismo `//go:build !wasm` que el resto del paquete:
 
 ```go
-package css
-
-// Device is the closed set of viewport classes. It exists because a media query
-// condition cannot read a custom property: the pixel thresholds must be baked into
-// the query string, and this is the only file in the ecosystem allowed to hold them.
+// FontFaces devuelve el bloque @font-face de las cuatro caras de la familia
+// declarada, servidas desde urlPrefix (p. ej. "/assets"). El prefijo es un dato
+// del llamador: este paquete no conoce ni inventa rutas de servidor.
 //
-// The three classes are mutually exclusive and jointly exhaustive: every viewport
-// width matches exactly one. That property is asserted by TestDeviceClassesPartition.
-type Device uint8
-
-const (
-	Mobile  Device = iota // narrow, touch-first
-	Tablet                // medium
-	Desktop               // wide, pointer-first
-)
-
-func (d Device) String() string {
-	switch d {
-	case Mobile:
-		return "Mobile"
-	case Tablet:
-		return "Tablet"
-	case Desktop:
-		return "Desktop"
-	default:
-		return "Unknown"
-	}
-}
-
-// Query returns the media-query condition for exactly this class, without the
-// leading "@media ". Thresholds mirror BpSm (640px) and BpLg (1024px).
-func (d Device) Query() string {
-	switch d {
-	case Mobile:
-		return "(max-width: 639.98px)"
-	case Tablet:
-		return "(min-width: 640px) and (max-width: 1023.98px)"
-	case Desktop:
-		return "(min-width: 1024px)"
-	default:
-		return ""
-	}
-}
-
-// Query joins several device classes into one condition list. Callers that mean
-// "tablet and desktop" pass both rather than emitting two blocks.
-// Duplicate and unknown values are dropped; the result is ordered Mobile,
-// Tablet, Desktop regardless of argument order, so emission is deterministic.
-func Query(devices ...Device) string { … }
+// No entra en RootCSS() ni en RenderCSS(): quien sirve los archivos decide
+// cuándo inyectarlo.
+func FontFaces(d font.Declaration, urlPrefix string) *Stylesheet
 ```
 
-### 2.1 Exact rules for `Query(devices ...Device)`
+Una regla por cara, en el orden de los cuatro `font.Style`. `font` ya está en `go.mod`
+(`css.go:5` lo importa).
 
-- Deduplicate, then sort ascending by the `Device` value, then join each `Query()` with
-  `", "` (comma = logical OR in a media query list).
-- `Query()` with no arguments returns `""`.
-- `Query(Mobile, Tablet, Desktop)` returns the three conditions joined — it does **not**
-  collapse to `"all"`. Determinism beats cleverness here and the minifier handles it.
-- Use `github.com/tinywasm/fmt` for string work. **No `strings`, no `sort`, no `fmt`
-  from the stdlib** anywhere in this repo's non-test files.
+### 2.1 Peso y estilo se derivan, no se inventan
 
-### 2.2 The `.98px` detail — do not "clean it up"
+| `font.Style` | `font-weight` | `font-style` |
+|---|---|---|
+| `Regular` | 400 | normal |
+| `Bold` | 700 | normal |
+| `Italic` | 400 | italic |
+| `BoldItalic` | 700 | italic |
 
-`639.98px` / `1023.98px` are deliberate. A browser reporting a fractional viewport width
-(zoom, scrollbar, device pixel ratio) at exactly `639.5px` must still match `Mobile`; using
-`639px` leaves a half-pixel gap where no class matches and the element falls back to its
-base rule — precisely the class of silent layout bug this plan exists to eliminate. Leave
-the fractions in place.
+Un `switch` sobre los cuatro constantes. Nada de mapas (regla del ecosistema) y nada de
+recibir el peso por parámetro: `font.Style` ya lo dice.
 
----
+### 2.2 El nombre del archivo lo deriva `font`
 
-## 3. Stage 2 — rail width tokens
+`d.Family().Face(s) + ".ttf"`. **Nunca** concatenar `"-Bold"` a mano: la derivación vive
+en `font` y duplicarla es el defecto que ese repo está cerrando ahora mismo
+(`font/docs/PLAN.md`, `Face(Regular)` → `-Regular`).
 
-`widget/style` will gain a `Sidebar` primitive whose fixed column needs a width from a
-closed scale. Per this repo's rule *"never invent a value"*, the values live here.
+**Prerrequisito:** publicar `font` v0.1.0 antes de ejecutar esto, o las URLs emitidas
+apuntarán al nombre viejo de la cara regular.
 
-In `catalog.go`, immediately after the `ColumnNarrow/Medium/Wide` block:
+### 2.3 `format("truetype")`, no `woff2`
 
-```go
-	// Rail widths — the fixed column of a Sidebar layout.
-	RailNarrow = Token{Name: "--rail-narrow", Dark: "3.5rem"}  // icon only
-	RailWide   = Token{Name: "--rail-wide", Dark: "12rem"}     // icon + label
-```
+El ecosistema sirve **un solo TTF por cara para web y PDF**: el documento se genera en el
+frontend, así que pide el mismo archivo que la página ya bajó — acierto de caché en vez
+de una segunda descarga (16.132 B y 1 petición, frente a 27.890 B y 2). Escribir
+`format("woff2")` haría que el navegador **rechace** el archivo, y el fallo se ve como
+«la fuente no carga», no como un error. Números en
+`app-releases/docs/TYPOGRAPHY_MASTER_PLAN.md`.
 
-In `css.go`, inside `RootCSS()`, extend the existing "Grid columns" `root(...)` group (do
-not add a fourth `root(...)` block):
+`font-display: swap` en las cuatro: el texto se pinta con la fuente de respaldo y se
+recompone al llegar la real, en vez de quedar invisible.
 
-```go
-		root(
-			// Grid columns
-			declare(ColumnNarrow),
-			declare(ColumnMedium),
-			declare(ColumnWide),
-			// Rail widths
-			declare(RailNarrow),
-			declare(RailWide),
-		),
-```
+### 2.4 Se construye con el DSL interno, no con `Raw`
 
-`3.5rem` fits a `2.5em` icon plus its padding — the value the previous hand-written
-chassis converged on after a documented bug where a `4vw` rail collapsed below the icon
-width. Do not change it to a viewport unit.
+`Raw` es la válvula de escape **para consumidores**, no para este paquete. `@font-face`
+es una at-rule y aquí ya hay tres implementadas con el mismo patrón —`layerItem`
+(`dsl.go:107`), media (`:124`), keyframes (`:205`)—: un tipo privado con su `writeTo`.
+Seguir ese patrón. Si `FontFaces` se implementara con `Raw`, esta pieza estaría usando
+su propia puerta de emergencia teniendo la puerta.
+
+El DSL sigue **sin exportarse**: se exporta la función, no la at-rule.
 
 ---
 
-## 4. Stage 3 — tests (`device_test.go`)
+## 3. Documentación
 
-`gotest`, never `go test`. Stdlib `testing` + `strings` only; no testify.
-
-| Test | Asserts |
-|---|---|
-| `TestDeviceClassesPartition` | For widths `320, 639, 640, 767, 1023, 1024, 1440`, exactly **one** of the three `Query()` strings matches. Parse the min/max out of each query and compare numerically — do not string-match. |
-| `TestDeviceQueryHasNoVar` | No `Query()` result contains `var(` — §1.2. |
-| `TestQueryJoinIsDeterministic` | `Query(Desktop, Mobile)` == `Query(Mobile, Desktop)`, and both equal `Mobile.Query() + ", " + Desktop.Query()`. |
-| `TestQueryDeduplicates` | `Query(Mobile, Mobile)` == `Mobile.Query()`. |
-| `TestQueryEmpty` | `Query()` == `""`. |
-| `TestRailTokensDeclared` | `RootCSS().String()` contains `--rail-narrow` and `--rail-wide`. |
-| `TestDeviceStringRoundTrip` | Each of the three constants has a non-`"Unknown"` `String()`. |
-
-Existing `TestNoUndeclaredTokensInEmittedCSS` and `TestComposedTokensAreDeclared` must stay
-green — that is the check that catches a forgotten `declare()`.
+- `docs/SPECS.md`: la tabla de §2.1 como aserción de test, la salida exacta para
+  `Declare("Roboto","x")` con prefijo `/assets`, y la nota de que `FontFaces` no forma
+  parte de `RootCSS()`/`RenderCSS()`.
+- `README.md`: una línea en la superficie pública. Es el quinto emisor de CSS junto a
+  `RootCSS`, `RenderCSS`, `Stylesheet` y `Raw`.
 
 ---
 
-## 5. Documentation (same commit as the code, before publishing)
+## 4. Verificación
 
-- **`docs/SPECS.md`** — new section `Device`: the three classes, their exact query strings
-  as a table, the partition guarantee, and the `var()`-in-`@media` prohibition from §1.2
-  stated as a rule. Add `--rail-narrow` / `--rail-wide` to the token table.
-- **`docs/ARCHITECTURE.md`** — one paragraph: why the breakpoint literal lives in Go and
-  not in a custom property, cross-referencing the `Bp*` tokens as the JS/container-query
-  counterpart.
-- **`docs/MIGRATION.md`** — new section "Upgrading to v0.4.0": purely additive, no consumer
-  changes required; `Device` is the sanctioned replacement for any hand-written `@media`
-  string in `widget/style` and in components.
-- **`README.md`** — must index every file in `docs/`. Verify nothing is missing.
-
-Everything in English. Diagrams `flowchart TD`, no `subgraph`, `<br/>` for line breaks.
-
----
-
-## 6. Explicit non-goals — do NOT do these
-
-- Do **not** export `media`, `rule`, `root`, `keyframes` or any other lowercase DSL helper.
-  The chassis is being rebuilt on `widget/style`, not on a reopened `css` DSL.
-- Do **not** delete `BpSm`/`BpMd`/`BpLg`/`BpXl`.
-- Do **not** delete or export the unexported `mediaDesktop` helper. It stays unexported and
-  unused; `widget/style` will use `Device` instead. (A later plan removes it once no
-  internal caller remains — not this one.)
-- Do **not** add an orientation or `hover:` condition to `Device.Query()`. Width-based
-  classes are testable for exhaustivity; capability-based ones are not, and the old
-  `(orientation: landscape) and (hover: hover)` query matched most tablets as "desktop",
-  which is one of the reasons the chassis broke.
-- Do **not** touch the colour tokens, the `light-dark()` machinery, or `Hover/Focus/Press`.
+1. `FontFaces(font.Declare("Roboto", ""), "/assets")` emite **cuatro** bloques, uno por
+   cara, con las URLs `/assets/Roboto-Regular.ttf`, `-Bold`, `-Italic`, `-BoldItalic`.
+2. Los cuatro declaran `format("truetype")` y `font-display:swap`.
+3. Peso y estilo coinciden con la tabla de §2.1, cara por cara.
+4. El prefijo se une sin barra doble ni barra ausente: `"/assets"`, `"/assets/"` y `""`
+   producen URLs válidas.
+5. Una familia vacía (`Declare("", …)`, que `font` permite construir) no emite reglas
+   rotas: o no emite nada, o la ausencia se ve. Decidirlo y afirmarlo en el test.
+6. El paquete sigue siendo build-time-only: `TestPackageIsBuildTimeOnly`
+   (`tokens_test.go`) sigue verde y el archivo nuevo lleva `//go:build !wasm`.
+7. Ningún `map[` en el código nuevo.
+8. `gotest`.
 
 ---
 
-## 7. Acceptance criteria
+## 5. Lo que este plan NO hace
 
-1. `gotest` green in this repo.
-2. `grep -rn "@media" --include=*.go .` shows media-query strings **only** in `device.go`
-   and the pre-existing unexported `media*` helpers in `dsl.go`.
-3. `grep -rn "var(--bp-" --include=*.go .` → empty.
-4. `RootCSS().String()` contains `--rail-narrow:3.5rem` and `--rail-wide:12rem`.
-5. The exported surface added is exactly: `Device`, `Mobile`, `Tablet`, `Desktop`,
-   `(Device).String`, `(Device).Query`, `Query`, `RailNarrow`, `RailWide`. Nothing else.
-6. `GOOS=js GOARCH=wasm go list -deps ./...` — this package must remain absent from any
-   WASM dependency graph (unchanged behaviour; just confirm the guard test still passes).
-
----
-
-## 8. Stages
-
-| # | Stage | Files | Gate |
-|---|---|---|---|
-| 1 | `Device` type, `Query` join | `device.go` (new) | — |
-| 2 | Rail width tokens | `catalog.go`, `css.go` | — |
-| 3 | Tests | `device_test.go` (new) | blocks 4 |
-| 4 | Docs | `docs/SPECS.md`, `docs/ARCHITECTURE.md`, `docs/MIGRATION.md`, `README.md` | — |
-
-Stages 1 and 2 are independent and may be done in either order. Stage 3 must pass before
-stage 4 is written.
-
-**Downstream:** `tinywasm/widget` consumes this release
-(https://github.com/tinywasm/widget/blob/main/docs/PLAN.md), and `tinywasm/layout` consumes
-that one (https://github.com/tinywasm/layout/blob/main/docs/PLAN.md). Neither can start
-until this release is published.
+- **No copia archivos ni conoce `OutputDir`.** Eso es de `assetmin`
+  (`assetmin/docs/PLAN.md`), que llamará a esta función con su prefijo.
+- **No mete el `@font-face` en `RootCSS()`.** `RootCSS()` sale por la extracción de `ssr`
+  y no sabe nada de URLs de assets.
+- **No toca `FontStack` ni el token `FontSans`.** Ya funcionan y resuelven otra mitad del
+  problema: ésta declara la fuente, aquélla la pide.

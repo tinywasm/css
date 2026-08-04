@@ -3,45 +3,11 @@
 package css
 
 import (
-	"math"
-	"strconv"
 	"strings"
 	"testing"
+
+	twcolor "github.com/tinywasm/color"
 )
-
-func parseHex(hex string) (r, g, b float64) {
-	hex = strings.TrimPrefix(hex, "#")
-	if len(hex) == 3 {
-		hex = string([]byte{hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]})
-	}
-	if len(hex) != 6 {
-		return 0, 0, 0
-	}
-	ri, _ := strconv.ParseUint(hex[0:2], 16, 32)
-	gi, _ := strconv.ParseUint(hex[2:4], 16, 32)
-	bi, _ := strconv.ParseUint(hex[4:6], 16, 32)
-	return float64(ri) / 255.0, float64(gi) / 255.0, float64(bi) / 255.0
-}
-
-func relativeLuminance(hex string) float64 {
-	r, g, b := parseHex(hex)
-	c := func(v float64) float64 {
-		if v <= 0.03928 {
-			return v / 12.92
-		}
-		return math.Pow((v+0.055)/1.055, 2.4)
-	}
-	return 0.2126*c(r) + 0.7152*c(g) + 0.0722*c(b)
-}
-
-func contrastRatio(hex1, hex2 string) float64 {
-	l1 := relativeLuminance(hex1)
-	l2 := relativeLuminance(hex2)
-	if l1 < l2 {
-		l1, l2 = l2, l1
-	}
-	return (l1 + 0.05) / (l2 + 0.05)
-}
 
 // resolveColor resolves a color fallback value which might be a CSS light-dark() function.
 // For example, resolveColor("light-dark(#FFFFFF, #0D1117)", true) returns "#0D1117".
@@ -65,7 +31,7 @@ func TestContrastRatios(t *testing.T) {
 		// Test Light mode contrast
 		bgLight := resolveColor(tc.Bg.GetFallback(), false)
 		fgLight := resolveColor(tc.Fg.GetFallback(), false)
-		ratioLight := contrastRatio(bgLight, fgLight)
+		ratioLight := twcolor.Contrast(twcolor.Color(bgLight), twcolor.Color(fgLight))
 		if ratioLight < tc.Min {
 			t.Errorf("Pair %s (Light Mode) (Bg: %s %s, Fg: %s %s) has contrast ratio %.2f:1, expected >= %.2f:1",
 				tc.Name, tc.Bg.GetName(), bgLight, tc.Fg.GetName(), fgLight, ratioLight, tc.Min)
@@ -76,7 +42,7 @@ func TestContrastRatios(t *testing.T) {
 		// Test Dark mode contrast
 		bgDark := resolveColor(tc.Bg.GetFallback(), true)
 		fgDark := resolveColor(tc.Fg.GetFallback(), true)
-		ratioDark := contrastRatio(bgDark, fgDark)
+		ratioDark := twcolor.Contrast(twcolor.Color(bgDark), twcolor.Color(fgDark))
 		if ratioDark < tc.Min {
 			t.Errorf("Pair %s (Dark Mode) (Bg: %s %s, Fg: %s %s) has contrast ratio %.2f:1, expected >= %.2f:1",
 				tc.Name, tc.Bg.GetName(), bgDark, tc.Fg.GetName(), fgDark, ratioDark, tc.Min)

@@ -76,6 +76,7 @@ Theme adaptation (Light/Dark mode) is computed natively in the browser using the
 - `RadiusFull` (`--radius-full`): `9999px`
 
 ### Typography Scale
+- `FontSans` (`--font-sans`): `"Roboto", system-ui, -apple-system, sans-serif`
 - `TextXs` (`--text-xs`): `0.75rem`
 - `TextSm` (`--text-sm`): `0.875rem`
 - `TextBase` (`--text-base`): `1rem`

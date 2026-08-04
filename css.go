@@ -2,6 +2,13 @@
 
 package css
 
+import "github.com/tinywasm/font"
+
+// FontStack returns a CSS font family stack starting with the given font family.
+func FontStack(family font.Family) string {
+	return `"` + string(family) + `", system-ui, -apple-system, sans-serif`
+}
+
 func RootCSS() *Stylesheet {
 	items := append([]item{brandRoot()}, defaultRoots()...)
 	return NewStylesheet(items...)

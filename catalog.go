@@ -25,6 +25,7 @@ var (
 	ColorSelection     = Token{Name: "--color-selection", Dark: "color-mix(in oklab, var(--color-primary), transparent 85%)"}
 	ColorOnSelection   = Token{Name: "--color-on-selection", Dark: "var(--color-on-surface)"}
 
+	FontSans = Token{Name: "--font-sans", Dark: `"Roboto", system-ui, -apple-system, sans-serif`}
 	TextXs   = Token{Name: "--text-xs", Dark: "0.75rem"}
 	TextSm   = Token{Name: "--text-sm", Dark: "0.875rem"}
 	TextBase = Token{Name: "--text-base", Dark: "1rem"}

@@ -55,6 +55,7 @@ func defaultRoots() []item {
 		),
 		root(
 			// Typography
+			declare(FontSans),
 			declare(LeadingNormal),
 			declare(FontWeightRegular),
 			declare(FontWeightMedium),

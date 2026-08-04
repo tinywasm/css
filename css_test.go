@@ -56,6 +56,59 @@ func TestRenderCSS_SitsInTheLowestLayer(t *testing.T) {
 	}
 }
 
+// The reset's job is that a part's own rules land on the same box in every
+// engine. Each case below is a place where two shipping browsers disagree
+// unless the reset says otherwise, so each is a guard, not coverage.
+func TestRenderCSS_NormalizesCrossBrowserDefaults(t *testing.T) {
+	got := RenderCSS().String()
+	for _, c := range []struct{ rule, why string }{
+		{"-webkit-tap-highlight-color: transparent",
+			"iOS paints a grey wash over anything tapped; Chrome Android uses another colour"},
+		{"appearance: none",
+			"iOS renders <button> as push-button chrome that outranks a part's background and radius"},
+		{"background-image: none",
+			"iOS gives <button> a vertical gradient no part asked for"},
+		{"text-transform: none",
+			"Firefox and Edge let <select> inherit text-transform; other engines do not"},
+		{"opacity: 1",
+			"Firefox ships ::placeholder at opacity 0.54"},
+		{"font-size: 1em",
+			"every engine renders the monospace default about 3px smaller"},
+	} {
+		if !strings.Contains(got, c.rule) {
+			t.Errorf("reset missing %q — %s", c.rule, c.why)
+		}
+	}
+}
+
+// appearance: none erases a checkbox and a radio instead of flattening them:
+// the control disappears rather than losing its chrome. The text-field rule
+// must keep both out.
+func TestRenderCSS_LeavesCheckboxAndRadioNative(t *testing.T) {
+	got := RenderCSS().String()
+	if !strings.Contains(got, `input:where(:not([type="checkbox"]):not([type="radio"]))`) {
+		t.Errorf("the text-field appearance reset must exclude checkbox and radio\nGot:\n%s", got)
+	}
+}
+
+// Author styles outrank the UA stylesheet whatever their layer, so
+// `img, svg, video { display: block }` defeats the UA's own [hidden] rule
+// unless the reset restates it.
+func TestRenderCSS_KeepsHiddenAttributeWorking(t *testing.T) {
+	got := RenderCSS().String()
+	img := strings.Index(got, "img, svg, video")
+	hidden := strings.Index(got, "[hidden]")
+	if hidden == -1 {
+		t.Fatalf("reset must restate [hidden] { display: none }\nGot:\n%s", got)
+	}
+	if img == -1 {
+		t.Fatalf("expected the replaced-element rule to be present\nGot:\n%s", got)
+	}
+	if hidden < img {
+		t.Errorf("[hidden] must come after the img/svg/video rule it defends against")
+	}
+}
+
 func TestGoldenEquivalence(t *testing.T) {
 	// RootCSS golden test (partial, checking key values are present)
 	root := RootCSS().String()

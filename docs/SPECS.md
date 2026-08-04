@@ -149,6 +149,29 @@ It configures standard `color-scheme` rules on `:root`, `[data-theme="light"]`, 
 }
 ```
 
+#### Cross-browser normalization guarantees
+
+Beyond the box-model and user-agent-margin resets, `RenderCSS()` closes the points where
+two shipping engines disagree, so a part's own rules land on the same box everywhere:
+
+| Rule | Divergence it closes |
+|---|---|
+| `-webkit-tap-highlight-color: transparent` on `html` | iOS washes tapped elements in grey; Chrome Android uses another colour and duration |
+| `appearance/background/border/radius` zeroed on `button, [type=button|reset|submit]` | iOS renders buttons as `push-button` chrome — its own radius, gradient and border — that outranks a part's declarations |
+| `appearance: none; border-radius: 0` on text fields | iOS forces an inset shadow and its own corner radius on inputs |
+| `text-transform: none` on `select` | Firefox and Edge let `<select>` inherit `text-transform`; other engines do not |
+| `opacity: 1` on `::placeholder` | Firefox ships placeholders at `0.54` |
+| `font-family: monospace; font-size: 1em` on `code, kbd, samp, pre` | every engine renders the `monospace` default ~3px smaller |
+| `[hidden] { display: none }` | author styles outrank the UA stylesheet whatever their layer, so the `img, svg, video { display: block }` rule would otherwise defeat the `hidden` attribute |
+
+Checkbox and radio are deliberately excluded from the text-field rule via `:where()`:
+`appearance: none` erases those controls rather than flattening them, and their styling
+belongs to `tinywasm/form`.
+
+Two divergences are **out of scope for any reset**: `system-ui` resolves to different
+typefaces per platform (SF Pro vs Roboto) with different metrics, and native control
+chrome (`<select>` dropdowns, date and file pickers) is owned by the OS.
+
 ---
 
 ## 5. Overriding & Theme Customization

@@ -103,7 +103,9 @@ alone = static value.
 1. Literal in `catalog.go`, in its group. Naming follows the existing prefixes
    (`--color-*`, `--space-*`, `--text-*`, `--radius-*`, `--mix-*`); a foreground is
    `ColorOn<Role>` paired with `Color<Role>`.
-2. `declare()` it in the matching `root(...)` group of `RootCSS()`.
+2. `declare()` it in the matching `root(...)` group: brand identity colors go in
+   `brandRoot()` (`css.brand.go`), every other scale in `defaultRoots()` (`css.default.go`).
+   `RootCSS()` (`css.go`) only composes the two.
 3. Add it to `allTokens` in `css_test.go` — `TestNoUndeclaredTokensInEmittedCSS` validates
    emitted CSS against that hardcoded list and fails otherwise.
 4. If it is a surface pair with literal values, add it to `AllPairs()`; if its value is

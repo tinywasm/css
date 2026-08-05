@@ -86,3 +86,27 @@ func Query(devices ...Device) string {
 
 	return b.String()
 }
+
+// Capability is a media condition that is not a viewport class. Unlike Device,
+// it is not a partition of widths: a device satisfies it or not regardless of
+// its size, and several capabilities can hold at once.
+type Capability uint8
+
+const (
+	// FinePointer is the hover capability: the primary input can hover. A
+	// touch tap fires `:hover` and synthetic mouse events, so CSS hover
+	// reveals must be gated on this query — `@media (hover: hover)` — or they
+	// misfire on phones.
+	FinePointer Capability = iota
+)
+
+// Query returns the media-query condition for this capability, without the
+// leading "@media ".
+func (c Capability) Query() string {
+	switch c {
+	case FinePointer:
+		return "(hover: hover)"
+	default:
+		return ""
+	}
+}

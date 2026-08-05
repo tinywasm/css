@@ -211,3 +211,14 @@ func TestQueryAllReturnsThree(t *testing.T) {
 		t.Errorf("Query(all) has %d parts, want 3: %q", len(parts), got)
 	}
 }
+
+func TestHoverCapabilityQuery(t *testing.T) {
+	// The fine-pointer gate: hover reveals are scoped on this condition because
+	// a touch tap fires `:hover` and synthetic mouse events but never this.
+	if got := FinePointer.Query(); got != "(hover: hover)" {
+		t.Errorf("FinePointer.Query() = %q, want \"(hover: hover)\"", got)
+	}
+	if got := Capability(99).Query(); got != "" {
+		t.Errorf("unknown capability Query() = %q, want empty", got)
+	}
+}

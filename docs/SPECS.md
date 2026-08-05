@@ -102,6 +102,39 @@ These are declared in `:root` for discoverability and can be overridden with
 - `RailNarrow` (`--rail-narrow`): `3.5rem` — icon-only sidebar column
 - `RailWide` (`--rail-wide`): `12rem` — icon + label sidebar column
 
+### Device Geometry
+
+Static tokens (`Dark` alone). Components write `var(--safe-top)` / `var(--viewport-h)`;
+they never write a bare `env(...)` or `100vh`.
+
+| Token | CSS Property | Value | Purpose |
+|---|---|---|---|
+| `SafeTop` | `--safe-top` | `env(safe-area-inset-top, 0px)` | Notch / Dynamic Island inset |
+| `SafeRight` | `--safe-right` | `env(safe-area-inset-right, 0px)` | Right safe-area inset |
+| `SafeBottom` | `--safe-bottom` | `env(safe-area-inset-bottom, 0px)` | Home-indicator / gesture bar inset |
+| `SafeLeft` | `--safe-left` | `env(safe-area-inset-left, 0px)` | Left safe-area inset |
+| `ViewportH` | `--viewport-h` | `100dvh` | Visible viewport height (shrinks with Safari iOS URL bar) |
+
+`env()` returns `0px` on devices without insets. Visible effect also requires
+`<meta name="viewport" content="…, viewport-fit=cover">` from `tinywasm/html` /
+`tinywasm/assetmin` — not emitted here.
+
+`dvh` is older than this library's baseline (`light-dark()`, `color-mix()`), so no
+`@supports` guard is emitted.
+
+**Where to apply:** `RootCSS()` is vocabulary only. Padding a header with
+`var(--safe-top)` or sizing a shell with `var(--viewport-h)` is a layout decision
+owned by `tinywasm/layout` / `tinywasm/widget/style`.
+
+### Form control text size (usage constraint, not a reset rule)
+
+A form control must not carry a text size below `TextBase` (`1rem` / 16px) on
+touch devices: iOS Safari zooms on focus when the computed `font-size` is under
+16px. The reset cannot enforce this — `RenderCSS()` sits in `@layer tokens`, so
+any `@layer widgets` rule wins by layer order. The constraint lives in
+`tinywasm/widget/style`; runtime detection is `browser_audit_mobile` in
+`tinywasm/devbrowser`.
+
 ---
 
 ## 4. API Surface & Asset Generation

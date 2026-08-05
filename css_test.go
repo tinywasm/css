@@ -225,6 +225,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		ColumnNarrow, ColumnMedium, ColumnWide,
 		RailNarrow, RailWide,
 		ControlHeight, ChipWidth, VeilBlur,
+		SafeTop, SafeRight, SafeBottom, SafeLeft, ViewportH,
 	}
 	for _, tok := range allTokens {
 		knownTokens[tok.GetName()] = true
@@ -253,5 +254,69 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 			t.Errorf("Undeclared token found in emitted CSS: %s", propName)
 		}
 		idx = endIdx
+	}
+}
+
+func TestRootCSS_ContainsDeviceGeometryTokens(t *testing.T) {
+	got := RootCSS().String()
+	for _, decl := range []string{
+		"--safe-top: env(safe-area-inset-top, 0px)",
+		"--safe-right: env(safe-area-inset-right, 0px)",
+		"--safe-bottom: env(safe-area-inset-bottom, 0px)",
+		"--safe-left: env(safe-area-inset-left, 0px)",
+		"--viewport-h: 100dvh",
+	} {
+		if !strings.Contains(got, decl) {
+			t.Errorf("RootCSS missing device geometry declaration %q\nGot:\n%s", decl, got)
+		}
+	}
+}
+
+// An env() without a fallback invalidates the whole declaration in any browser
+// that does not know the variable — a silent failure. Every emitted env() must
+// carry its second argument.
+func TestRootCSS_EveryEnvHasFallback(t *testing.T) {
+	got := RootCSS().String()
+	idx := 0
+	for {
+		start := strings.Index(got[idx:], "env(")
+		if start == -1 {
+			break
+		}
+		startIdx := idx + start
+		// Find matching close paren for this env( call.
+		depth := 0
+		endIdx := -1
+		for i := startIdx + 3; i < len(got); i++ {
+			switch got[i] {
+			case '(':
+				depth++
+			case ')':
+				depth--
+				if depth == 0 {
+					endIdx = i
+				}
+			}
+			if endIdx != -1 {
+				break
+			}
+		}
+		if endIdx == -1 {
+			t.Fatalf("unclosed env( starting at %d in RootCSS output", startIdx)
+		}
+		call := got[startIdx : endIdx+1]
+		// env(name, fallback) must contain a comma separating name from fallback.
+		inner := call[len("env(") : len(call)-1]
+		if !strings.Contains(inner, ",") {
+			t.Errorf("env() without fallback (silent invalidation risk): %s", call)
+		}
+		idx = endIdx + 1
+	}
+}
+
+func TestViewportH_Var(t *testing.T) {
+	got := ViewportH.Var()
+	if got != "var(--viewport-h,100dvh)" {
+		t.Errorf("ViewportH.Var() = %q, want %q", got, "var(--viewport-h,100dvh)")
 	}
 }

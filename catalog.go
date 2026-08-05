@@ -105,6 +105,14 @@ var (
 	MixHover = Token{Name: "--mix-hover", Dark: "15%"}
 	MixFocus = Token{Name: "--mix-focus", Dark: "30%"}
 	MixPress = Token{Name: "--mix-press", Dark: "45%"}
+
+	// Device geometry — insets reported by the device, and the viewport
+	// height that shrinks with Safari iOS' collapsing URL bar.
+	SafeTop    = Token{Name: "--safe-top", Dark: "env(safe-area-inset-top, 0px)"}
+	SafeRight  = Token{Name: "--safe-right", Dark: "env(safe-area-inset-right, 0px)"}
+	SafeBottom = Token{Name: "--safe-bottom", Dark: "env(safe-area-inset-bottom, 0px)"}
+	SafeLeft   = Token{Name: "--safe-left", Dark: "env(safe-area-inset-left, 0px)"}
+	ViewportH  = Token{Name: "--viewport-h", Dark: "100dvh"}
 )
 
 var (

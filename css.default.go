@@ -107,5 +107,14 @@ func defaultRoots() []item {
 			declare(ChipWidth),
 			declare(VeilBlur),
 		),
+		root(
+			// Device geometry — insets reported by the device, and the viewport
+			// height that shrinks with Safari iOS' collapsing URL bar.
+			declare(SafeTop),
+			declare(SafeRight),
+			declare(SafeBottom),
+			declare(SafeLeft),
+			declare(ViewportH),
+		),
 	}
 }

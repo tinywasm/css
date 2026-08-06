@@ -10,11 +10,35 @@ import (
 
 var composedTokens = []Token{ColorSurfaceSunken, ColorSelection, ColorOnSelection}
 
-// A fallback that composes other variables must not re-state their values.
-func TestComposedTokensContainNoHex(t *testing.T) {
+// A composed token's fallback is read as an ARGUMENT inside another
+// color-mix()/light-dark() call (see catalog.go's own construction, and
+// css.go's mixToward) or, via declare(), as a declaration's own top-level
+// :root value — either way it must contain NO var() anywhere.
+//
+// This inverts what this test checked before EnhancedVar/NestedEnhanced
+// existed (composed tokens used to read other tokens live, via
+// "var(--color-surface)"). The reason is a CSS Custom Properties rule that
+// is easy to miss: ANY var() anywhere in a declaration's value — even one
+// that would itself always resolve to something valid — defers validity
+// checking for the WHOLE declaration to computed-value time. A browser that
+// can't parse the outer color-mix()/light-dark() then falls to the
+// property's initial value instead of an earlier sibling declaration,
+// exactly the bug the double-declaration Safari-legacy fallback exists to
+// avoid (see docs/PLAN or the git history around the iPhone-7-all-blue
+// investigation). Confirmed empirically, not just by spec reading: a
+// minimal repro with the unsupported function's arguments as var()
+// references reproduces the failure; the same repro with plain literals
+// does not.
+//
+// The real cost: an app's Theme(Set(...))/SetTheme() does not reach these
+// three tokens' Dark — only republishing this package's catalog defaults
+// does. Accepted, since dark/light switching for THESE composed derivations
+// only matters on browsers new enough to have color-mix() in the first
+// place.
+func TestComposedTokensContainNoVar(t *testing.T) {
 	for _, tok := range composedTokens {
-		if strings.Contains(tok.GetFallback(), "#") {
-			t.Errorf("%s hardcodes a hex inside a composed fallback: %s", tok.Name, tok.GetFallback())
+		if strings.Contains(tok.GetFallback(), "var(") {
+			t.Errorf("%s must contain no var() anywhere — it is read as an argument inside an outer color-mix()/light-dark() call, and any var() there defers the WHOLE declaration to computed-value time, breaking the legacy-Safari fallback: %s", tok.Name, tok.GetFallback())
 		}
 	}
 }
@@ -43,10 +67,15 @@ func TestInteractionDerivationIsThemeAware(t *testing.T) {
 	}
 }
 
-// The intensity must stay a live var() so an app can retune it with
-// Theme(Set(MixHover, ...)) — a baked percentage is only changeable by
-// republishing this package and regenerating every consumer's stylesheet.
-func TestInteractionIntensityIsOverridable(t *testing.T) {
+// Hover/Focus/Press must bake their intensity as a literal, not a live
+// var() reference to --mix-hover/-focus/-press — see
+// TestComposedTokensContainNoVar for why: mixToward's whole point is a
+// color-mix() call a legacy browser can't parse, and ANY var() anywhere in
+// that declaration (even to MixHover, an always-safe static token) would
+// defer the WHOLE thing to computed-value time and break the fallback. Cost
+// accepted: Theme(Set(MixHover, ...)) does not retune these three — only
+// republishing this package's catalog default does.
+func TestInteractionIntensityIsLiteral(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		got  string
@@ -56,8 +85,11 @@ func TestInteractionIntensityIsOverridable(t *testing.T) {
 		{"Focus", Focus(ColorPrimary), MixFocus},
 		{"Press", Press(ColorPrimary), MixPress},
 	} {
-		if !strings.Contains(c.got, c.tok.Var()) {
-			t.Errorf("%s bakes its intensity instead of referencing %s: %s", c.name, c.tok.Name, c.got)
+		if strings.Contains(c.got, "var(") {
+			t.Errorf("%s must contain no var() anywhere: %s", c.name, c.got)
+		}
+		if !strings.Contains(c.got, c.tok.Dark) {
+			t.Errorf("%s must bake %s's literal intensity (%s): %s", c.name, c.tok.Name, c.tok.Dark, c.got)
 		}
 	}
 }

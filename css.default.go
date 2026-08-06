@@ -2,24 +2,35 @@
 
 package css
 
+// themeGroupDecls declares the adaptive theme colors plus, for every theme
+// pair among them, the plain light/dark halves declareSplit needs — see
+// Token.EnhancedVar for why widget/style reads those instead of the
+// light-dark()-valued properties declared here.
+func themeGroupDecls() []decl {
+	decls := []decl{
+		declare(ColorBackground),
+		declare(ColorOnBackground),
+		declare(ColorSurface),
+		declare(ColorOnSurface),
+		declare(ColorOutline),
+		declare(ColorMuted),
+		declare(ColorSurfaceSunken),
+		declare(ColorSelection),
+		declare(ColorOnSelection),
+	}
+	for _, t := range []Token{ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted} {
+		decls = append(decls, declareSplit(t)...)
+	}
+	return decls
+}
+
 // defaultRoots declares every token group that is not brand identity: the
 // adaptive theme surface colors plus the typography, spacing, radius,
 // shadow, motion, z-index, breakpoint, and layout scales. These are the
 // tokens an app inherits as-is; only brandRoot() is meant to be reskinned.
 func defaultRoots() []item {
 	return []item{
-		root(
-			// Theme group — Adaptive layout colors using CSS light-dark() fallbacks.
-			declare(ColorBackground),
-			declare(ColorOnBackground),
-			declare(ColorSurface),
-			declare(ColorOnSurface),
-			declare(ColorOutline),
-			declare(ColorMuted),
-			declare(ColorSurfaceSunken),
-			declare(ColorSelection),
-			declare(ColorOnSelection),
-		),
+		root(themeGroupDecls()...),
 		root(
 			// Interaction intensities
 			declare(MixHover),

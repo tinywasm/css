@@ -7,8 +7,17 @@ package css
 // For theme tokens, Light and Dark hold the light/dark pair and Var/GetFallback
 // generate light-dark(Light, Dark) automatically.
 type Token struct {
-	Name       string
+	Name        string
 	Light, Dark string // Dark solo = static fallback; ambos = light-dark pair
+
+	// LightStatic overrides LightValue() for a token whose Dark (or Light)
+	// holds a live expression — color-mix(...) or var(--other-token) — that a
+	// browser without color-mix()/light-dark() support cannot evaluate.
+	// Leave empty for every plain-hex token: LightValue() derives it
+	// automatically from Light (or Dark). Only the handful of composed color
+	// tokens in catalog.go need to set this, precomputed via color.Mix at
+	// package-init time.
+	LightStatic string
 }
 
 // Var returns the CSS variable expression for the token, including its default fallback.
@@ -33,6 +42,93 @@ func (t Token) fallback() string {
 		return t.Dark
 	}
 	return "light-dark(" + t.Light + ", " + t.Dark + ")"
+}
+
+// LightValue returns the token's browser-safe static value: no light-dark()
+// or color-mix() involved, ever. A browser that can't evaluate those (Safari
+// < 17.5 / < 16.2 — iOS 15-era Safari on older hardware, among others) gets
+// this value permanently, regardless of system or app theme — the light
+// theme, never dark. Callers emit it as the first of a double declaration,
+// immediately followed by EnhancedVar(), never Var() — see EnhancedVar for
+// why that distinction is load-bearing.
+func (t Token) LightValue() string {
+	if t.LightStatic != "" {
+		return t.LightStatic
+	}
+	if t.Light != "" {
+		return t.Light
+	}
+	return t.Dark
+}
+
+// LightVarName and DarkVarName are the custom-property names of a theme
+// token's plain, browser-safe halves — declared separately from Name itself
+// (see declareSplit in dsl.go). Not used by EnhancedVar/NestedEnhanced below
+// (see their comments for why a var() reference, even to one of these
+// always-valid halves, is not safe inside a light-dark()/color-mix() call);
+// they exist as public custom properties for an app's OWN CSS to build the
+// same double-declaration pattern against. Only meaningful for a theme token
+// (Light != "") — a static token has no light/dark split to name.
+func (t Token) LightVarName() string { return t.Name + "-light" }
+func (t Token) DarkVarName() string  { return t.Name + "-dark" }
+
+// EnhancedVar returns the value used as the SECOND half of a double
+// declaration when the token is the declaration's ENTIRE top-level value
+// (e.g. `background-color: <this>;`) — see NestedEnhanced for the
+// alternative required when it is instead one ARGUMENT inside another
+// light-dark()/color-mix() call.
+//
+// For a theme token this must never be Var(): Var() wraps the value in
+// var(t.Name, ...), and t.Name's OWN registered :root value (see declare()
+// in dsl.go) is exactly the light-dark()/color-mix() expression a legacy
+// browser cannot compute. Reaching it through var() makes the declaration
+// invalid at COMPUTED-value time — which, per the CSS Custom Properties
+// cascade, does NOT fall back to an earlier sibling declaration for the
+// same property; it falls to the property's initial value instead
+// (transparent, for a color), silently discarding whatever static
+// declaration a caller put before it. So this is 100% literal — baked from
+// the catalog's default Light/Dark at Go build time, with NO var() anywhere
+// in it, so the unsupported function is the first thing a legacy browser's
+// parser sees, invalid at PARSE time — which DOES correctly leave an
+// earlier sibling declaration standing. A real, accepted cost: an app's
+// Theme(Set(...))/SetTheme() therefore does not reach this specific
+// declaration (it still reaches Var() and the -light/-dark properties
+// above, used everywhere else in this package).
+//
+// For a static token there is nothing to protect — Var() was never wrapped
+// in light-dark()/color-mix(), so it stays live and override-able.
+func (t Token) EnhancedVar() string {
+	if t.Light != "" {
+		return "light-dark(" + t.Light + "," + t.Dark + ")"
+	}
+	if t.LightStatic != "" {
+		return t.Dark
+	}
+	return t.Var()
+}
+
+// NestedEnhanced is EnhancedVar's counterpart for a token used as one
+// ARGUMENT inside another light-dark()/color-mix() call (see catalog.go's
+// composed tokens, and css.go's mixToward) rather than as a declaration's
+// own top-level value.
+//
+// The distinction matters because the "any var() anywhere defers validity
+// to computed-value time" rule (see EnhancedVar) applies to the OUTER
+// declaration as a whole, not just to the specific sub-expression that
+// contains it: a static token's Var() is completely safe used on its own
+// (EnhancedVar returns it, correctly, for exactly that reason) but the
+// moment that SAME var() call sits inside an outer color-mix()/light-dark()
+// that a legacy browser cannot parse, its mere presence defers the ENTIRE
+// containing declaration to computed-value time too — even though the
+// nested var() would itself have resolved just fine. That silently turns
+// the outer function's parse-time failure into the same
+// falls-to-initial-value bug EnhancedVar exists to avoid. NestedEnhanced
+// closes that gap by never using var(), for any token kind.
+func (t Token) NestedEnhanced() string {
+	if t.Light != "" {
+		return "light-dark(" + t.Light + "," + t.Dark + ")"
+	}
+	return t.Dark
 }
 
 // Pair represents a complete surface decision: background and foreground colors coupled.

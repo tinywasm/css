@@ -388,3 +388,18 @@ func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssV
 func declare(t Token) decl {
 	return decl{t.Name, t.GetFallback()}
 }
+
+// declareSplit declares a theme token's plain, browser-safe light/dark
+// halves — see Token.EnhancedVar for why these exist as their own custom
+// properties instead of being read out of t.Name. Returns nil for a token
+// with no light/dark pair (Light == "") — a static token has nothing to
+// split.
+func declareSplit(t Token) []decl {
+	if t.Light == "" {
+		return nil
+	}
+	return []decl{
+		{t.LightVarName(), t.Light},
+		{t.DarkVarName(), t.Dark},
+	}
+}

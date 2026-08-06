@@ -21,9 +21,24 @@ var (
 
 	// Computed semantic tokens — derived from live var() references, no hex drift.
 
-	ColorSurfaceSunken = Token{Name: "--color-surface-sunken", Dark: "color-mix(in oklab, var(--color-surface), var(--color-on-surface) 8%)"}
-	ColorSelection     = Token{Name: "--color-selection", Dark: "color-mix(in oklab, var(--color-primary), transparent 85%)"}
-	ColorOnSelection   = Token{Name: "--color-on-selection", Dark: "var(--color-on-surface)"}
+	// LightStatic: these three hold live var()/color-mix() expressions a
+	// browser without color-mix() (Safari < 16.2) can't evaluate, so — unlike
+	// every plain-hex token above, whose LightValue() derives automatically —
+	// they need a precomputed static fallback. Computed once, from the
+	// catalog's own default Light values: an app that overrides ColorSurface/
+	// ColorPrimary via Theme(Set(...)) does not retroactively change this
+	// literal — an accepted gap for the legacy-browser tier only.
+	//
+	// Dark is built from the constituent tokens' NestedEnhanced(), NOT
+	// EnhancedVar() and NOT a raw "var(--color-surface)" string: this Dark
+	// string becomes an ARGUMENT inside the outer color-mix() here, and
+	// NestedEnhanced() is the one guaranteed to contain no var() anywhere —
+	// see its doc comment in tokens.go for why even a var() to an
+	// always-safe property poisons an outer color-mix()/light-dark() that a
+	// legacy browser can't parse.
+	ColorSurfaceSunken = Token{Name: "--color-surface-sunken", Dark: "color-mix(in oklab, " + ColorSurface.NestedEnhanced() + ", " + ColorOnSurface.NestedEnhanced() + " 8%)", LightStatic: staticMix(ColorSurface.Light, ColorOnSurface.Light, 0.08)}
+	ColorSelection     = Token{Name: "--color-selection", Dark: "color-mix(in oklab, " + ColorPrimary.NestedEnhanced() + ", transparent 85%)", LightStatic: FadeStatic(ColorPrimary, 0.85)}
+	ColorOnSelection   = Token{Name: "--color-on-selection", Dark: ColorOnSurface.NestedEnhanced(), LightStatic: ColorOnSurface.Light}
 
 	FontSans = Token{Name: "--font-sans", Dark: `"Roboto", system-ui, -apple-system, sans-serif`}
 	TextXs   = Token{Name: "--text-xs", Dark: "0.75rem"}

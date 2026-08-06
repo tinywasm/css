@@ -230,6 +230,12 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	for _, tok := range allTokens {
 		knownTokens[tok.GetName()] = true
 	}
+	// Every theme pair also declares plain light/dark half properties (see
+	// declareSplit, Token.EnhancedVar) — legitimate, not drift.
+	for _, t := range []Token{ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted} {
+		knownTokens[t.LightVarName()] = true
+		knownTokens[t.DarkVarName()] = true
+	}
 
 	cssStr := RootCSS().String() + "\n" + RenderCSS().String()
 

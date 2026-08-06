@@ -40,6 +40,23 @@ var (
 	ColorSelection     = Token{Name: "--color-selection", Dark: "color-mix(in oklab, " + ColorPrimary.NestedEnhanced() + ", transparent 85%)", LightStatic: FadeStatic(ColorPrimary, 0.85)}
 	ColorOnSelection   = Token{Name: "--color-on-selection", Dark: ColorOnSurface.NestedEnhanced(), LightStatic: ColorOnSurface.Light}
 
+	// ColorAccentWash is Accent faded toward transparency, the same
+	// construction as ColorSelection but off ColorAccent instead of
+	// ColorPrimary: a light amber tint for a hover/preview state that must
+	// read as "leans toward the accent color" without claiming the solid
+	// Accent fill, which is reserved for an actual committed state (e.g.
+	// selection).
+	ColorAccentWash = Token{Name: "--color-accent-wash", Dark: "color-mix(in oklab, " + ColorAccent.NestedEnhanced() + ", transparent 85%)", LightStatic: FadeStatic(ColorAccent, 0.85)}
+
+	// ColorAccentHover is Accent faded only 30% toward transparency — a
+	// visibly softer amber than the fully committed Accent fill, but close
+	// enough in strength that ColorOnPrimary (white) still reads on it. A
+	// pairing like ColorAccentWash (85% faded, nearly the page background
+	// already) cannot carry a white icon at any faded strength that low;
+	// this token exists for callers that need "clearly not yet committed"
+	// AND "white icon" at once, which the 85% wash cannot deliver.
+	ColorAccentHover = Token{Name: "--color-accent-hover", Dark: "color-mix(in oklab, " + ColorAccent.NestedEnhanced() + ", transparent 30%)", LightStatic: FadeStatic(ColorAccent, 0.30)}
+
 	FontSans = Token{Name: "--font-sans", Dark: `"Roboto", system-ui, -apple-system, sans-serif`}
 	TextXs   = Token{Name: "--text-xs", Dark: "0.75rem"}
 	TextSm   = Token{Name: "--text-sm", Dark: "0.875rem"}

@@ -212,6 +212,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		ColorAccent, ColorOnAccent,
 		ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted,
 		ColorSurfaceSunken, ColorSelection, ColorOnSelection,
+		ColorAccentWash, ColorAccentHover,
 		MixHover, MixFocus, MixPress,
 		FontSans, TextXs, TextSm, TextBase, TextLg, TextXl, Text2xl,
 		LeadingNormal, FontWeightRegular, FontWeightMedium, FontWeightBold,

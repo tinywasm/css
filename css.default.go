@@ -17,6 +17,8 @@ func themeGroupDecls() []decl {
 		declare(ColorSurfaceSunken),
 		declare(ColorSelection),
 		declare(ColorOnSelection),
+		declare(ColorAccentWash),
+		declare(ColorAccentHover),
 	}
 	for _, t := range []Token{ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted} {
 		decls = append(decls, declareSplit(t)...)

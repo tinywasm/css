@@ -124,6 +124,14 @@ var (
 	// column of them lines up instead of each one hugging its own text.
 	ChipWidth = Token{Name: "--chip-width", Dark: "7rem"}
 
+	// The height every chip shares — a field's legend, a row's badge — so a
+	// chip is a box of KNOWN size instead of an emergent one. Without this the
+	// height comes from font-size × line-height and two chips only match by
+	// accident; with it, OnEdge can mount a chip over a border line with real
+	// margins instead of a transform, which is invisible to scroll-height
+	// measurement and reserves no layout space.
+	ChipHeight = Token{Name: "--chip-height", Dark: "1.25rem"}
+
 	// The height every interactive row shares — a list row, a form field —
 	// so the two read as the same rhythm instead of drifting apart.
 	ControlHeight = Token{Name: "--control-height", Dark: "3.125rem"}

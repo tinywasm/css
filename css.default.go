@@ -115,9 +115,10 @@ func defaultRoots() []item {
 			// Rail widths
 			declare(RailNarrow),
 			declare(RailWide),
-			// Shared control height and chip width
+			// Shared control height and chip size
 			declare(ControlHeight),
 			declare(ChipWidth),
+			declare(ChipHeight),
 			declare(VeilBlur),
 		),
 		root(

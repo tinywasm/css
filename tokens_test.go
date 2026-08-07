@@ -24,7 +24,7 @@ var composedTokens = []Token{ColorSurfaceSunken, ColorSelection, ColorOnSelectio
 // can't parse the outer color-mix()/light-dark() then falls to the
 // property's initial value instead of an earlier sibling declaration,
 // exactly the bug the double-declaration Safari-legacy fallback exists to
-// avoid (see docs/PLAN or the git history around the iPhone-7-all-blue
+// avoid (see the git history around the iPhone-7-all-blue
 // investigation). Confirmed empirically, not just by spec reading: a
 // minimal repro with the unsupported function's arguments as var()
 // references reproduces the failure; the same repro with plain literals

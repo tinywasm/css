@@ -102,6 +102,12 @@ These are declared in `:root` for discoverability and can be overridden with
 - `RailNarrow` (`--rail-narrow`): `3.5rem` — icon-only sidebar column
 - `RailWide` (`--rail-wide`): `12rem` — icon + label sidebar column
 
+### Chip Size
+
+| Token | CSS Property | Value | Purpose |
+|---|---|---|---|
+| `ChipHeight` | `--chip-height` | `1.25rem` | The height every chip shares — a field's legend, a row's badge — so a chip is a box of KNOWN size instead of an emergent one. `1.25rem` (20px) fixes what a chip measures today with `TextXs` (0.75rem) and the inherited line-height, so nothing changes visually. With a known height, `OnEdge` can mount a chip over a border line with real margins (`calc(-0.5 * var(--chip-height))`) instead of a `transform`, which is invisible to `scrollHeight`/`clientHeight` measurement and reserves no layout space. |
+
 ### Device Geometry
 
 Static tokens (`Dark` alone). Components write `var(--safe-top)` / `var(--viewport-h)`;

@@ -71,10 +71,14 @@ func resetRules() []item {
 		// grey box instead, so the same button is two different shapes. Zeroing
 		// appearance, background, border and radius makes the element an empty
 		// box on both, which is what a styled part expects to start from.
+		// padding: 0 kills the UA's own button padding (1px block, 6px inline)
+		// that a bare <button> inside a flex row still carries — a part that
+		// declares Pad() rebuilds it anyway, but an unstyled one must not
+		// arrive with a lopsided box the design never asked for.
 		// The [type=…] selectors cover <input type="submit">, which is a button
 		// everywhere except in the selector `button`.
 		rule(selector("button, [type=\"button\"], [type=\"reset\"], [type=\"submit\"]"),
-			rawRule("  -webkit-appearance: none;\n  appearance: none;\n  background-color: transparent;\n  background-image: none;\n  color: inherit;\n  font: inherit;\n  border: 0;\n  border-radius: 0;"),
+			rawRule("  -webkit-appearance: none;\n  appearance: none;\n  background-color: transparent;\n  background-image: none;\n  color: inherit;\n  font: inherit;\n  border: 0;\n  border-radius: 0;\n  padding: 0;"),
 		),
 		// iOS Safari paints an inset shadow and forces its own corner radius on
 		// text fields; no border-radius a part declares removes it. :where()

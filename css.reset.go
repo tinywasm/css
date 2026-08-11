@@ -85,8 +85,17 @@ func resetRules() []item {
 		// keeps checkbox and radio out — appearance: none on those erases the
 		// control entirely instead of flattening it, and their styling belongs
 		// to tinywasm/form.
+		//
+		// border: 0 for the same reason the button rule above carries it, and it
+		// was the one half of that pair this rule was missing: appearance: none
+		// does NOT drop the UA's own `border: 2px inset`, so a field arrived with
+		// a heavy dark box no skin had asked for. A part painting a flat fill
+		// (fieldset's input is As(Page), no border at all) could not remove it
+		// either — there was nothing in the cascade to override, only chrome to
+		// undo. Parts that DO want an edge declare it themselves and win here
+		// anyway: this rule is @layer tokens, a skin is @layer widgets.
 		rule(selector("input:where(:not([type=\"checkbox\"]):not([type=\"radio\"])), textarea"),
-			rawRule("  -webkit-appearance: none;\n  appearance: none;\n  border-radius: 0;"),
+			rawRule("  -webkit-appearance: none;\n  appearance: none;\n  border: 0;\n  border-radius: 0;"),
 		),
 		// Firefox and Edge let a <select> inherit text-transform from an
 		// ancestor; every other engine does not, so an uppercased container

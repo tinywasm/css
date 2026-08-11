@@ -81,6 +81,27 @@ func TestRenderCSS_NormalizesCrossBrowserDefaults(t *testing.T) {
 	}
 }
 
+// appearance: none flattens a text field's chrome but leaves the UA's own
+// `border: 2px inset` standing, so every input arrived carrying a heavy dark
+// box. A skin cannot undo that by painting a flat fill — there is no border
+// declaration to override, only chrome to remove — so the reset has to. This
+// asserts it on the text-field rule specifically: `border: 0` also appears in
+// the button rule above, and a whole-sheet Contains would pass on that alone.
+func TestRenderCSS_StripsTheUABorderFromTextFields(t *testing.T) {
+	got := RenderCSS().String()
+	i := strings.Index(got, `input:where(:not([type="checkbox"]):not([type="radio"]))`)
+	if i == -1 {
+		t.Fatal("expected a text-field reset rule")
+	}
+	end := strings.Index(got[i:], "}")
+	if end == -1 {
+		t.Fatal("malformed text-field reset rule")
+	}
+	if block := got[i : i+end]; !strings.Contains(block, "border: 0") {
+		t.Errorf("the text-field reset must drop the UA border, block:\n%s", block)
+	}
+}
+
 // appearance: none erases a checkbox and a radio instead of flattening them:
 // the control disappears rather than losing its chrome. The text-field rule
 // must keep both out.

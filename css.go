@@ -39,6 +39,13 @@ type Override struct {
 	// forcing token.Name to a single value), but Set() on a static token
 	// leaves them empty since there is no split to override.
 	light, dark string
+
+	// gradient, when non-empty, overrides the token's ImageVarName()
+	// companion property instead of the token itself — see SetGradient.
+	// Mutually independent from value/light/dark: a SetGradient-only
+	// Override carries no value, so Theme leaves the token's own solid
+	// declaration untouched.
+	gradient string
 }
 
 // Set builds an Override for a designated Token with the specified custom value.
@@ -55,6 +62,31 @@ func SetTheme(t Token, light, dark string) Override {
 	return Override{token: t, value: "light-dark(" + light + ", " + dark + ")", light: light, dark: dark}
 }
 
+// SetGradient layers a linear-gradient between from and to on top of t's own
+// solid background — widget/style always emits t's background-image as
+// var(t.ImageVarName(), none), so this is what makes that property resolve
+// to something other than "none". t's own solid value (its Set/SetTheme
+// override, or its catalog default if neither was called) still applies as
+// the background-color underneath, and still drives Hover/Focus/Press —
+// color-mix() has no gradient analogue, so interaction states stay solid;
+// only the resting background gets the gradient. angle is a raw CSS
+// <linear-gradient> direction, e.g. "135deg" or "to right".
+//
+// from/to are referenced through Var(), not NestedEnhanced(): unlike
+// Hover/Focus/Press's color-mix() (whose *Static counterpart exists
+// precisely because legacy browsers can't parse it), linear-gradient() is
+// universally supported, so there is no parse-time-deferral hazard to dodge
+// — and Var() is what lets a from/to token's OWN Set() override in the same
+// Theme() call resolve live from the cascade instead of this gradient
+// baking in that token's catalog default from Go, stale the moment the app
+// overrides it.
+func SetGradient(t Token, angle string, from, to Token) Override {
+	return Override{
+		token:    t,
+		gradient: "linear-gradient(" + angle + ", " + from.Var() + ", " + to.Var() + ")",
+	}
+}
+
 // Theme returns the entire RootCSS() catalog with custom overrides appended.
 func Theme(overrides ...Override) *Stylesheet {
 	catalog := RootCSS() // default catalog
@@ -63,10 +95,15 @@ func Theme(overrides ...Override) *Stylesheet {
 	}
 	var decls []decl
 	for _, o := range overrides {
-		decls = append(decls, decl{o.token.Name, o.value})
+		if o.value != "" {
+			decls = append(decls, decl{o.token.Name, o.value})
+		}
 		if o.light != "" {
 			decls = append(decls, decl{o.token.LightVarName(), o.light})
 			decls = append(decls, decl{o.token.DarkVarName(), o.dark})
+		}
+		if o.gradient != "" {
+			decls = append(decls, decl{o.token.ImageVarName(), o.gradient})
 		}
 	}
 	return withRootTail(catalog, root(decls...))

@@ -225,6 +225,39 @@ func TestTheme_OverrideTakesPrecedence(t *testing.T) {
 	}
 }
 
+func TestSetGradient_OnlyTouchesImageVar(t *testing.T) {
+	got := Theme(SetGradient(ColorPrimary, "135deg", ColorPrimary, ColorAccent)).String()
+
+	if strings.Contains(got, "--color-primary: ;") || strings.Contains(got, "--color-primary:;") {
+		t.Errorf("SetGradient alone must not emit an empty value for the token itself, got: %s", got)
+	}
+	if !strings.Contains(got, "--color-primary-image: linear-gradient(135deg,") {
+		t.Errorf("SetGradient must emit the token's ImageVarName() declaration, got: %s", got)
+	}
+}
+
+// TestSetGradient_ReferencesLiveOverride guards against a real bug caught
+// while building this: from/to must resolve through the CASCADE (var()), not
+// bake in the Go struct's catalog default — SetGradient(ColorPrimary, ...,
+// ColorPrimary, ColorAccent) combined with Set(ColorPrimary, "#16a34a") in
+// the SAME Theme() call must produce a gradient that follows the app's own
+// override, not ColorPrimary's catalog default (a stale color the moment an
+// app overrides it would be a silent, hard-to-notice bug — the gradient
+// direction/stops would look right in the source but wrong on screen).
+func TestSetGradient_ReferencesLiveOverride(t *testing.T) {
+	got := Theme(
+		Set(ColorPrimary, "#16a34a"),
+		SetGradient(ColorPrimary, "135deg", ColorPrimary, ColorAccent),
+	).String()
+
+	if !strings.Contains(got, "linear-gradient(135deg, var(--color-primary") {
+		t.Errorf("gradient must reference --color-primary through var(), not a baked-in static value, got: %s", got)
+	}
+	if strings.Contains(got, "linear-gradient(135deg, #654FF0") {
+		t.Errorf("gradient baked in ColorPrimary's catalog default instead of referencing the live custom property, got: %s", got)
+	}
+}
+
 func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	// Gather all known token names from the catalog
 	knownTokens := map[string]bool{}

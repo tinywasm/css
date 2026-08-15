@@ -72,6 +72,14 @@ func (t Token) LightValue() string {
 func (t Token) LightVarName() string { return t.Name + "-light" }
 func (t Token) DarkVarName() string  { return t.Name + "-dark" }
 
+// ImageVarName names the token's optional background-image companion
+// property — see SetGradient. Declared unconditionally by widget/style as
+// `background-image: var(--x-image, none);` alongside every surface's
+// background-color, so it stays inert (the "none" fallback) until an app
+// sets it, and paints over the solid color without replacing it when it
+// does — no separate "is this surface a gradient" flag to keep in sync.
+func (t Token) ImageVarName() string { return t.Name + "-image" }
+
 // EnhancedVar returns the value used as the SECOND half of a double
 // declaration when the token is the declaration's ENTIRE top-level value
 // (e.g. `background-color: <this>;`) — see NestedEnhanced for the

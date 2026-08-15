@@ -134,7 +134,7 @@ func TestGoldenEquivalence(t *testing.T) {
 	// RootCSS golden test (partial, checking key values are present)
 	root := RootCSS().String()
 	tokens := []string{
-		"--color-primary: #1b5d8c",
+		"--color-primary: #654FF0",
 		"--color-background: light-dark(#FFFFFF, #0D1117)",
 		"--text-base: 1rem",
 		"--space-4: 1rem",

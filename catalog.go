@@ -3,7 +3,7 @@
 package css
 
 var (
-	ColorPrimary     = Token{Name: "--color-primary", Dark: "#1b5d8c"}
+	ColorPrimary     = Token{Name: "--color-primary", Dark: "#654FF0"}
 	ColorOnPrimary   = Token{Name: "--color-on-primary", Dark: "#FFFFFF"}
 	ColorSuccess     = Token{Name: "--color-success", Dark: "#1e7a30"}
 	ColorOnSuccess   = Token{Name: "--color-on-success", Dark: "#FFFFFF"}

@@ -17,7 +17,7 @@ func TestDSL_Rule(t *testing.T) {
 		),
 	)
 	got := sheet.String()
-	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#1b5d8c);\n}\n\n"
+	want := ".btn {\n  background-color: #fff;\n  color: var(--color-primary,#654FF0);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -176,7 +176,7 @@ func TestDSL_Keyframes(t *testing.T) {
 		),
 	)
 	got := sheet.String()
-	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#1b5d8c);\n  }\n}\n\n"
+	want := "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    opacity: 1;\n  }\n  100% {\n    transform: scale(1.1);\n    opacity: 0;\n    color: var(--color-primary,#654FF0);\n  }\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -190,7 +190,7 @@ func TestDSL_Root(t *testing.T) {
 		),
 	)
 	got := sheet.String()
-	want := ":root {\n  --color-primary: #1b5d8c;\n  --color-background: light-dark(#FFFFFF, #0D1117);\n}\n\n"
+	want := ":root {\n  --color-primary: #654FF0;\n  --color-background: light-dark(#FFFFFF, #0D1117);\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
 	}

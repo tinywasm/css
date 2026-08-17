@@ -2,23 +2,31 @@
 
 package css
 
-// themeGroupDecls declares the adaptive theme colors plus, for every theme
-// pair among them, the plain light/dark halves declareSplit needs — see
-// Token.EnhancedVar for why widget/style reads those instead of the
-// light-dark()-valued properties declared here.
+// themeTokens are the colours whose value adapts to the theme. They are
+// declared twice: the static half here, the adaptive half inside
+// ModernColorSupport — see declare() and enhancedDecls().
+func themeTokens() []Token {
+	return []Token{
+		ColorBackground,
+		ColorOnBackground,
+		ColorSurface,
+		ColorOnSurface,
+		ColorOutline,
+		ColorMuted,
+		ColorSurfaceSunken,
+		ColorSelection,
+		ColorOnSelection,
+		ColorAccentWash,
+		ColorAccentHover,
+	}
+}
+
+// themeGroupDecls declares the theme colors' static values plus, for every
+// theme pair among them, the plain light/dark halves declareSplit needs.
 func themeGroupDecls() []decl {
-	decls := []decl{
-		declare(ColorBackground),
-		declare(ColorOnBackground),
-		declare(ColorSurface),
-		declare(ColorOnSurface),
-		declare(ColorOutline),
-		declare(ColorMuted),
-		declare(ColorSurfaceSunken),
-		declare(ColorSelection),
-		declare(ColorOnSelection),
-		declare(ColorAccentWash),
-		declare(ColorAccentHover),
+	var decls []decl
+	for _, t := range themeTokens() {
+		decls = append(decls, declare(t))
 	}
 	for _, t := range []Token{ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted} {
 		decls = append(decls, declareSplit(t)...)
@@ -33,6 +41,10 @@ func themeGroupDecls() []decl {
 func defaultRoots() []item {
 	return []item{
 		root(themeGroupDecls()...),
+		// The adaptive upgrade, gated. It has to come after the static block
+		// so it wins where it applies, and before anything an app declares so
+		// Theme(Set(...)) still outranks both.
+		supports(ModernColorSupport, root(enhancedDecls(themeTokens()...)...)),
 		root(
 			// Interaction intensities
 			declare(MixHover),

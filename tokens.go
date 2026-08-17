@@ -86,33 +86,35 @@ func (t Token) ImageVarName() string { return t.Name + "-image" }
 // alternative required when it is instead one ARGUMENT inside another
 // light-dark()/color-mix() call.
 //
-// For a theme token this must never be Var(): Var() wraps the value in
-// var(t.Name, ...), and t.Name's OWN registered :root value (see declare()
-// in dsl.go) is exactly the light-dark()/color-mix() expression a legacy
-// browser cannot compute. Reaching it through var() makes the declaration
-// invalid at COMPUTED-value time — which, per the CSS Custom Properties
-// cascade, does NOT fall back to an earlier sibling declaration for the
-// same property; it falls to the property's initial value instead
-// (transparent, for a color), silently discarding whatever static
-// declaration a caller put before it. So this is 100% literal — baked from
-// the catalog's default Light/Dark at Go build time, with NO var() anywhere
-// in it, so the unsupported function is the first thing a legacy browser's
-// parser sees, invalid at PARSE time — which DOES correctly leave an
-// earlier sibling declaration standing. A real, accepted cost: an app's
-// Theme(Set(...))/SetTheme() therefore does not reach this specific
-// declaration (it still reaches Var() and the -light/-dark properties
-// above, used everywhere else in this package).
+// It is Var(), and that is the whole point. It used to bake the catalog's
+// light-dark(<light>,<dark>) in as a literal, because t.Name's registered
+// :root value WAS that expression and reaching it through var() would make
+// the declaration invalid at computed-value time on a browser that cannot
+// evaluate it — which, per the Custom Properties cascade, falls to the
+// property's initial value rather than to an earlier sibling declaration.
+// The literal dodged that by failing at PARSE time instead, which does leave
+// the sibling standing.
 //
-// For a static token there is nothing to protect — Var() was never wrapped
-// in light-dark()/color-mix(), so it stays live and override-able.
+// It also meant no app could change any of these colours: a literal baked at
+// Go build time is not reachable from Theme(Set(...)), so a site could
+// declare its entire palette and still be painted in the library's default
+// one. That is not a corner of the API — it is the background, text and
+// border of every surface in the ecosystem.
+//
+// The poison is now removed at the source instead: :root declares the static
+// value unguarded and re-declares the adaptive one inside ModernColorSupport
+// (see declare/enhancedDecls in dsl.go), so t.Name always holds something
+// every engine can compute. var() is therefore safe, and an app's override —
+// which lands after both — finally reaches the declaration.
+// It is the BARE var() — no fallback. Var()'s fallback is the adaptive
+// expression, and a fallback still counts as a colour function sitting inside
+// a var() as far as any reader (or drift guard) can tell, even though it is
+// unreachable while the property is declared. It is also genuinely redundant
+// here: :root declares this property unconditionally, so the fallback can
+// never be substituted. Leaving it out keeps the emitted declaration exactly
+// as safe and says so plainly.
 func (t Token) EnhancedVar() string {
-	if t.Light != "" {
-		return "light-dark(" + t.Light + "," + t.Dark + ")"
-	}
-	if t.LightStatic != "" {
-		return t.Dark
-	}
-	return t.Var()
+	return "var(" + t.Name + ")"
 }
 
 // NestedEnhanced is EnhancedVar's counterpart for a token used as one

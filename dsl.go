@@ -173,6 +173,45 @@ func media(query string, items ...item) item {
 	return mediaItem{query: query, items: items}
 }
 
+// ModernColorSupport is the feature query that gates every declaration whose
+// value uses light-dark() or color-mix(). It is exported because an app
+// writing its own CSS against these tokens needs the exact same guard — and
+// getting it wrong is silent.
+//
+// It exists because of an asymmetry in the cascade. A declaration a browser
+// cannot PARSE is dropped, and an earlier sibling for the same property
+// stands. A declaration containing var() always parses; if the substituted
+// value turns out to be unparseable, it is "invalid at computed-value time",
+// and per the Custom Properties spec that does NOT fall back to an earlier
+// sibling — it falls to the property's initial value. So a custom property
+// holding light-dark(...) poisons every var() reference to it on a browser
+// that lacks the function: not "wrong colour", but transparent.
+//
+// Declaring the static value unguarded and the enhanced one inside this block
+// removes the poison at the source. The custom property then holds a value
+// that is always computable, which is what makes plain Var() safe everywhere
+// — and Var() is the only form an app's Theme(Set(...)) can override.
+const ModernColorSupport = "(color: light-dark(#000, #fff)) and (color: color-mix(in oklab, #000, #fff))"
+
+type supportsItem struct {
+	condition string
+	items     []item
+}
+
+func (s supportsItem) writeTo(b *fmt.Builder) {
+	b.WriteString("@supports ")
+	b.WriteString(s.condition)
+	b.WriteString(" {\n")
+	for _, it := range s.items {
+		it.writeTo(b)
+	}
+	b.WriteString("}\n\n")
+}
+
+func supports(condition string, items ...item) item {
+	return supportsItem{condition: condition, items: items}
+}
+
 func mediaPrefersDark(items ...item) item {
 	return media("(prefers-color-scheme: dark)", items...)
 }
@@ -385,8 +424,36 @@ func backgroundSize(v value) decl      { return decl{"background-size", v.cssVal
 func backgroundPosition(v value) decl  { return decl{"background-position", v.cssValue()} }
 func backgroundRepeat(v value) decl    { return decl{"background-repeat", v.cssValue()} }
 
+// declare registers a token's value at :root. The value is the STATIC one —
+// no light-dark(), no color-mix() — so that var(t.Name) always computes, on
+// every engine. The adaptive value is re-declared by enhancedDecls() inside
+// ModernColorSupport, where it is safe.
+//
+// For a token whose value carries no colour function at all (a spacing step, a
+// radius, a font stack) static and adaptive are the same string and the guard
+// block simply never mentions it.
 func declare(t Token) decl {
-	return decl{t.Name, t.GetFallback()}
+	return decl{t.Name, t.LightValue()}
+}
+
+// enhancedDecls returns the adaptive re-declaration for the tokens among ts
+// whose value actually differs from the static one. Emitted inside
+// ModernColorSupport, after the plain :root block, so a supporting browser
+// upgrades and every other one keeps the light theme.
+//
+// Order matters beyond this pair: an app's Theme(Set(...)) overrides land at
+// the END of the sheet (see withRootTail), so they outrank BOTH halves. That
+// is the whole point — before this split, the adaptive value was baked into
+// widget/style's declarations as a literal and nothing an app declared could
+// reach it.
+func enhancedDecls(ts ...Token) []decl {
+	var out []decl
+	for _, t := range ts {
+		if adaptive := t.GetFallback(); adaptive != t.LightValue() {
+			out = append(out, decl{t.Name, adaptive})
+		}
+	}
+	return out
 }
 
 // declareSplit declares a theme token's plain, browser-safe light/dark

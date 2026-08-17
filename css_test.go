@@ -381,3 +381,49 @@ func TestViewportH_Var(t *testing.T) {
 		t.Errorf("ViewportH.Var() = %q, want %q", got, "var(--viewport-h,100dvh)")
 	}
 }
+
+// TestThemeOverrideReachesComponentDeclarations is the defect that shipped in
+// veltylabs/mjosefa-website: the site declared its whole palette with the
+// sanctioned API and was painted in the library's default one anyway. A
+// visitor whose system was in dark mode got a near-black clinic site whose v2
+// has no dark theme at all.
+//
+// The two halves that have to hold together:
+//
+//  1. What a component emits for a surface must be reachable from :root —
+//     i.e. a var() reference, not a literal baked at Go build time. That is
+//     the only form Theme(Set(...)) can override.
+//  2. The custom property it reaches must hold a value every engine can
+//     compute. A :root value of light-dark(...) makes every var() reference to
+//     it invalid at computed-value time on a browser without the function,
+//     which falls to `transparent` rather than to the static sibling
+//     declaration — worse than the wrong colour.
+func TestThemeOverrideReachesComponentDeclarations(t *testing.T) {
+	for _, tok := range []Token{ColorSurface, ColorOnSurface, ColorBackground, ColorOutline, ColorSurfaceSunken} {
+		want := "var(" + tok.Name + ")"
+		if got := tok.EnhancedVar(); got != want {
+			t.Errorf("%s: components emit %q, which no Theme(Set(...)) can override; want the var() form %q",
+				tok.Name, got, want)
+		}
+	}
+
+	got := Theme(Set(ColorSurface, "#ffffff")).String()
+
+	// The static :root value must carry no colour function, or the var()
+	// above resolves to something a legacy engine cannot compute.
+	staticRoot := got[:strings.Index(got, "@supports")]
+	if strings.Contains(staticRoot, ColorSurface.Name+": light-dark(") ||
+		strings.Contains(staticRoot, ColorSurface.Name+": color-mix(") {
+		t.Errorf("%s is declared with a colour function outside the feature query; every var() reference to it becomes invalid at computed-value time on an engine without it:\n%s",
+			ColorSurface.Name, staticRoot)
+	}
+
+	// The app's override must come last, so it outranks both halves.
+	override := strings.LastIndex(got, ColorSurface.Name+": #ffffff")
+	if override == -1 {
+		t.Fatalf("Theme(Set(ColorSurface, …)) emitted no override:\n%s", got)
+	}
+	if adaptive := strings.LastIndex(got, ColorSurface.Name+": light-dark("); adaptive > override {
+		t.Errorf("the default adaptive value is declared after the app's override, so the app's theme loses:\n%s", got)
+	}
+}

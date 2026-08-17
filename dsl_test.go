@@ -182,6 +182,9 @@ func TestDSL_Keyframes(t *testing.T) {
 	}
 }
 
+// TestDSL_Root pins that declare() registers the STATIC value. The adaptive
+// one is a separate declaration inside ModernColorSupport — see
+// TestThemeOverrideReachesComponentDeclarations for why the split exists.
 func TestDSL_Root(t *testing.T) {
 	sheet := NewStylesheet(
 		root(
@@ -190,9 +193,26 @@ func TestDSL_Root(t *testing.T) {
 		),
 	)
 	got := sheet.String()
-	want := ":root {\n  --color-primary: #654FF0;\n  --color-background: light-dark(#FFFFFF, #0D1117);\n}\n\n"
+	want := ":root {\n  --color-primary: #654FF0;\n  --color-background: #FFFFFF;\n}\n\n"
 	if got != want {
 		t.Errorf("got:\n%q\nwant:\n%q", got, want)
+	}
+}
+
+// TestDSL_RootEnhanced is TestDSL_Root's other half: the adaptive value, gated.
+func TestDSL_RootEnhanced(t *testing.T) {
+	sheet := NewStylesheet(
+		supports(ModernColorSupport, root(enhancedDecls(ColorPrimary, ColorBackground)...)),
+	)
+	got := sheet.String()
+	if !strings.Contains(got, "@supports "+ModernColorSupport) {
+		t.Errorf("adaptive block is not gated by a feature query: %s", got)
+	}
+	if !strings.Contains(got, "--color-background: light-dark(#FFFFFF, #0D1117)") {
+		t.Errorf("missing adaptive value for a theme token: %s", got)
+	}
+	if strings.Contains(got, "--color-primary") {
+		t.Errorf("a static token has no adaptive half and must not be re-declared: %s", got)
 	}
 }
 

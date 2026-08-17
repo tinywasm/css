@@ -8,7 +8,7 @@ Single source of truth for the ecosystem's design decisions: the token catalog a
 typed CSS emission engine. Stylesheets are produced **at build/SSR time**; the browser
 receives plain CSS, never Go.
 
-Consumers: `tinywasm/widget/style` (semantic styling API), `tinywasm/assetmin` (SSR asset
+Consumers: `tinywasm/widget/style` (semantic styling API), `tinywasm/sitec` (SSR asset
 registration), `tinywasm/components` and `tinywasm/layout` (their `//go:build !wasm`
 `css.go` files).
 

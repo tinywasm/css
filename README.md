@@ -57,7 +57,7 @@ func (l *TargetList) Style() *style.Sheet {
 
 ## SSR contract: `RootCSS` vs `RenderCSS`
 
-`assetmin` recognizes two CSS functions with strictly separate roles:
+`sitec` recognizes two CSS functions with strictly separate roles:
 
 | Function | Slot | Replacement | Content |
 |---|---|---|---|
@@ -68,7 +68,7 @@ The split is the key to safe theming: vocabulary is replaceable so apps can rebr
 
 ### Theming an App (Rebrand)
 
-To apply a theme or rebrand to an application, the root project exposes its own `RootCSS()`. Because `assetmin` treats the `:root` block as a **single-winner slot**, the app's `RootCSS()` completely replaces the library defaults.
+To apply a theme or rebrand to an application, the root project exposes its own `RootCSS()`. Because `sitec` treats the `:root` block as a **single-winner slot**, the app's `RootCSS()` completely replaces the library defaults.
 
 ```go
 // config/css.go in the application (!wasm)

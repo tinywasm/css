@@ -2,7 +2,7 @@
 
 ## RootCSS and the Single-Winner Slot
 
-In the `tinywasm` SSR pipeline, `assetmin` discovers the `RootCSS()` blocks of the dependency graph. The `:root` block (the token vocabulary) is a **single-winner slot by replacement**:
+In the `tinywasm` SSR pipeline, `sitec` discovers the `RootCSS()` blocks of the dependency graph. The `:root` block (the token vocabulary) is a **single-winner slot by replacement**:
 
 1. If the application (the root project) declares `func RootCSS() *css.Stylesheet`, that block **completely replaces** the default `RootCSS()` of the `tinywasm/css` library.
 2. `RenderCSS()` (the rule and binding logic) is **additive**: the contributions of all modules are concatenated.

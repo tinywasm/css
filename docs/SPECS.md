@@ -123,7 +123,7 @@ they never write a bare `env(...)` or `100vh`.
 
 `env()` returns `0px` on devices without insets. Visible effect also requires
 `<meta name="viewport" content="…, viewport-fit=cover">` from `tinywasm/html` /
-`tinywasm/assetmin` — not emitted here.
+`tinywasm/sitec` — not emitted here.
 
 `dvh` is older than this library's baseline (`light-dark()`, `color-mix()`), so no
 `@supports` guard is emitted.
@@ -165,7 +165,7 @@ dark).
 ### RootCSS, RenderCSS and FontFaces
 
 The library provides three CSS emitters. `RootCSS` and `RenderCSS` match the
-`assetmin` SSR pipeline contract; `FontFaces` is injected separately by whoever
+`sitec` SSR pipeline contract; `FontFaces` is injected separately by whoever
 serves the font files.
 
 ### 1. `RootCSS() *Stylesheet`
@@ -179,7 +179,7 @@ root := css.RootCSS()
 
 Emits one `@font-face` rule per face of the declared family. **Not** part of
 `RootCSS()` or `RenderCSS()`: whoever serves the font files decides when to
-inject the stylesheet (typically `assetmin` with its own URL prefix).
+inject the stylesheet (typically `sitec` with its own URL prefix).
 
 Weight and style are derived from `font.Style` — never received as strings:
 

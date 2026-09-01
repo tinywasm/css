@@ -46,6 +46,12 @@ type Override struct {
 	// Override carries no value, so Theme leaves the token's own solid
 	// declaration untouched.
 	gradient string
+
+	// gradientStops holds just the two colour stops ("var(--from), var(--to)")
+	// so Theme can also publish ImageStopsVarName() — the hook a single surface
+	// uses to repaint this gradient at its own angle (widget/style's
+	// GradientAngle). Set only by SetGradient, alongside gradient.
+	gradientStops string
 }
 
 // Set builds an Override for a designated Token with the specified custom value.
@@ -81,9 +87,11 @@ func SetTheme(t Token, light, dark string) Override {
 // baking in that token's catalog default from Go, stale the moment the app
 // overrides it.
 func SetGradient(t Token, angle string, from, to Token) Override {
+	stops := from.Var() + ", " + to.Var()
 	return Override{
-		token:    t,
-		gradient: "linear-gradient(" + angle + ", " + from.Var() + ", " + to.Var() + ")",
+		token:         t,
+		gradient:      "linear-gradient(" + angle + ", " + stops + ")",
+		gradientStops: stops,
 	}
 }
 
@@ -104,6 +112,9 @@ func Theme(overrides ...Override) *Stylesheet {
 		}
 		if o.gradient != "" {
 			decls = append(decls, decl{o.token.ImageVarName(), o.gradient})
+		}
+		if o.gradientStops != "" {
+			decls = append(decls, decl{o.token.ImageStopsVarName(), o.gradientStops})
 		}
 	}
 	return withRootTail(catalog, root(decls...))

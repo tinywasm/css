@@ -258,6 +258,23 @@ func TestSetGradient_ReferencesLiveOverride(t *testing.T) {
 	}
 }
 
+// TestSetGradient_PublishesStops: alongside the baked-angle ImageVarName(),
+// SetGradient publishes the colour stops on their own (ImageStopsVarName()), so
+// one surface can repaint the SAME gradient at a different angle
+// (widget/style's GradientAngle) instead of re-origining the one direction.
+func TestSetGradient_PublishesStops(t *testing.T) {
+	got := Theme(SetGradient(ColorPrimary, "135deg", ColorPrimary, ColorAccent)).String()
+
+	want := "--color-primary-image-stops: var(--color-primary,#654FF0), var(--color-accent,#e8a33d);"
+	if !strings.Contains(got, want) {
+		t.Errorf("SetGradient must publish the angle-free stops as %q, got: %s", want, got)
+	}
+	// The stops must NOT carry an angle — that is the whole point.
+	if strings.Contains(got, "--color-primary-image-stops: linear-gradient") {
+		t.Errorf("the -image-stops companion must be bare colour stops, not a linear-gradient(): %s", got)
+	}
+}
+
 func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	// Gather all known token names from the catalog
 	knownTokens := map[string]bool{}

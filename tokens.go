@@ -80,6 +80,15 @@ func (t Token) DarkVarName() string  { return t.Name + "-dark" }
 // does — no separate "is this surface a gradient" flag to keep in sync.
 func (t Token) ImageVarName() string { return t.Name + "-image" }
 
+// ImageStopsVarName names the companion that holds only the gradient's colour
+// stops ("var(--from), var(--to)"), without the angle — set by SetGradient
+// alongside ImageVarName(). It lets one surface repaint the SAME theme gradient
+// at a different angle (widget/style's GradientAngle) instead of every surface
+// re-origining the one baked-in direction. Unset until an app calls
+// SetGradient, so a `linear-gradient(<angle>, var(--x-image-stops))` that
+// references it is invalid — and therefore ignored — until then.
+func (t Token) ImageStopsVarName() string { return t.Name + "-image-stops" }
+
 // EnhancedVar returns the value used as the SECOND half of a double
 // declaration when the token is the declaration's ENTIRE top-level value
 // (e.g. `background-color: <this>;`) — see NestedEnhanced for the

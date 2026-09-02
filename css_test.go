@@ -156,7 +156,8 @@ func TestGoldenEquivalence(t *testing.T) {
 		"box-sizing: border-box",
 		"margin: 0",
 		"font-size: var(--text-base",
-		"outline: 2px solid var(--color-primary",
+		"outline: 2px solid var(--color-accent",
+		"outline-offset: -2px",
 		"display: block",
 		"color-scheme: light dark",
 		"color-scheme: light",
@@ -272,6 +273,35 @@ func TestSetGradient_PublishesStops(t *testing.T) {
 	// The stops must NOT carry an angle — that is the whole point.
 	if strings.Contains(got, "--color-primary-image-stops: linear-gradient") {
 		t.Errorf("the -image-stops companion must be bare colour stops, not a linear-gradient(): %s", got)
+	}
+}
+
+// TestFocusRingIsAmberAndInset pins the framework-wide focus affordance: the
+// :focus-visible ring is drawn in the Accent family (the "active element"
+// colour every other signal in the system uses) and with a NEGATIVE
+// outline-offset so it renders inside the border box — a positive offset put it
+// outside, where a clipping ancestor (a search bar with overflow: hidden)
+// sheared it. This is the only focus ring in the ecosystem; widget/style emits
+// none of its own.
+func TestFocusRingIsAmberAndInset(t *testing.T) {
+	render := RenderCSS().String()
+
+	i := strings.Index(render, ":focus-visible")
+	if i < 0 {
+		t.Fatal("expected a :focus-visible rule in the reset")
+	}
+	block := render[i:]
+	if end := strings.Index(block, "}"); end >= 0 {
+		block = block[:end]
+	}
+	if !strings.Contains(block, "outline: 2px solid var(--color-accent") {
+		t.Errorf("focus ring must be amber (var(--color-accent)), got:\n%s", block)
+	}
+	if strings.Contains(block, "--color-primary") {
+		t.Errorf("focus ring must not use the primary/gradient hue, got:\n%s", block)
+	}
+	if !strings.Contains(block, "outline-offset: -2px") {
+		t.Errorf("focus ring must be inset (outline-offset: -2px) so a clipping ancestor cannot shear it, got:\n%s", block)
 	}
 }
 

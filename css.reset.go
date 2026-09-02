@@ -28,9 +28,18 @@ func resetRules() []item {
 			color(ColorOnSurface),
 			background(ColorBackground),
 		),
+		// Amber, not ColorPrimary: every "this is the active element" signal in
+		// the system is the Accent family — the current nav item, a selected
+		// row — and a focus ring is the same statement for a control, so it
+		// speaks the same colour instead of the primary/gradient hue that reads
+		// as chrome here. A negative outline-offset draws the ring INSIDE the
+		// border box: a positive offset put it outside, where any clipping
+		// ancestor (a search bar with overflow: hidden) sheared it off and a
+		// tight neighbour collided with it. Inset, it is always fully drawn and
+		// never moves the layout.
 		rule(selector(":focus-visible"),
-			outline(str("2px solid "+ColorPrimary.Var())),
-			outlineOffset(px(2)),
+			outline(str("2px solid "+ColorAccent.Var())),
+			outlineOffset(px(-2)),
 		),
 		// User-agent margins and list chrome are geometry the style DSL cannot
 		// express and cannot see. A <ul> used as a nav rail carries 40px of

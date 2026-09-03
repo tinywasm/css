@@ -18,6 +18,7 @@ func themeTokens() []Token {
 		ColorOnSelection,
 		ColorAccentWash,
 		ColorAccentHover,
+		ColorDangerWash,
 	}
 }
 

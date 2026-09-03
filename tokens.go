@@ -162,7 +162,7 @@ type NamedPair struct {
 }
 
 // AllPairs returns the 6 active functional design decision pairs for automated contrast auditing.
-// SurfaceSunken and SurfaceSelected are excluded (remaining 2 of the 8 total pairs):
+// SurfaceSunken, SurfaceSelected and SurfaceDangerWash are excluded (remaining 3 of the 9 total pairs):
 // their values are color-mix() expressions that resolveColor() cannot evaluate.
 // Evaluating color-mix(in oklab, ...) is a known gap, pending resolution in
 // github.com/tinywasm/color (see color/docs/PLAN.md §3.3).

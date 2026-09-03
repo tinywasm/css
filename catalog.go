@@ -57,6 +57,13 @@ var (
 	// AND "white icon" at once, which the 85% wash cannot deliver.
 	ColorAccentHover = Token{Name: "--color-accent-hover", Dark: "color-mix(in oklab, " + ColorAccent.NestedEnhanced() + ", transparent 30%)", LightStatic: FadeStatic(ColorAccent, 0.30)}
 
+	// ColorDangerWash is Danger faded toward transparency, the same
+	// construction as ColorAccentWash but off ColorDanger instead of
+	// ColorAccent: a light red tint for a selection state that must read as
+	// "leans toward danger" without claiming the solid Danger fill, which is
+	// reserved for an actual destructive commit (e.g. the confirm button).
+	ColorDangerWash = Token{Name: "--color-danger-wash", Dark: "color-mix(in oklab, " + ColorDanger.NestedEnhanced() + ", transparent 85%)", LightStatic: FadeStatic(ColorDanger, 0.85)}
+
 	FontSans = Token{Name: "--font-sans", Dark: `"Roboto", system-ui, -apple-system, sans-serif`}
 	TextXs   = Token{Name: "--text-xs", Dark: "0.75rem"}
 	TextSm   = Token{Name: "--text-sm", Dark: "0.875rem"}
@@ -162,6 +169,7 @@ var (
 	SurfaceSunken     = Pair{ColorSurfaceSunken, ColorOnSurface}
 	SurfaceSelected   = Pair{ColorSelection, ColorOnSelection}
 	SurfaceDanger     = Pair{ColorDanger, ColorOnDanger}
+	SurfaceDangerWash = Pair{ColorDangerWash, ColorOnSurface}
 	SurfaceAccent     = Pair{ColorAccent, ColorOnAccent}
 	SurfaceSuccess    = Pair{ColorSuccess, ColorOnSuccess}
 )

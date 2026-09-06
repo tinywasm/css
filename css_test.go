@@ -474,3 +474,13 @@ func TestThemeOverrideReachesComponentDeclarations(t *testing.T) {
 		t.Errorf("the default adaptive value is declared after the app's override, so the app's theme loses:\n%s", got)
 	}
 }
+
+// ColorDangerWash is one tone up from the accent wash's 85%: at 85% the red
+// reads pink. Pins the mix so a future "harmonization" cannot silently wash
+// it back out.
+func TestDangerWashMixStaysRed(t *testing.T) {
+	dark := string(ColorDangerWash.Dark)
+	if !strings.Contains(dark, "transparent 70%") {
+		t.Errorf("danger wash must fade 70%% (reads red, not pink), got: %s", dark)
+	}
+}

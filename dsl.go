@@ -3,7 +3,7 @@
 package css
 
 import (
-	"github.com/tinywasm/fmt"
+	"webtyp.com/fmt"
 )
 
 type Stylesheet struct{ items []item }
@@ -217,7 +217,7 @@ func mediaPrefersDark(items ...item) item {
 }
 
 // MediaDesktop wraps the canonical "landscape + hover" media query used by
-// tinywasm layouts to distinguish desktop from mobile.
+// webtyp layouts to distinguish desktop from mobile.
 // Reference: appears 4 times verbatim in platformd Appendix A.
 func mediaDesktop(items ...item) item {
 	return media("(orientation: landscape) and (hover: hover)", items...)

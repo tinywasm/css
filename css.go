@@ -3,10 +3,10 @@
 package css
 
 import (
-	clr "github.com/tinywasm/color"
-	"github.com/tinywasm/font"
+	clr "webtyp.com/color"
+	"webtyp.com/font"
 
-	. "github.com/tinywasm/fmt"
+	. "webtyp.com/fmt"
 )
 
 // FontStack returns a CSS font family stack starting with the given font family.
@@ -142,7 +142,7 @@ func mixToward(t, amount Token) string {
 // of Hover/Focus/Press: t's LightValue mixed toward black by the same
 // intensity, computed once in Go instead of once per paint in the browser.
 // Callers emit this as the first of a double declaration — see
-// tinywasm/widget/style — so a browser without color-mix() support (Safari <
+// webtyp/widget/style — so a browser without color-mix() support (Safari <
 // 16.2) keeps it, permanently in the light theme, instead of an invalid
 // declaration.
 func HoverStatic(t Token) string { return staticMixToward(t, MixHover) }

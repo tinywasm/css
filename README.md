@@ -1,7 +1,7 @@
-# tinywasm/css
+# webtyp/css
 <img src="docs/img/badges.svg">
 
-Typed CSS design tokens and emission engine for the tinywasm framework.
+Typed CSS design tokens and emission engine for the webtyp framework.
 
 This module acts as the single source of truth for design decisions and theme construction. It replaces string-based `.css` files with Go-typed design tokens, exposing **both** `RootCSS()` and `RenderCSS()` with strictly separate responsibilities:
 
@@ -23,7 +23,7 @@ The public API consists solely of:
 - `Theme`, `Set`, `SetTheme` for rebranded app themes.
 - `RootCSS`, `RenderCSS`, `FontFaces`, `Raw` — CSS emitters (`FontFaces` is separate from the SSR root/render slots).
 
-All component styling is expressed using the semantic visual intention API in `github.com/tinywasm/widget/style`, which compiles down to CSS rules.
+All component styling is expressed using the semantic visual intention API in `webtyp.com/widget/style`, which compiles down to CSS rules.
 
 ### Component Styling Example
 
@@ -33,8 +33,8 @@ Components do not write raw CSS or lower-level property functions. Instead, they
 package targetlist
 
 import (
-	"github.com/tinywasm/widget"
-	"github.com/tinywasm/widget/style"
+	"webtyp.com/widget"
+	"webtyp.com/widget/style"
 )
 
 const (
@@ -72,7 +72,7 @@ To apply a theme or rebrand to an application, the root project exposes its own 
 
 ```go
 // config/css.go in the application (!wasm)
-import "github.com/tinywasm/css"
+import "webtyp.com/css"
 
 func RootCSS() *css.Stylesheet {
     return css.Theme(

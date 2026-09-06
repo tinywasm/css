@@ -1,6 +1,6 @@
-# tinywasm/css Technical Specification
+# webtyp/css Technical Specification
 
-This document provides a comprehensive technical specification for the `tinywasm/css` library. It outlines the core architecture, design token definitions, API contract, and theme customizability model.
+This document provides a comprehensive technical specification for the `webtyp/css` library. It outlines the core architecture, design token definitions, API contract, and theme customizability model.
 
 ---
 
@@ -31,7 +31,7 @@ func (t Token) Var() string {
 
 ## 2. Color Palette & Theming (12-Token System)
 
-Rather than maintaining separate and verbose light/dark mode source variables (which ballooned to over 69 variables previously), `tinywasm/css` leverages a modern, streamlined **12-token system**.
+Rather than maintaining separate and verbose light/dark mode source variables (which ballooned to over 69 variables previously), `webtyp/css` leverages a modern, streamlined **12-token system**.
 
 Theme adaptation (Light/Dark mode) is computed natively in the browser using the standard CSS `light-dark()` function, reducing complexity and cascade leaks.
 
@@ -122,15 +122,15 @@ they never write a bare `env(...)` or `100vh`.
 | `ViewportH` | `--viewport-h` | `100dvh` | Visible viewport height (shrinks with Safari iOS URL bar) |
 
 `env()` returns `0px` on devices without insets. Visible effect also requires
-`<meta name="viewport" content="…, viewport-fit=cover">` from `tinywasm/html` /
-`tinywasm/sitec` — not emitted here.
+`<meta name="viewport" content="…, viewport-fit=cover">` from `webtyp/html` /
+`webtyp/sitec` — not emitted here.
 
 `dvh` is older than this library's baseline (`light-dark()`, `color-mix()`), so no
 `@supports` guard is emitted.
 
 **Where to apply:** `RootCSS()` is vocabulary only. Padding a header with
 `var(--safe-top)` or sizing a shell with `var(--viewport-h)` is a layout decision
-owned by `tinywasm/layout` / `tinywasm/widget/style`.
+owned by `webtyp/layout` / `webtyp/widget/style`.
 
 ### Form control text size (usage constraint, not a reset rule)
 
@@ -138,8 +138,8 @@ A form control must not carry a text size below `TextBase` (`1rem` / 16px) on
 touch devices: iOS Safari zooms on focus when the computed `font-size` is under
 16px. The reset cannot enforce this — `RenderCSS()` sits in `@layer tokens`, so
 any `@layer widgets` rule wins by layer order. The constraint lives in
-`tinywasm/widget/style`; runtime detection is `browser_audit_mobile` in
-`tinywasm/devbrowser`.
+`webtyp/widget/style`; runtime detection is `browser_audit_mobile` in
+`webtyp/devbrowser`.
 
 ---
 
@@ -191,7 +191,7 @@ Weight and style are derived from `font.Style` — never received as strings:
 | `BoldItalic` | 700 | italic |
 
 File names come from `d.Family().Face(s) + ".ttf"` (derivation lives in
-`tinywasm/font`). Format is always `format("truetype")` — one TTF per face for
+`webtyp/font`). Format is always `format("truetype")` — one TTF per face for
 web and PDF. Every rule sets `font-display: swap`.
 
 An empty family (`Declare("", …)`) emits an empty stylesheet (no broken rules).
@@ -268,7 +268,7 @@ two shipping engines disagree, so a part's own rules land on the same box everyw
 
 Checkbox and radio are deliberately excluded from the text-field rule via `:where()`:
 `appearance: none` erases those controls rather than flattening them, and their styling
-belongs to `tinywasm/form`.
+belongs to `webtyp/form`.
 
 Two divergences are **out of scope for any reset**: `system-ui` resolves to different
 typefaces per platform (SF Pro vs Roboto) with different metrics, and native control
@@ -288,7 +288,7 @@ Overrides are generated via `Set(Token, string)` for static values or
 `SetTheme(Token, light, dark string)` for theme-aware pairs:
 
 ```go
-import "github.com/tinywasm/css"
+import "webtyp.com/css"
 
 func RootCSS() *css.Stylesheet {
     return css.Theme(

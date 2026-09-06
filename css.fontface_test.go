@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/font"
+	"webtyp.com/font"
 )
 
 func TestFontFaces_FourFaces(t *testing.T) {

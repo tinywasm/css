@@ -165,7 +165,7 @@ type NamedPair struct {
 // SurfaceSunken, SurfaceSelected and SurfaceDangerWash are excluded (remaining 3 of the 9 total pairs):
 // their values are color-mix() expressions that resolveColor() cannot evaluate.
 // Evaluating color-mix(in oklab, ...) is a known gap, pending resolution in
-// github.com/tinywasm/color (see color/docs/PLAN.md §3.3).
+// webtyp.com/color (see color/docs/PLAN.md §3.3).
 func AllPairs() []NamedPair {
 	return []NamedPair{
 		{"SurfacePrimary", ColorPrimary, ColorOnPrimary, 4.5},

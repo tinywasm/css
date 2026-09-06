@@ -2,7 +2,7 @@
 
 package css
 
-import "github.com/tinywasm/fmt"
+import "webtyp.com/fmt"
 
 // Device is the closed set of viewport classes. It exists because a media query
 // condition cannot read a custom property: the pixel thresholds must be baked into

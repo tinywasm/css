@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/fmt"
+	"webtyp.com/fmt"
 )
 
 func TestDSL_Rule(t *testing.T) {

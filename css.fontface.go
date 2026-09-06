@@ -3,8 +3,8 @@
 package css
 
 import (
-	"github.com/tinywasm/fmt"
-	"github.com/tinywasm/font"
+	"webtyp.com/fmt"
+	"webtyp.com/font"
 )
 
 // FontFaces returns the @font-face block for the four faces of the declared

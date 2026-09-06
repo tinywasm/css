@@ -1,4 +1,4 @@
-# AGENTS.md — tinywasm/css
+# AGENTS.md — webtyp/css
 
 Constraints for agents changing this library. Read before touching any file.
 
@@ -8,8 +8,8 @@ Single source of truth for the ecosystem's design decisions: the token catalog a
 typed CSS emission engine. Stylesheets are produced **at build/SSR time**; the browser
 receives plain CSS, never Go.
 
-Consumers: `tinywasm/widget/style` (semantic styling API), `tinywasm/sitec` (SSR asset
-registration), `tinywasm/components` and `tinywasm/layout` (their `//go:build !wasm`
+Consumers: `webtyp/widget/style` (semantic styling API), `webtyp/sitec` (SSR asset
+registration), `webtyp/components` and `webtyp/layout` (their `//go:build !wasm`
 `css.go` files).
 
 ---
@@ -24,7 +24,7 @@ regression that depends on the linker's dead-code elimination.
 - Values (`#1b5d8c`, `1rem`, `250ms`) describe CSS and are resolved when the stylesheet is
   emitted. There is nothing for the browser-side Go code to do with them.
 - Identity strings that the frontend genuinely needs (widget and part names) belong to
-  `tinywasm/widget`, which is identity-only and WASM-safe. Do not reintroduce them here.
+  `webtyp/widget`, which is identity-only and WASM-safe. Do not reintroduce them here.
 - Interfaces are the worst thing to leave on the WASM side: satisfying one forces method
   sets and type descriptors to survive DCE. `ValueGetter`, `NamedPair` and `AllPairs()`
   exist solely for the contrast audit — audit code is `!wasm` code.
@@ -121,7 +121,7 @@ consumers is the drift this catalog eliminates.
 ## Testing
 
 ```bash
-go install github.com/tinywasm/devflow/cmd/gotest@latest   # external agents have no global gotest
+go install webtyp.com/devflow/cmd/gotest@latest   # external agents have no global gotest
 gotest
 ```
 

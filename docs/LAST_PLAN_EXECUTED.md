@@ -45,7 +45,7 @@ pasa a existir para el layout, y todo lo de arriba se cae solo.
 
 ## 2. Contexto del repo para un agente sin contexto previo
 
-- Módulo: `github.com/tinywasm/css`. `docs/PLAN.md` va junto a `go.mod`.
+- Módulo: `webtyp.com/css`. `docs/PLAN.md` va junto a `go.mod`.
 - Los tokens viven en `catalog.go` como valores `Token{Name, Light, Dark, ...}`.
 - Un token no sirve de nada si no se **declara** además en `css.default.go`
   (o `css.brand.go` si es identidad de marca): el catálogo define el valor, la
@@ -53,7 +53,7 @@ pasa a existir para el layout, y todo lo de arriba se cae solo.
 - Hay un test que falla si se emite un token no registrado —
   `TestNoUndeclaredTokensInEmittedCSS` en `css_test.go` — con una lista explícita
   de tokens conocidos que **también** hay que actualizar.
-- Nada de librería estándar en paquetes que compilan a WASM: usar `tinywasm/fmt`,
+- Nada de librería estándar en paquetes que compilan a WASM: usar `webtyp/fmt`,
   nunca `errors`/`strconv`/`strings`.
 - Prohibidas las cadenas repetidas en la lógica: todo literal repetido va a una
   constante con nombre.

@@ -1,8 +1,8 @@
 # Justification for the Typed CSS DSL in Go
 
-> **ARCHITECTURE NOTE:** This document justifies the design decisions of the typed CSS DSL in Go. Following the final redesign, this low-level DSL has been **unexported from the public surface** to prevent widget developers from escaping the design system by writing manual CSS properties. Instead, the DSL now acts as the internal emission engine, consumed exclusively by the semantic intent API of `github.com/tinywasm/widget/style`.
+> **ARCHITECTURE NOTE:** This document justifies the design decisions of the typed CSS DSL in Go. Following the final redesign, this low-level DSL has been **unexported from the public surface** to prevent widget developers from escaping the design system by writing manual CSS properties. Instead, the DSL now acts as the internal emission engine, consumed exclusively by the semantic intent API of `webtyp.com/widget/style`.
 
-> Analysis document. It answers the question: **is this API the most intuitive, readable, and professional way to write CSS in Go for the tinywasm ecosystem?**
+> Analysis document. It answers the question: **is this API the most intuitive, readable, and professional way to write CSS in Go for the webtyp ecosystem?**
 
 ## 1. The Proposed Form (Internal Emission Engine)
 
@@ -11,8 +11,8 @@
 package button
 
 import (
-	"github.com/tinywasm/widget"
-	"github.com/tinywasm/widget/style"
+	"webtyp.com/widget"
+	"webtyp.com/widget/style"
 )
 
 const (
@@ -41,7 +41,7 @@ To answer honestly, we must define what "better" means. These are the three crit
 | **Readable** | A reader who did not write the code can return weeks later and reconstruct the mental model effortlessly. |
 | **Professional** | Coherent with established practices in consolidated frameworks; supports refactoring, testing, and IDE tools. |
 
-To these, I add two non-negotiable technical criteria of the tinywasm ecosystem, because they disqualify several theoretically valid alternatives:
+To these, I add two non-negotiable technical criteria of the webtyp ecosystem, because they disqualify several theoretically valid alternatives:
 
 | Technical Criterion | Reason |
 |---|---|
@@ -91,7 +91,7 @@ This is not a local invention. It is the industrial convergence of the last deca
 
 ### 3.4 Zero CSS in the WASM binary
 
-**Guaranteed by construction.** The layout of the `tinywasm/css` package:
+**Guaranteed by construction.** The layout of the `webtyp/css` package:
 
 | File | Build tag | Compiles to WASM |
 |---|---|---|
@@ -101,7 +101,7 @@ This is not a local invention. It is the industrial convergence of the last deca
 | `css.go` (RootCSS, RenderCSS) | `!wasm` | ❌ |
 
 Nothing crosses to the WASM binary. The identity-layer logic (class names,
-part names) that the HTML needs to emit lives in `tinywasm/widget`, which is
+part names) that the HTML needs to emit lives in `webtyp/widget`, which is
 identity-only and WASM-safe. The CSS generator does not exist in the frontend.
 
 ### 3.5 No generators
@@ -120,7 +120,7 @@ identity-only and WASM-safe. The CSS generator does not exist in the frontend.
 | **CSS-in-Go runtime styled-components style** | Drags the CSS engine into the WASM binary. Disqualified immediately. |
 | **Text templates (`text/template`)** | Returns to untyped strings; loses compiler validation. |
 | **Fluent DSL (builder with `.Padding(...).Color(...)`)** | Expressively equivalent to the variadic constructor, worse for long rules (uncomfortable vertical chaining); variadic flattens better. |
-| **Sub-package `tinywasm/css/cssgo`** | Forces two imports, breaks dot-import. No real value. |
+| **Sub-package `webtyp/css/cssgo`** | Forces two imports, breaks dot-import. No real value. |
 
 ---
 
@@ -160,7 +160,7 @@ Here we must distinguish two questions:
 ### 6.1 Is it the best way to write CSS in a typed language?
 There is a legitimate debate. **vanilla-extract in TypeScript** is probably more mature today in absolute terms. But for a **Go-first + TinyGo + no generators** project, constraints eliminate TypeScript from the set of applicable solutions.
 
-### 6.2 Is it the best way to write CSS in Go for tinywasm?
+### 6.2 Is it the best way to write CSS in Go for webtyp?
 **Yes, within the set of solutions compatible with the project's constraints.** I do not know of an alternative that simultaneously fulfills:
 - Zero CSS in WASM binary
 - No generators
@@ -175,7 +175,7 @@ The first five exist isolated in other proposals; none gathers them all.
 
 ## 7. Verdict
 
-**Yes, it is the most intuitive, readable, and professional way to write CSS in Go for tinywasm**, conditioned on accepting the costs named in section 5 (especially verbosity and the initial curve). It is professionally defensible because it replicates a pattern with ~10 years of industrial adoption in other typed languages, adapted to the specific constraints of Go + TinyGo + SSR architecture of the project.
+**Yes, it is the most intuitive, readable, and professional way to write CSS in Go for webtyp**, conditioned on accepting the costs named in section 5 (especially verbosity and the initial curve). It is professionally defensible because it replicates a pattern with ~10 years of industrial adoption in other typed languages, adapted to the specific constraints of Go + TinyGo + SSR architecture of the project.
 
 If the verdict does not convince, the points to question first are:
 1. Are the costs of section 5 acceptable to your team?

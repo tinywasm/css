@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	twcolor "github.com/tinywasm/color"
+	twcolor "webtyp.com/color"
 )
 
 // resolveColor resolves a color fallback value which might be a CSS light-dark() function.

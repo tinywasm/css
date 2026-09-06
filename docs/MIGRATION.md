@@ -1,4 +1,4 @@
-# Migration Guide: Upgrading to tinywasm/css v0.3.3 (Interaction Derivation API)
+# Migration Guide: Upgrading to webtyp/css v0.3.3 (Interaction Derivation API)
 
 This guide provides instructions and mapping specifications to upgrade applications and dependent libraries from the legacy 69-color-token system to the modernized, streamlined 12-token system. This document is optimized for both human reading and direct consumption by Large Language Models (LLMs) to perform automated code migrations.
 
@@ -7,7 +7,7 @@ This guide provides instructions and mapping specifications to upgrade applicati
 ## 1. Architectural Changes
 
 ### The 12-Token Paradigm
-Previously, `tinywasm/css` maintained separate *active* tokens and *source* tokens for light/dark mode (e.g. `ColorBackground`, `ColorBackgroundLight`, `ColorBackgroundDark`). Responsive theme switching was accomplished via manual variable binding inside `RenderCSS()`.
+Previously, `webtyp/css` maintained separate *active* tokens and *source* tokens for light/dark mode (e.g. `ColorBackground`, `ColorBackgroundLight`, `ColorBackgroundDark`). Responsive theme switching was accomplished via manual variable binding inside `RenderCSS()`.
 
 In `v0.2.0`, **all source tokens are eliminated**. Responsive light/dark theme adaptation is achieved directly in browser space using the CSS `light-dark()` function within the active token fallback value. Manual bindings and prefers-color-scheme rule copying are removed entirely.
 

@@ -93,7 +93,7 @@ func resetRules() []item {
 		// text fields; no border-radius a part declares removes it. :where()
 		// keeps checkbox and radio out — appearance: none on those erases the
 		// control entirely instead of flattening it, and their styling belongs
-		// to tinywasm/form.
+		// to webtyp/form.
 		//
 		// border: 0 for the same reason the button rule above carries it, and it
 		// was the one half of that pair this rule was missing: appearance: none
@@ -110,7 +110,7 @@ func resetRules() []item {
 		// ancestor; every other engine does not, so an uppercased container
 		// silently uppercases the dropdown on two browsers only. The native
 		// arrow stays: it is the only affordance the control has, and
-		// tinywasm/form owns replacing it.
+		// webtyp/form owns replacing it.
 		rule(selector("select"),
 			rawRule("  text-transform: none;"),
 		),

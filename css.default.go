@@ -130,6 +130,7 @@ func defaultRoots() []item {
 			declare(RailWide),
 			// Shared control height and chip size
 			declare(ControlHeight),
+			declare(ControlWidth),
 			declare(ChipWidth),
 			declare(ChipHeight),
 			declare(VeilBlur),

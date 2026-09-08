@@ -326,7 +326,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		MaxWReadable,
 		ColumnNarrow, ColumnMedium, ColumnWide,
 		RailNarrow, RailWide,
-		ControlHeight, ChipWidth, ChipHeight, VeilBlur,
+		ControlHeight, ControlWidth, ChipWidth, ChipHeight, VeilBlur,
 		SafeTop, SafeRight, SafeBottom, SafeLeft, ViewportH,
 	}
 	for _, tok := range allTokens {

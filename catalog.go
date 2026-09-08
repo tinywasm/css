@@ -144,6 +144,12 @@ var (
 	// so the two read as the same rhythm instead of drifting apart.
 	ControlHeight = Token{Name: "--control-height", Dark: "3.125rem"}
 
+	// The minimum width every interactive control shares — a checkbox, a
+	// radio — so its tap target meets the touch-size floor on BOTH axes.
+	// ControlHeight alone only sizes the block axis: a native checkbox is
+	// ~13px wide and ControlBox() would leave it a 13×50 sliver.
+	ControlWidth = Token{Name: "--control-width", Dark: "2.75rem"}
+
 	// Rail widths — the fixed column of a Sidebar layout.
 	RailNarrow = Token{Name: "--rail-narrow", Dark: "3.5rem"}
 	RailWide   = Token{Name: "--rail-wide", Dark: "12rem"}

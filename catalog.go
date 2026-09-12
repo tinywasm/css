@@ -12,6 +12,12 @@ var (
 	ColorAccent      = Token{Name: "--color-accent", Dark: "#e8a33d"}
 	ColorOnAccent    = Token{Name: "--color-on-accent", Dark: "#1C1C1E"}
 
+	// ColorPrimaryGradient is the second stop ColorPrimary fades into by
+	// default — see brandRoot(). An app that wants a flat solid primary
+	// calls Theme(ClearGradient(ColorPrimary)); an app that wants a
+	// different second stop calls Theme(Set(ColorPrimaryGradient, "#...")).
+	ColorPrimaryGradient = Token{Name: "--color-primary-gradient", Dark: "#00ADD8"}
+
 	ColorBackground   = Token{Name: "--color-background", Light: "#FFFFFF", Dark: "#0D1117"}
 	ColorOnBackground = Token{Name: "--color-on-background", Light: "#1C1C1E", Dark: "#E6EDF3"}
 	ColorSurface      = Token{Name: "--color-surface", Light: "#F2F2F7", Dark: "#161B22"}

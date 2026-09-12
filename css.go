@@ -95,6 +95,20 @@ func SetGradient(t Token, angle string, from, to Token) Override {
 	}
 }
 
+// ClearGradient turns off token t's default gradient, restoring a flat
+// solid fill — the opposite of SetGradient. Use it when an app overrides
+// t's own color (Theme(Set(t, ...))) and wants that override to render flat
+// instead of inheriting t's catalog default gradient (see ColorPrimary /
+// ColorPrimaryGradient in brandRoot()).
+//
+// It clears only ImageVarName() (what widget/style actually paints).
+// ImageStopsVarName() is left as-is: nothing reads the stops companion
+// without also reading the image var first, so there is nothing to
+// desynchronize.
+func ClearGradient(t Token) Override {
+	return Override{token: t, gradient: "none"}
+}
+
 // Theme returns the entire RootCSS() catalog with custom overrides appended.
 func Theme(overrides ...Override) *Stylesheet {
 	catalog := RootCSS() // default catalog

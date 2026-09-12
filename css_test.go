@@ -35,6 +35,23 @@ func TestRootCSS_DoesNotContainSwitchingLogic(t *testing.T) {
 	}
 }
 
+func TestRootCSS_DefaultsPrimaryToAGradient(t *testing.T) {
+	got := RootCSS().String()
+	if !strings.Contains(got, "--color-primary-image: linear-gradient(135deg,") {
+		t.Errorf("expected a default --color-primary-image gradient\nGot:\n%s", got)
+	}
+	if !strings.Contains(got, "--color-primary-gradient: #00ADD8") {
+		t.Errorf("expected --color-primary-gradient default declared\nGot:\n%s", got)
+	}
+}
+
+func TestTheme_ClearGradientOverridesDefault(t *testing.T) {
+	got := Theme(ClearGradient(ColorPrimary)).String()
+	if !strings.Contains(got, "--color-primary-image: none") {
+		t.Errorf("expected ClearGradient to emit --color-primary-image: none\nGot:\n%s", got)
+	}
+}
+
 func TestRenderCSS_ContainsColorScheme(t *testing.T) {
 	got := RenderCSS().String()
 	if !strings.Contains(got, "color-scheme: light dark;") {
@@ -310,7 +327,7 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 	knownTokens := map[string]bool{}
 	allTokens := []ValueGetter{
 		ColorPrimary, ColorOnPrimary, ColorSuccess, ColorOnSuccess, ColorDanger, ColorOnDanger,
-		ColorAccent, ColorOnAccent,
+		ColorAccent, ColorOnAccent, ColorPrimaryGradient,
 		ColorBackground, ColorOnBackground, ColorSurface, ColorOnSurface, ColorOutline, ColorMuted,
 		ColorSurfaceSunken, ColorSelection, ColorOnSelection,
 		ColorAccentWash, ColorAccentHover, ColorDangerWash,
@@ -338,6 +355,10 @@ func TestNoUndeclaredTokensInEmittedCSS(t *testing.T) {
 		knownTokens[t.LightVarName()] = true
 		knownTokens[t.DarkVarName()] = true
 	}
+	// ColorPrimary's default gradient (brandRoot/defaultGradient) declares
+	// its image/stops companion properties too — legitimate, not drift.
+	knownTokens[ColorPrimary.ImageVarName()] = true
+	knownTokens[ColorPrimary.ImageStopsVarName()] = true
 
 	cssStr := RootCSS().String() + "\n" + RenderCSS().String()
 
